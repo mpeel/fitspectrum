@@ -12,15 +12,17 @@
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
+from spectra import *
+
 
 ###
 # Configuration options
 ###
-
-template_filenames = ["../data/haslam408_dsds_Remazeilles2014.fits", "../data/512_60.00smoothed_HFI_SkyMap_857_2048_R2.00_full.fits"]
-cmbspectrum_filename = "../data/wmap_tt_spectrum_7yr_v4p1_nohead.txt";
+template_filenames = ["data/haslam408_dsds_Remazeilles2014.fits", "data/512_60.00smoothed_HFI_SkyMap_857_2048_R2.00_full.fits"]
+cmbspectrum_filename = "data/wmap_tt_spectrum_7yr_v4p1_nohead.txt";
 nside = 4
-regions = [[[118, 135], [20, 37]]]
+regions = [[118, 135], [20, 37]]
+outputdir = "output"
 
 
 ### 
@@ -28,7 +30,8 @@ regions = [[[118, 135], [20, 37]]]
 ###
 npix = hp.nside2npix(nside)
 num_templates = len(template_filenames)
-
+num_regions = len(regions)
+const = get_spectrum_constants()
 # Arrays
 templates = np.zeros((num_templates, npix))
 coefficients = np.zeros(num_templates)
@@ -72,10 +75,11 @@ testmap = 10.0*templates[0] + 0.1*templates[1]
 covar = np.identity(npix)
 
 # CMB covariance matrix
-cmbspectrum = numpy.loadtxt(cmbspectrum_filename)
+cmbspectrum = np.loadtxt(cmbspectrum_filename)
 
 # Invert the covariance matrix
 covar_inv = np.linalg.inv(covar)
+
 
 ###
 # Calculate the coefficients
@@ -89,21 +93,13 @@ chisq = (diff.dot(covar_inv)).dot(diff.T)
 abar = sum(a.dot(sigma_inv)) / sum(sigma_inv)
 a_err = np.sqrt(np.diag(sigma_inv))
 
+###
+# Output the results
+###
 print a
 print chisq
 print abar
 print a_err
 
-# def chisqfunc((a, b)):
-#     model = a + b*strain
-#     chisq = numpy.sum(((stress - model)/err_stress)**2)
-#     return chisq
-
-# result =  opt.minimize(chisqfunc, x0)
-
-# hp.mollview(testmap)
-# plt.show()
-
-
-# print templates
-
+# That's all, folks!
+# EOF

@@ -24,6 +24,6 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0):
 		nside_out = nside
 
 	if nside_out != nside:
-		map = hp.ud_grade(map, nside_out)
+		smoothed_map = hp.ud_grade(smoothed_map, nside_out)
 
-	hp.write_map(map)
+	hp.write_map(output, smoothed_map)

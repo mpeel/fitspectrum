@@ -51,20 +51,13 @@
 import numpy as np
 #import scipy as sp
 from mpfit import mpfit
-from math import pi
 from spectra import *
 import copy
 import matplotlib.pyplot as plt
 
 # Define some constants, used later in the SED functions
-const = {
-	'h': 6.626e-34,
-	'k': 1.381e-23,
-	'c': 2.997e8,
-	'pi': pi,
-	'dust_optical_depth_freq': 1198.8,
-	'tcmb': 2.726
-}
+const = get_spectrum_constants()
+
 solid_angle = 1.0
 
 def spectrum(p, fjac=None, x=None, y=None, err=None):

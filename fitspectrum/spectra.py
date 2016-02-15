@@ -1,5 +1,17 @@
 import numpy as np
 import scipy as sp
+from math import pi
+
+def get_spectrum_constants():
+	const = {
+		'h': 6.626e-34,
+		'k': 1.381e-23,
+		'c': 2.997e8,
+		'pi': pi,
+		'dust_optical_depth_freq': 1198.8,
+		'tcmb': 2.7255
+	}
+	return const
 
 def synchrotron(const, freq, basefreq, sync_amp, sync_spec):
 	return sync_amp * (freq/basefreq)**sync_spec
@@ -69,7 +81,12 @@ def thermaldust(const, freq, amp, index, temperature, optical_depth_freq, solid_
 	S = amp * thermaldust * solid_angle *1e26
 	return S
 
-def paraobla (freq, coeff1, coeff2, coeff3):
+def paraobla(freq, coeff1, coeff2, coeff3):
 	S = np.exp(coeff1 + coeff2*np.log(freq) + coeff3*np.log(freq)**2 )
 	return S
  
+def planckcorr(const, nu_ghz):
+	nu = nu_ghz * 1.0e9
+	x = const['h'] * nu / (const['k'] * const['tcmb'])
+	value = (np.exp(x)-1.0)**2.0 / (x**2. * np.exp(x))
+	return value
