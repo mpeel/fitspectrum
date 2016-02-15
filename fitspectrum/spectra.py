@@ -77,7 +77,7 @@ def thermaldust(const, freq, amp, index, temperature, optical_depth_freq, solid_
 	xx = const['h'] * freq*1.0e9 / (const['k'] * temperature)
 
 	# fit optical depth at 250 um (1198.8 GHz) - dust_optical_depth_freq
-	thermaldust = 2.0 * const['h'] * (freq*1e9)**3/(2.997e8)**2 * (freq/optical_depth_freq)**index / (np.exp(xx)-1.0)
+	thermaldust = 2.0 * const['h'] * (freq*1e9)**3/(const['c'])**2 * (freq/optical_depth_freq)**index / (np.exp(xx)-1.0)
 	S = amp * thermaldust * solid_angle *1e26
 	return S
 
@@ -90,3 +90,56 @@ def planckcorr(const, nu_ghz):
 	x = const['h'] * nu / (const['k'] * const['tcmb'])
 	value = (np.exp(x)-1.0)**2.0 / (x**2. * np.exp(x))
 	return value
+
+# Function to calculate the conversion factors between different units.
+# 
+# Mike Peel, 1 October 2014 - Forked from haperflux.pro
+# Mike Peel, 15 February 2016 - converted from IDL to python
+def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
+	unitslist = ['K','mK','uK','K_RJ','mK_RJ','uK_RJ','K_CMB','mK_CMB','uK_CMB', 'MJy/sr', 'Jy/pix' ]
+	# get conversion from the input units to Jy/pix
+	if (units_in == 'K' or units_in == 'K_RJ' or units_in == 'KRJ'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area
+	elif (units_in == 'mK' or units_in == 'mK_RJ' or units_in == 'mKRJ'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3
+	elif (units_in == 'uK' or units_in == 'uK_RJ' or units_in == 'uKRJ'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6
+	elif (units_in == 'K_CMB' or units_in == 'KCMB'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / planckcorr(const, frequency)
+	elif (units_in == 'mK_CMB' or units_in == 'mKCMB'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3 / planckcorr(const, frequency)
+	elif (units_in == 'uK_CMB' or units_in == 'uKCMB'):
+		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6 / planckcorr(const, frequency)
+	elif (units_in == 'MJy/sr' or units_in == "MJY/SR" or units_in == "MjySr"):
+		factor_in = pix_area * 1.0e6
+	elif (units_in == 'Jy/pixel' or units_in == 'JY/PIXEL' or units_in == 'JY/PIX' or units_in == 'JyPix' or units_in == 'Jy/Pix'):
+		factor_in = 1.0
+	else:
+		print 'Invalid unit conversion specified for convertunits (units_out='+units_out+'). ***Returning 1.*** Please use one of the following available units:'
+		print unitlist
+		return 1.0
+
+	if (units_out == 'K' or units_out == 'K_RJ' or units_out == 'KRJ'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area
+	elif (units_out == 'mK' or units_out == 'mK_RJ' or units_out == 'mKRJ'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3
+	elif (units_out == 'uK' or units_out == 'uK_RJ' or units_out == 'uKRJ'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6
+	elif (units_out == 'K_CMB' or units_out == 'KCMB'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / planckcorr(const, frequency)
+	elif (units_out == 'mK_CMB' or units_out == 'mKCMB'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3 / planckcorr(const, frequency)
+	elif (units_out == 'uK_CMB' or units_out == 'uKCMB'):
+		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6 / planckcorr(const, frequency)
+	elif (units_out == 'MJy/sr' or units_out == "MJY/SR" or units_out == "MjySr"):
+		factor_out = pix_area * 1.0e6
+	elif (units_out == 'Jy/pixel' or units_out == 'JY/PIXEL' or units_out == 'JY/PIX' or units_out == 'JyPix' or units_out == 'Jy/Pix'):
+		factor_out = 1.0
+	else:
+		print 'Invalid unit conversion specified for convertunits (units_out='+units_out+'). ***Returning 1.*** Please use one of the following available units:'
+		print unitlist
+		return 1.0
+
+	# Return the ratio of the factors
+	return factor_in/factor_out
+

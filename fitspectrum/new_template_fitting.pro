@@ -390,6 +390,7 @@ FOR i=0L, nvals-1 DO BEGIN
       anglediff = sphdist(boxLong[i], boxLat[i], boxLong[j], boxLat[j],/degrees)
       anglediff = (anglediff*!PI)/180.
       cosine = cos(anglediff)
+      print cosine
       ;Use vectors now
       pl = legendre(cosine, l, 0, /double)
       temp = (2*l+1.)* cl *pl* (wpix^2)*(B_l^2)      
