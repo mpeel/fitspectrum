@@ -3,6 +3,7 @@
 #
 # History:
 # Mike Peel   10-Jan-2016   Initial version.
+# Mike Peel   8-Mar-2016    Start to generalise to cover other numbers of maps
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -12,18 +13,28 @@ import healpy as hp
 import matplotlib.pyplot as plt
 
 def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0):
-	if (pol):
-		field = (0,1,2)
-	else:
-		field = 0
-	map = hp.read_map(input, field=field)
+	# Slightly convoluted in order to also process the header...
+	maps = hp.read_map(input, field=None, h=True)
+	hdr = maps[-1]
+	nmaps = len(maps)
+	map = maps[0:nmaps-1]
+	del maps
+	nmaps -= 1
+
 	nside = hp.get_nside(map)
-	smoothed_map = hp.sphtfunc.smoothing(map, fwhm=np.radians(fwhm_arcmin/60.0))
+	smoothed_map = map
+	for i in range (0,nmaps):
+		smoothed_map[i] = hp.sphtfunc.smoothing(map[i], fwhm=np.radians(fwhm_arcmin/60.0))
 
 	if (nside_out == 0):
 		nside_out = nside
 
 	if nside_out != nside:
-		smoothed_map = hp.ud_grade(smoothed_map, nside_out)
+		for i in range (0,nmaps):
+			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out)
 
-	hp.write_map(output, smoothed_map)
+	# Need to modify this to write out all N maps.
+	if (pol):
+		hp.write_map(output, smoothed_map[0:3])
+	else:
+		hp.write_map(output, smoothed_map[i])

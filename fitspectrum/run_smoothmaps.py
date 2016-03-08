@@ -7,6 +7,10 @@ directory = 'PR2/'
 output_resolution = 60.0
 output_nside = 512
 
+smoothmap('wmaptest/wmap_band_iqumap_r9_7yr_K_v4.fits','wmaptest/512_60.00smoothed_wmap_band_iqumap_r9_7yr_K_v4.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
+
+exit()
+
 smoothmap(directory+'LFI_SkyMap_030-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
 smoothmap(directory+'LFI_SkyMap_044-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_44_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
 smoothmap(directory+'LFI_SkyMap_070-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_70_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)

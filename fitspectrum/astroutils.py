@@ -14,7 +14,7 @@ def ensure_dir(f):
 def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):
 
 	npix = hp.nside2npix(nside)
-	masked_map = np.ones(npix)
+	masked_map = np.zeros(npix)
 
 	for i in range(0,npix):
 		pos = hp.pixelfunc.pix2ang(nside, i)
@@ -23,15 +23,15 @@ def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):
 
 		# Check for negative longitude ranges
 		if (phi <= long_max and phi >= long_min and theta <= lat_max and theta >= lat_min):
-			masked_map[i] = 0
+			masked_map[i] = 1
 		if (long_max < 0): 
 			# Assuming that this means that long_min is also less than zero
 			if (phi-360.0 <= long_max and phi-360.0 >= long_min and theta <= lat_max and theta >= lat_min):
-				masked_map[i] = 0
+				masked_map[i] = 1
 		if (long_min < 0): 
 			# Longitudes higher than 0 will have been dealt with above, deal with the negative ones here.
 			if (phi-360.0 >= long_min and theta <= lat_max and theta >= lat_min):
-				masked_map[i] = 0
+				masked_map[i] = 1
 
 
 	return masked_map
