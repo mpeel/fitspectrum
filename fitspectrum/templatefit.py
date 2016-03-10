@@ -130,6 +130,13 @@ if (cmbsub == 1):
 
 # Read in the full CMB spectrum
 cmbspectrum_full = np.loadtxt(cmbspectrum_filename)
+cmbspectrum = cmbspectrum_full[:lmax, 1]
+pixel_windowfunction = hp.sphtfunc.pixwin(nside)
+pixel_windowfunction = pixel_windowfunction[:lmax]
+pixel_windowfunctionsq = pixel_windowfunction**2
+beam_windowfunction = hp.sphtfunc.gauss_beam(np.radians(resolution/60.0))
+beam_windowfunction = beam_windowfunction[:lmax]
+beam_windowfunctionsq = beam_windowfunction**2
 
 
 ###
@@ -196,13 +203,6 @@ for i in range(0,num_regions):
 
 		# CMB covariance matrix - want this where we're not subtracting the CMB.
 		if (cmbsub == 0):
-			cmbspectrum = cmbspectrum_full[:lmax, 1]
-			pixel_windowfunction = hp.sphtfunc.pixwin(nside)
-			pixel_windowfunction = pixel_windowfunction[:lmax]
-			pixel_windowfunctionsq = pixel_windowfunction**2
-			beam_windowfunction = hp.sphtfunc.gauss_beam(np.radians(resolution/60.0))
-			beam_windowfunction = beam_windowfunction[:lmax]
-			beam_windowfunctionsq = beam_windowfunction**2
 			cmb_covar = np.zeros((npix_region, npix_region))
 			# Calculate all of the separations between pixels in one big array
 			pos_coord = SkyCoord(frame="galactic", l=positions_masked[1][:]*(180.0/pi), b=90.0-(positions_masked[0][:]*180.0/pi),unit="deg")

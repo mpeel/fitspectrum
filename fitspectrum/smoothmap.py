@@ -12,7 +12,7 @@ import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
 
-def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0):
+def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1):
 	# Slightly convoluted in order to also process the header...
 	maps = hp.read_map(input, field=None, h=True)
 	hdr = maps[-1]
@@ -20,6 +20,9 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0):
 	map = maps[0:nmaps-1]
 	del maps
 	nmaps -= 1
+
+	if (nobsmap >=0 ):
+		nobs_sum = np.sum(map[nobsmap])
 
 	nside = hp.get_nside(map)
 	smoothed_map = map
@@ -32,9 +35,15 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0):
 	if nside_out != nside:
 		for i in range (0,nmaps):
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out)
+			if (i == nobsmap): # If we have an nobs map, renormalise to account for the reduction in pixel numbers.
+				smoothed_map[i] *= (nside/nside_out)^2
+				nobs_sum2 = np.sum(smoothed_map[nobsmap])
+				print 'Smoothing nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
 
 	# Need to modify this to write out all N maps.
-	if (pol):
-		hp.write_map(output, smoothed_map[0:3])
-	else:
-		hp.write_map(output, smoothed_map[i])
+	# if (pol):
+		# hp.write_map(output, smoothed_map[0:3])
+	# else:
+		# hp.write_map(output, smoothed_map[i])
+	hp.write_map(output, smoothed_map)
+	

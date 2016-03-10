@@ -1,16 +1,27 @@
 from smoothmap import smoothmap
 import numpy as np
 
-# Planck PR2 maps
 
-directory = 'PR2/'
 output_resolution = 60.0
 output_nside = 512
 
-smoothmap('wmaptest/wmap_band_iqumap_r9_7yr_K_v4.fits','wmaptest/512_60.00smoothed_wmap_band_iqumap_r9_7yr_K_v4.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
+# WMAP 9-year maps
+#directory = 'wmap/9yr/'
+directory=''
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=True,nside_out=output_nside)
+
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_Ka_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=True,nside_out=output_nside)
+
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_Q_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=True,nside_out=output_nside)
+
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_V_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=True,nside_out=output_nside)
+
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_W_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=True,nside_out=output_nside)
 
 exit()
 
+# Planck PR2 maps
+directory = 'PR2/'
 smoothmap(directory+'LFI_SkyMap_030-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
 smoothmap(directory+'LFI_SkyMap_044-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_44_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
 smoothmap(directory+'LFI_SkyMap_070-BPassCorrected-field-IQU_0256_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_70_256_PR2_full.fits', np.sqrt(output_resolution**2-60.0**2),pol=True,nside_out=output_nside)
