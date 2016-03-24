@@ -6,17 +6,16 @@ output_resolution = 60.0
 output_nside = 512
 
 # WMAP 9-year maps
-#directory = 'wmap/9yr/'
-directory=''
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=True,nside_out=output_nside)
+directory = 'wmap/9yr/'
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
 
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_Ka_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=True,nside_out=output_nside)
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_Ka_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
 
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_Q_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=True,nside_out=output_nside)
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_Q_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
 
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_V_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=True,nside_out=output_nside)
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_V_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
 
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_W_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=True,nside_out=output_nside)
+smoothmap(directory+'wmap_band_iqumap_r9_9yr_W_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
 
 exit()
 

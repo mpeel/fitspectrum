@@ -27,7 +27,7 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1):
 	nside = hp.get_nside(map)
 	smoothed_map = map
 	for i in range (0,nmaps):
-		smoothed_map[i] = hp.sphtfunc.smoothing(map[i], fwhm=np.radians(fwhm_arcmin/60.0))
+		smoothed_map[i][:] = hp.sphtfunc.smoothing(map[i], fwhm=np.radians(fwhm_arcmin/60.0))
 
 	if (nside_out == 0):
 		nside_out = nside
