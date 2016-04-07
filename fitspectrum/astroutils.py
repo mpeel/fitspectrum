@@ -6,9 +6,13 @@ from math import pi
 # Ensure that a directory exists
 # Function from http://stackoverflow.com/questions/273192/in-python-check-if-a-directory-exists-and-create-it-if-necessary
 def ensure_dir(f):
-	d = os.path.dirname(f)
-	if not os.path.exists(d):
-		os.makedirs(d)
+	if f == '':
+		print 'No directory path passed to ensure_dir, not checking or creating one!'
+		return
+	else:
+		d = os.path.dirname(f)
+		if not os.path.exists(d):
+			os.makedirs(d)
 
 # Create a healpix mask given an nside, min/max longitudes and latitudes, and a coordinate system
 def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):
@@ -31,6 +35,14 @@ def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):
 		if (long_min < 0): 
 			# Longitudes higher than 0 will have been dealt with above, deal with the negative ones here.
 			if (phi-360.0 >= long_min and theta <= lat_max and theta >= lat_min):
+				masked_map[i] = 1
+		if (long_max > 360): 
+			# Assuming that this means that long_min is also less than zero
+			if (phi+360.0 <= long_max and phi+360.0 >= long_min and theta <= lat_max and theta >= lat_min):
+				masked_map[i] = 1
+		if (long_min > 360): 
+			# Longitudes higher than 0 will have been dealt with above, deal with the negative ones here.
+			if (phi+360.0 >= long_min and theta <= lat_max and theta >= lat_min):
 				masked_map[i] = 1
 
 

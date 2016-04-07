@@ -26,19 +26,23 @@ from astropy.coordinates import SkyCoord
 # Type of template fit to do
 tpl_style = 1 # 1 = I, 2 = Q&U, 3 = P
 debug = 1 # 0 = silent, 1 = prints debug statements
-simulation = 1 # 1 = do a simulation rather than using real data, 0 = use the real data.
-num_runs = 50 # Set to 1 for normal use, or more than that if doing a simulation.
+simulation = 0 # 1 = do a simulation rather than using real data, 0 = use the real data.
+num_runs = 1 # Set to 1 for normal use, or more than that if doing a simulation.
+simulation_add_cmb = 0 # Use a simulated CMB map too?
 cmbsub = 0 # Set to 1 to subtract CMB map, or 0 to use the covariance matrix
-cmb_use_covar = 0 # Set to 1 to use the covariance matrix, or 0 to not use it.
+cmb_use_covar = 1 # Set to 1 to use the covariance matrix, or 0 to not use it.
 usemask = 1
+outdir = "templatefit_davies_wmap1_output/" # Output directory. Will be created if it doesn't already exist.
 # Input data
-data_filenames = ['PR2/512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits']#, 'PR2/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', 'PR2/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', 'PR2/512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', 'PR2/512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits']
+# data_filenames = ['wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits'] # WMAP 9-year data
+data_filenames = ['wmap1/512_60.00smoothed_map_k_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_ka_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_q_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_v_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_w_imap_yr1_v1.fits'] # WMAP 1-year data
 #data_filenames = ['PR2/512_60.00smoothed_LFI_SkyMap_30_256_PR2_full.fits', 'PR2/512_60.00smoothed_LFI_SkyMap_44_256_PR2_full.fits']
-data_variance_column = [3, 3, 3, 3, 3] # Starting from 0
+# data_variance_column = [3, 3, 3, 3, 3] # Starting from 0
+data_variance_column = [1, 1, 1, 1, 1] # Starting from 0
 data_sigma_0 = [1.418, 1.429, 2.105, 2.854, 5.253] # Set to -1 if the variance maps are actually variance maps, or the appropriate value if they are Nobs maps. If useful values, needs to be in the same units as the input maps.
 data_frequencies = [22.8, 33.0, 40.7, 60.8, 93.5]
 data_units = ['mK_CMB', 'mK_CMB', 'mK_CMB', 'mK_CMB', 'mK_CMB']
-data_units_use = ['mK_CMB', 'uK_CMB', 'uK_CMB', 'uK_CMB', 'uK_CMB']
+data_units_use = ['uK_RJ', 'uK_RJ', 'uK_RJ', 'uK_RJ', 'uK_RJ']
 # Templates. If you want an offset too, include a blank map here.
 template_names = ['sync', 'halpha', 'dust', 'offset']
 template_filenames = ["2p3ghz/64_60.00smoothed_lambda_haslam408_dsds_halpha_ddd3.fits", "2p3ghz/64_60.00smoothed_ha_correct_33_h256.fits", "2p3ghz/64_60.00smoothed_lambda_fds_dust_94GHz.fits", "2p3ghz/64_const.fits"]
@@ -52,16 +56,19 @@ simulation_noise = [1.0] # In whichever units are used for the templates
 # CMB
 cmbmap_filename = "PR2/512_60.00smoothed_COM_CMB_IQU-commander-field-Int_2048_R2.01_full.fits"
 cmbmap_units = 'mK_CMB' # The CMB map will automatically be converted to data units as needed for the subtraction.
-cmbspectrum_filename = "data/wmap_tt_spectrum_7yr_v4p1_nohead.txt";
-cmbspectrum_units = 'mK_CMB'
+# cmbspectrum_filename = "data/wmap_tt_spectrum_7yr_v4p1_nohead.txt"; # WMAP 7-year
+#cmbspectrum_units = 'uK_CMB'
+#cmbspectrum_Cl = False # If the CMB spectrum is already in Cl, set this to true, otherwise false and we'll assume l(l+1)C_l/2pi
+cmbspectrum_filename = "wmap1/wmap_1yr_kband_powerspectrum.fits.dat"; # WMAP 1-year
+cmbspectrum_units = 'uK_CMB'
+cmbspectrum_Cl = True # If the CMB spectrum is already in Cl, set this to true, otherwise false and we'll assume l(l+1)C_l/2pi
+cmbspectrum_minl = 2
 # Masks
 mask_filenames = ["2p3ghz/64_60.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
-regions = [ [[245, 260],[21, 31]]]#, [[140, 155],[15, 20]] ]
+regions = [ [[245, 260],[21, 31]], [[140, 155],[15, 20]], [[200, 230],[-48, -41]], [[250, 260],[-35, -25]], [[90, 97],[-30, -13]], [[118, 135],[20, 37]], [[300, 315],[35, 45]], [[227, 237],[12, 18]], [[145, 165],[-38, -30]], [[300, 320],[-40, -30]], [[33, 45],[50, 70]], [[270, 310],[55, 70]], [[350, 365],[-50, -35]], [[70, 90],[20, 30]], [[76, 84],[-50, -30]]] # Davies et al. (2006) 15 regions
 # Map configuration
 nside = 64 # Maps will be ud_graded to this as needed.
 resolution = 60.0 # Arcmin. Assumes that the maps are already at this resolution.
-# Output directory. Will be created if it doesn't already exist.
-outdir = "templatefit_2p3ghz_output/"
 
 
 ### 
@@ -154,8 +161,14 @@ if (cmbsub == 1):
 
 # Read in the full CMB spectrum. Also calculate pixel and beam window functions here.
 if (cmb_use_covar):
+	print (convertunits(const, cmbspectrum_units, data_units_use[0], data_frequencies[0]))**2
 	cmbspectrum_full = np.loadtxt(cmbspectrum_filename)
-	cmbspectrum = cmbspectrum_full[:lmax, 1] * convertunits(const, cmbspectrum_units, data_units_use[0], data_frequencies[0])
+	cmbspectrum = cmbspectrum_full[:lmax, 1] * (convertunits(const, cmbspectrum_units, data_units_use[0], data_frequencies[0]))**2
+	cmbspectrum = np.roll(cmbspectrum, cmbspectrum_minl)
+	if (cmbspectrum_Cl == False):
+		cmbspectrum *= (2.0 * const['pi'] / (lrange*(lrange+1.0)))
+	for i in range(0,cmbspectrum_minl):
+		cmbspectrum[i] = 0.0
 	pixel_windowfunction = hp.sphtfunc.pixwin(nside)
 	pixel_windowfunction = pixel_windowfunction[:lmax]
 	pixel_windowfunctionsq = pixel_windowfunction**2
@@ -210,6 +223,11 @@ for r in range(0,num_runs):
 			for j in range(1,num_templates):
 				maps[i] += simulation_values[j] * templates[j]
 			maps[i] += np.random.randn(npix) * simulation_noise[i]
+			if (simulation_add_cmb == 1):
+				sim_cmb_map = hp.sphtfunc.synfast(cmbspectrum, nside,lmax, fwhm=np.radians(resolution/60.0))
+				hp.write_map(outdir + "cmb_simulation_"+str(r)+".fits", sim_cmb_map)
+				maps[i] += sim_cmb_map
+				# maps[i] += cmb_map * convertunits(const, cmbmap_units, data_units_use[i], data_frequencies[i])
 			variance[i] = simulation_noise[i]**2
 
 	###
@@ -244,7 +262,8 @@ for r in range(0,num_runs):
 		positions_masked = np.zeros((2,npix_region))
 		positions_masked[0] = pixel_positions[0][mask == 1]
 		positions_masked[1] = pixel_positions[1][mask == 1]
-		print np.shape(data_masked)
+		if (debug):
+			print "Number of pixels: " + str(np.shape(data_masked))
 
 		outputfile = open(outdir+'results_'+str(r)+'_'+str(i)+'.txt', "w")
 		np.savetxt(outputfile, ["freq"] + template_names + ["chisq"], fmt="%s", newline=" ")
@@ -277,20 +296,21 @@ for r in range(0,num_runs):
 					print '**** Calculating CMB covariance matrix'
 				cmb_covar = np.zeros((npix_region, npix_region))
 				# Calculate all of the separations between pixels in one big array
-				pos_coord = SkyCoord(frame="galactic", l=positions_masked[1][:]*(180.0/pi), b=90.0-(positions_masked[0][:]*180.0/pi),unit="deg")
+				pos_coord = SkyCoord(frame="galactic", l=positions_masked[1][:]*(180.0/const['pi']), b=90.0-(positions_masked[0][:]*180.0/const['pi']),unit="deg")
 				separations = np.array([np.cos(pos_coord[i_temp].separation(pos_coord).rad) for i_temp in range(npix_region)])
 				separations = np.reshape(separations, (npix_region, npix_region))
-				print np.shape(separations)
+				# print np.shape(separations)
 
 				for i_cov in range(0,npix_region):
 					for j_cov in range (0,npix_region):
-						cmb_covar[i_cov,j_cov] = 0.0
 						Pl = special.lpmv(0, lrange, separations[i_cov,j_cov])
-						cmb_covar[i_cov,j_cov] = np.sum((2.0*lrange+1)*cmbspectrum*(beam_windowfunctionsq)*(pixel_windowfunctionsq)*Pl)
+						# print lrange[10]
+						# print separations[i_cov,j_cov]
+						# print Pl[10]
+						cmb_covar[i_cov,j_cov] = np.sum((2.0*lrange+1.0)*cmbspectrum*(beam_windowfunctionsq)*(pixel_windowfunctionsq)*Pl)
 						# print i,j,cmb_covar[i,j]
 
 				cmb_covar /= (4.0*const['pi'])
-
 				covar += cmb_covar
 				del separations # We don't need this any more.
 				del cmb_covar
@@ -329,11 +349,12 @@ for r in range(0,num_runs):
 			###
 			# Output the results
 			###
+			print str(["freq"] + template_names + ["chisq"])
 			print a[r][i][j]
-			print abar[r][i][j]
+			# print abar[r][i][j]
 			print a_err[r][i][j]
 			print chisq[r][i][j]
-
+			# for t in range(0,num_templates):
 			outputfile.write("%.2f val %s %.4g\n" % (data_frequencies[j], str(a[r][i][j])[1:-1], chisq[r][i][j]))
 			outputfile.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
 			# np.savetxt(outputfile, (data_frequencies[j], a_err[j], chisq[j]), fmt="%.2f", newline=" ")
@@ -349,8 +370,9 @@ if (num_runs > 1):
 			print 'Sim: ' + str(simulation_values)
 			print 'Noise: ' + str(simulation_noise[0])
 			print 'Noise/sqrt(Npix): ' + str(simulation_noise[0]/np.sqrt(num_region_pixels[i]))
+			print template_names
 			print 'Average: ' + str(np.mean(a, axis=0))
-			print 'Abar avg: ' + str(np.mean(abar, axis=0))
+			# print 'Abar avg: ' + str(np.mean(abar, axis=0))
 			print 'std: ' + str(np.std(a, axis=0))
 			print 'avg err: ' + str(np.mean(a_err, axis=0))
 

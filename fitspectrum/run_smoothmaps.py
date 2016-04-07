@@ -5,6 +5,20 @@ import numpy as np
 output_resolution = 60.0
 output_nside = 512
 
+# WMAP 1-year maps
+directory = 'wmap/1yr/'
+smoothmap(directory+'map_k_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_k_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'map_ka_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_ka_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'map_q_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_q_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'map_v_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_v_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'map_w_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_w_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+exit()
+
 # WMAP 9-year maps
 directory = 'wmap/9yr/'
 smoothmap(directory+'wmap_band_iqumap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
