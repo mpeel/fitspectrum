@@ -120,23 +120,30 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	###
 	# Read in the file containing the SED data
 	# Different formats are supported, namely:
-	# 1: freq [Hz] flux [Jy] err [Jy]'
-	# 2: wavelength [um]  flux [W/m^2/um] err [W/m^2/um] 
+	# 1: freq [GHz] flux [Jy] err [Jy]'
+	# 2: freq [Hz] flux [Jy] err [Jy]'
+	# 3: wavelength [um]  flux [W/m^2/um] err [W/m^2/um] 
 	# Use # to mark comments in the input file, and these will be ignored.
 	# For the actual fitting, we'll use freq [GHz], flux [Jy], err [Jy] - other formats will be converted to this.
 	###
 	inputspectrum = np.loadtxt(filename)
 	if format == 1:
-		freqs = inputspectrum[:,0] / 1e9
+		freqs = inputspectrum[:,0]
 		fd = inputspectrum[:,1]
 		fd_err = inputspectrum[:,2]
 	elif format == 2:
+		freqs = inputspectrum[:,0] / 1e9
+		fd = inputspectrum[:,1]
+		fd_err = inputspectrum[:,2]
+	elif format == 3:
 		wavelength = inputspectrum[:,0]
 		freqs = const['c'] / (wavelength*1e3)
 		fd = inputspectrum[:,1] / ((1e-26 * (const['c']*1e6) / (wavelength**2))) # Convert from W/m^2/um to W/m^2/Hz then to Jy
 		fd_err = inputspectrum[:,2] / ((1e-26 * (const['c']*1e6) / (wavelength**2)))
 
 	num_datapoints = len(freqs)
+	print num_datapoints
+	print fd_err
 	minfreq = min(freqs)
 	maxfreq = max(freqs)
 	minflux = min(fd)
@@ -151,7 +158,9 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	if minfitfreq != 0:
 		goodvals[freqs < minfitfreq] = 0
 	num_goodvals = np.sum(goodvals)
-
+	badvals = True
+	if (num_goodvals == num_datapoints):
+		badvals = False
 	###
 	# Use MPFit
 	###
@@ -280,7 +289,8 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	plt.plot(x, model_overall, 'black')
 	# Add the data to the plot
 	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
+	if badvals:
+		plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
 
 	# Formatting, and output
 	plt.title(srcname)
@@ -373,7 +383,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		# print plot_range
 		fig = corner.corner(samples)#,range=plot_range)#, labels=["$m$", "$b$", "$\ln\,f$"],
                       # truths=[m_true, b_true, np.log(f_true)])
-		fig.savefig("triangle.png")
+		fig.savefig(outdir+srcname+"_triangle.png")
 		plt.close()
 
 
@@ -398,7 +408,8 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	plt.plot(x, model_overall, 'black')
 	# Add the data to the plot
 	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
+	if badvals:
+		plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
 
 	# Formatting, and output
 	plt.title(srcname)
