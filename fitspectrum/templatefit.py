@@ -26,16 +26,16 @@ from astropy.coordinates import SkyCoord
 # Type of template fit to do
 tpl_style = 1 # 1 = I, 2 = Q&U, 3 = P
 debug = 1 # 0 = silent, 1 = prints debug statements
-simulation = 0 # 1 = do a simulation rather than using real data, 0 = use the real data.
-num_runs = 1 # Set to 1 for normal use, or more than that if doing a simulation.
+simulation = 1 # 1 = do a simulation rather than using real data, 0 = use the real data.
+num_runs = 1000 # Set to 1 for normal use, or more than that if doing a simulation.
 simulation_add_cmb = 0 # Use a simulated CMB map too?
 cmbsub = 0 # Set to 1 to subtract CMB map, or 0 to use the covariance matrix
-cmb_use_covar = 1 # Set to 1 to use the covariance matrix, or 0 to not use it.
+cmb_use_covar = 0 # Set to 1 to use the covariance matrix, or 0 to not use it.
 usemask = 1
-outdir = "templatefit_davies_wmap1_output/" # Output directory. Will be created if it doesn't already exist.
+outdir = "templatefit_davies_wmap1_sim_output/" # Output directory. Will be created if it doesn't already exist.
 # Input data
 # data_filenames = ['wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits'] # WMAP 9-year data
-data_filenames = ['wmap1/512_60.00smoothed_map_k_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_ka_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_q_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_v_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_w_imap_yr1_v1.fits'] # WMAP 1-year data
+data_filenames = ['wmap1/512_60.00smoothed_map_k_imap_yr1_v1.fits']#, 'wmap1/512_60.00smoothed_map_ka_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_q_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_v_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_w_imap_yr1_v1.fits'] # WMAP 1-year data
 #data_filenames = ['PR2/512_60.00smoothed_LFI_SkyMap_30_256_PR2_full.fits', 'PR2/512_60.00smoothed_LFI_SkyMap_44_256_PR2_full.fits']
 # data_variance_column = [3, 3, 3, 3, 3] # Starting from 0
 data_variance_column = [1, 1, 1, 1, 1] # Starting from 0
@@ -49,8 +49,8 @@ template_filenames = ["2p3ghz/64_60.00smoothed_lambda_haslam408_dsds_halpha_ddd3
 #template_filenames = ["2p3ghz/64_60.00smoothed_map_2300mhz_1deg_halpha_ddd3.fits", "2p3ghz/64_60.00smoothed_ha_correct_33_h256.fits", "2p3ghz/64_60.00smoothed_lambda_fds_dust_94GHz.fits"]
 #template_filenames = ["data/haslam408_dsds_Remazeilles2014.fits", "data/512_60.00smoothed_HFI_SkyMap_857_2048_R2.00_full.fits"]
 template_frequencies = [0.408, 1.0, 94.0, 1.0] # Only needed if converting units below
-template_units = ['K_CMB', 'K_CMB', 'K_CMB', 'K_CMB']
-template_units_use = ['K_CMB', 'K_CMB', 'K_CMB', 'K_CMB']
+template_units = ['K_CMB', 'R', 'K_CMB', 'K_CMB']
+template_units_use = ['K_CMB', 'R', 'K_CMB', 'K_CMB']
 simulation_values = [10.0, 1.0, 0.0, 0.0]
 simulation_noise = [1.0] # In whichever units are used for the templates
 # CMB
@@ -64,8 +64,9 @@ cmbspectrum_units = 'uK_CMB'
 cmbspectrum_Cl = True # If the CMB spectrum is already in Cl, set this to true, otherwise false and we'll assume l(l+1)C_l/2pi
 cmbspectrum_minl = 2
 # Masks
-mask_filenames = ["2p3ghz/64_60.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
-regions = [ [[245, 260],[21, 31]], [[140, 155],[15, 20]], [[200, 230],[-48, -41]], [[250, 260],[-35, -25]], [[90, 97],[-30, -13]], [[118, 135],[20, 37]], [[300, 315],[35, 45]], [[227, 237],[12, 18]], [[145, 165],[-38, -30]], [[300, 320],[-40, -30]], [[33, 45],[50, 70]], [[270, 310],[55, 70]], [[350, 365],[-50, -35]], [[70, 90],[20, 30]], [[76, 84],[-50, -30]]] # Davies et al. (2006) 15 regions
+mask_filenames = ["wmap1/64_60.00smoothed_map_kp2_mask_yr1_v1_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
+#mask_filenames = ["2p3ghz/64_60.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
+regions = [ [[245, 260],[21, 31]]]#, [[140, 155],[15, 20]], [[200, 230],[-48, -41]], [[250, 260],[-35, -25]], [[90, 97],[-30, -13]], [[118, 135],[20, 37]], [[300, 315],[35, 45]], [[227, 237],[12, 18]], [[145, 165],[-38, -30]], [[300, 320],[-40, -30]], [[33, 45],[50, 70]], [[270, 310],[55, 70]], [[350, 365],[-50, -35]], [[70, 90],[20, 30]], [[76, 84],[-50, -30]]] # Davies et al. (2006) 15 regions
 # Map configuration
 nside = 64 # Maps will be ud_graded to this as needed.
 resolution = 60.0 # Arcmin. Assumes that the maps are already at this resolution.
@@ -266,8 +267,15 @@ for r in range(0,num_runs):
 			print "Number of pixels: " + str(np.shape(data_masked))
 
 		outputfile = open(outdir+'results_'+str(r)+'_'+str(i)+'.txt', "w")
+		outputfile.write("Run " + str(r) + ", region " + str(i))
+		outputfile.write('\n')
 		np.savetxt(outputfile, ["freq"] + template_names + ["chisq"], fmt="%s", newline=" ")
 		outputfile.write('\n')
+		outputfile_unc = open(outdir+'results_'+str(r)+'_'+str(i)+'_unc.txt', "w")
+		outputfile_unc.write("Run " + str(r) + ", region " + str(i) + " - Uncertainty")
+		outputfile_unc.write('\n')
+		np.savetxt(outputfile_unc, ["freq"] + template_names + ["chisq"], fmt="%s", newline=" ")
+		outputfile_unc.write('\n')
 		###
 		# Start loop over data maps
 		###
@@ -356,10 +364,11 @@ for r in range(0,num_runs):
 			print chisq[r][i][j]
 			# for t in range(0,num_templates):
 			outputfile.write("%.2f val %s %.4g\n" % (data_frequencies[j], str(a[r][i][j])[1:-1], chisq[r][i][j]))
-			outputfile.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
+			outputfile_unc.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
 			# np.savetxt(outputfile, (data_frequencies[j], a_err[j], chisq[j]), fmt="%.2f", newline=" ")
 
 		outputfile.close()
+		outputfile_unc.close()
 
 
 if (num_runs > 1):
@@ -375,6 +384,14 @@ if (num_runs > 1):
 			# print 'Abar avg: ' + str(np.mean(abar, axis=0))
 			print 'std: ' + str(np.std(a, axis=0))
 			print 'avg err: ' + str(np.mean(a_err, axis=0))
+
+			for k in range(0,num_templates):
+				plt.hist(a[:,i,j,k])
+				plt.title("Histogram")
+				plt.xlabel("Value")
+				plt.ylabel("Frequency")
+				plt.savefig(outdir+"hist_region_"+str(i)+"_map_"+str(j)+"_template_"+str(k)+".png")
+				plt.close()
 
 			# print '#	Input	std	Avg	std:'
 			# for k in range(0, num_templates):
