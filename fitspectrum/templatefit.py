@@ -28,11 +28,12 @@ tpl_style = 1 # 1 = I, 2 = Q&U, 3 = P
 debug = 1 # 0 = silent, 1 = prints debug statements
 simulation = 1 # 1 = do a simulation rather than using real data, 0 = use the real data.
 num_runs = 1000 # Set to 1 for normal use, or more than that if doing a simulation.
-simulation_add_cmb = 0 # Use a simulated CMB map too?
+simulation_add_cmb = 1 # Use a simulated CMB map too?
 cmbsub = 0 # Set to 1 to subtract CMB map, or 0 to use the covariance matrix
-cmb_use_covar = 0 # Set to 1 to use the covariance matrix, or 0 to not use it.
+cmb_use_covar = 1 # Set to 1 to use the covariance matrix, or 0 to not use it.
+save_cmbcovar = 1
 usemask = 1
-outdir = "templatefit_davies_wmap1_sim_output/" # Output directory. Will be created if it doesn't already exist.
+outdir = "templatefit_davies_wmap1_sim_cmb_output/" # Output directory. Will be created if it doesn't already exist.
 # Input data
 # data_filenames = ['wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits'] # WMAP 9-year data
 data_filenames = ['wmap1/512_60.00smoothed_map_k_imap_yr1_v1.fits']#, 'wmap1/512_60.00smoothed_map_ka_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_q_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_v_imap_yr1_v1.fits', 'wmap1/512_60.00smoothed_map_w_imap_yr1_v1.fits'] # WMAP 1-year data
@@ -96,6 +97,7 @@ abar = np.zeros((num_runs, num_regions, num_maps, num_templates))
 a_err = np.zeros((num_runs, num_regions, num_maps, num_templates))
 chisq = np.zeros((num_runs, num_regions, num_maps))
 num_region_pixels = np.zeros((num_regions))
+cmb_covar_saved = 0
 
 # Output directories
 ensure_dir(outdir)
@@ -298,7 +300,7 @@ for r in range(0,num_runs):
 				covar[i_cov,i_cov]=np.sqrt(variance_masked[j][i_cov])
 
 			# CMB covariance matrix - want this where we're not subtracting the CMB.
-			if (cmb_use_covar == 1):
+			if (cmb_use_covar == 1 and cmb_covar_saved == 0):
 				if (debug):
 					print ''
 					print '**** Calculating CMB covariance matrix'
@@ -319,8 +321,12 @@ for r in range(0,num_runs):
 						# print i,j,cmb_covar[i,j]
 
 				cmb_covar /= (4.0*const['pi'])
-				covar += cmb_covar
+				cmb_covar_saved = 1
 				del separations # We don't need this any more.
+			if (cmb_use_covar == 1):
+				covar += cmb_covar
+
+			if (save_cmbcovar == 0):
 				del cmb_covar
 
 			# Invert the covariance matrix

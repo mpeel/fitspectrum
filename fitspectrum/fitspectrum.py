@@ -141,6 +141,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		fd = inputspectrum[:,1] / ((1e-26 * (const['c']*1e6) / (wavelength**2))) # Convert from W/m^2/um to W/m^2/Hz then to Jy
 		fd_err = inputspectrum[:,2] / ((1e-26 * (const['c']*1e6) / (wavelength**2)))
 
+
 	num_datapoints = len(freqs)
 	print num_datapoints
 	print fd_err
@@ -264,15 +265,6 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	print 'Chisq: ', m.fnorm / dof
 	print 'Parameters: ', m.params
 
-	if nodust == False:
-		print 'Dust amplitude:' + str(m.params[2]) + " +- " + str(m.perror[2])
-		print 'Dust index:' + str(m.params[3]) + " +- " + str(m.perror[3])
-		print 'Dust temperature:' + str(m.params[4]) + " +- " + str(m.perror[4])
-	if nodust2 == False:
-		print 'Dust amplitude:' + str(m.params[10]) + " +- " + str(m.perror[10])
-		print 'Dust index:' + str(m.params[11]) + " +- " + str(m.perror[11])
-		print 'Dust temperature:' + str(m.params[12]) + " +- " + str(m.perror[12])
-
 
 
 	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/1000.0)
@@ -301,6 +293,24 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
 	plt.savefig(outdir+srcname+'.pdf')
 	plt.close()
+
+	outputfile = open(outdir+srcname+".dat", "w")
+	outputfile.write("# " + srcname + "\n")
+	for i in range(0,num_datapoints):
+		outputfile.write(str(freqs[i]) + "	" + str(fd[i]) + "	" + str(fd_err[i]) + "\n")
+
+	if nodust == False:
+		outputfile.write('# Dust amplitude: ' + str(m.params[2]) + " +- " + str(m.perror[2]) + '\n')
+		outputfile.write('# Dust index: ' + str(m.params[3]) + " +- " + str(m.perror[3]) + '\n')
+		outputfile.write('# Dust temperature: ' + str(m.params[4]) + " +- " + str(m.perror[4]) + '\n')
+	if nodust2 == False:
+		outputfile.write('# Dust2 amplitude: ' + str(m.params[10]) + " +- " + str(m.perror[10]) + '\n')
+		outputfile.write('# Dust2 index: ' + str(m.params[11]) + " +- " + str(m.perror[11]) + '\n')
+		outputfile.write('# Dust2 temperature: ' + str(m.params[12]) + " +- " + str(m.perror[12]) + '\n')
+
+
+
+	outputfile.close()
 
 	###
 	# MCMC fitting
@@ -388,43 +398,39 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 
 
 
-	###
-	# Plot out the model
-	###
+		###
+		# Plot out the model
+		###
 
-	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/1000.0)
-	# model = synchrotron(const, x, 1.0, p[7], p[8]) + freefree(const, x, p[0], p[1], solid_angle) +
+		x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/1000.0)
+		# model = synchrotron(const, x, 1.0, p[7], p[8]) + freefree(const, x, p[0], p[1], solid_angle) +
 
-	# Generate the model and plot it
-	if nodust == False:
-		model_dust1 = thermaldust(const, x, vals[2][0], vals[3][0], vals[4][0], const['dust_optical_depth_freq'], solid_angle)
-		plt.plot(x, model_dust1, 'r')#, freqs, fd, 'g')
-	if nodust2 == False:
-		model_dust2 = thermaldust(const, x, vals[10][0], vals[11][0], vals[12][0], const['dust_optical_depth_freq'], solid_angle)
-		plt.plot(x, model_dust2, 'g')#, freqs, fd, 'g')
+		# Generate the model and plot it
+		if nodust == False:
+			model_dust1 = thermaldust(const, x, vals[2][0], vals[3][0], vals[4][0], const['dust_optical_depth_freq'], solid_angle)
+			plt.plot(x, model_dust1, 'r')#, freqs, fd, 'g')
+		if nodust2 == False:
+			model_dust2 = thermaldust(const, x, vals[10][0], vals[11][0], vals[12][0], const['dust_optical_depth_freq'], solid_angle)
+			plt.plot(x, model_dust2, 'g')#, freqs, fd, 'g')
 
-	print vals[:],[0]
-	model_overall = spectrum(vals[:][0], x=x)
-	plt.plot(x, model_overall, 'black')
-	# Add the data to the plot
-	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-	if badvals:
-		plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
+		print vals[:],[0]
+		model_overall = spectrum(vals[:][0], x=x)
+		plt.plot(x, model_overall, 'black')
+		# Add the data to the plot
+		plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
+		if badvals:
+			plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
 
-	# Formatting, and output
-	plt.title(srcname)
-	plt.xscale('log')
-	plt.yscale('log')
-	plt.xlabel('Frequency (GHz)')
-	plt.ylabel('Flux density (Jy)')
-	plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
-	plt.savefig(outdir+srcname+'_likelihood.pdf')
-	plt.close()
+		# Formatting, and output
+		plt.title(srcname)
+		plt.xscale('log')
+		plt.yscale('log')
+		plt.xlabel('Frequency (GHz)')
+		plt.ylabel('Flux density (Jy)')
+		plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
+		plt.savefig(outdir+srcname+'_likelihood.pdf')
+		plt.close()
 
-	# outputfile = open(outdir+srcname+".dat", "w")
-	# np.savetxt(outputfile, "# " + srcname, fmt="%s", newline=" ")
-	# outputfile.write('\n')
-	# outputfile.close()
 
 
 # That's all, folks!
