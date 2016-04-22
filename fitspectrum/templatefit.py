@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 from scipy import special
 from spectra import *
 from astroutils import *
-from astropy.coordinates import SkyCoord
-
+from tplfit import *
 
 ###
 # Configuration options
@@ -73,7 +72,7 @@ cmbspectrum_minl = 2
 # mask_filenames = ["wmap1/64_60.00smoothed_map_kp2_mask_yr1_v1_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
 mask_filenames = ["2p3ghz_3deg/64_180.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"]
 #mask_filenames = ["2p3ghz/64_60.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
-regions = [ [[220, 300], [25, 40]] ]#[[310, 400], [30, 70]]]
+regions = [ [[220, 300], [25, 40]] ]#[[310, 400], [30, 70]]] # Some of the Peel et al. (2011) regions.
 # regions = [ [[245, 260],[21, 31]]]#, [[140, 155],[15, 20]], [[200, 230],[-48, -41]], [[250, 260],[-35, -25]], [[90, 97],[-30, -13]], [[118, 135],[20, 37]], [[300, 315],[35, 45]], [[227, 237],[12, 18]], [[145, 165],[-38, -30]], [[300, 320],[-40, -30]], [[33, 45],[50, 70]], [[270, 310],[55, 70]], [[350, 365],[-50, -35]], [[70, 90],[20, 30]], [[76, 84],[-50, -30]]] # Davies et al. (2006) 15 regions
 # Map configuration
 nside = 64 # Maps will be ud_graded to this as needed.
@@ -334,33 +333,16 @@ for r in range(0,num_runs):
 				if (debug):
 					print ''
 					print '**** Calculating CMB covariance matrix'
-				cmb_covar = np.zeros((npix_region, npix_region))
-				# Calculate all of the separations between pixels in one big array
-				pos_coord = SkyCoord(frame="galactic", l=positions_masked[1][:]*(180.0/const['pi']), b=90.0-(positions_masked[0][:]*180.0/const['pi']),unit="deg")
-				separations = np.array([np.cos(pos_coord[i_temp].separation(pos_coord).rad) for i_temp in range(npix_region)])
-				separations = np.reshape(separations, (npix_region, npix_region))
+				cmb_covar = calc_cmbcovar(const, npix_region, positions_masked, lrange, cmbspectrum, beam_windowfunctionsq, pixel_windowfunctionsq)
 
-				for i_cov in range(0,npix_region):
-					for j_cov in range (0,npix_region):
-						Pl = special.lpmv(0, lrange, separations[i_cov,j_cov])
-						cmb_covar[i_cov,j_cov] = np.sum((2.0*lrange+1.0)*cmbspectrum*(beam_windowfunctionsq)*(pixel_windowfunctionsq)*Pl)
-
-				cmb_covar /= (4.0*const['pi'])
 				if (save_cmbcovar == 1):
 					cmb_covar_saved = 1
-				del separations # We don't need this any more.
 
 			if (cmb_use_covar == 1):
 				covar += cmb_covar
 
 			if (save_cmbcovar == 0):
 				del cmb_covar
-
-			# Invert the covariance matrix
-			if (debug):
-				print ''
-				print '**** Inverting covariance matrix'
-			covar_inv = np.linalg.inv(covar)
 
 			###
 			# Calculate the coefficients
@@ -369,11 +351,7 @@ for r in range(0,num_runs):
 				print ''
 				print '**** Calculating coefficients'
 
-
-			a_arr = np.dot(templates_masked, np.dot(covar_inv, templates_masked.T)) # Bottom half of equation
-			a_inv = np.linalg.inv(a_arr) # Since we're dividing
-			b_arr = np.dot(data_masked[j], np.dot(covar_inv, templates_masked.T)) # Top half of the equation
-			a[r][i][j] = np.dot(b_arr, a_inv) # Combine the top and bottom halves of the equation
+			a[r][i][j], a_err[r][i][j], chisq[r][i][j] = templatefit(covar, templates_masked, data_masked[j])
 
 			# Calculate the difference map between the test map and the templates with coefficients
 			diff = data_masked[j] - a[r][i][j].dot(templates_masked)
@@ -383,8 +361,11 @@ for r in range(0,num_runs):
 				origmap = (maps[j]) * mask
 				hp.write_map(outdir + "orig_"+str(i)+"_"+str(j)+".fits", origmap)
 
-			a_err[r][i][j] = np.sqrt(np.diag(a_inv))
-			chisq[r][i][j] = (diff.dot(covar_inv)).dot(diff.T)
+			# Calculate spectral indices
+			# This bit isn't working right at the moment, convert_factor isn't correct.
+			convert_factor = np.array([convertunits(const, data_units[i], data_units_use[i], data_frequencies[i]) / convertunits(const, template_units[i_temp], data_units_use[i], template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
+			beta = np.log(a[r][i][j] * convert_factor) / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
+			beta_err = a_err[r][i][j] * convert_factor / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp])*a[r][i][j][i_temp]*convert_factor[i_temp] for i_temp in range(0,num_templates)])
 
 			###
 			# Output the results
@@ -394,6 +375,9 @@ for r in range(0,num_runs):
 			print a_err[r][i][j]
 			print 'Chisq: ' + str(chisq[r][i][j])
 			print 'Reduced chisq: ' + str(chisq[r][i][j]/npix_region)
+			print 'Coefficients correspond to spectral indices of:'
+			print beta
+			print beta_err
 			outputfile.write("%.2f val %s %.4g\n" % (data_frequencies[j], str(a[r][i][j])[1:-1], chisq[r][i][j]))
 			outputfile_unc.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
 

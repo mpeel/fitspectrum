@@ -47,3 +47,17 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1):
 		# hp.write_map(output, smoothed_map[i])
 	hp.write_map(output, smoothed_map)
 	
+# Change the resolution of an nobs map. Simplest just to convert it into a variance map, and smooth that.
+# def udgrade_nobs(map_in, nside_out):
+# 	return 1.0/udgrade_variance(1.0/map_in, nside_out)
+
+# # Change the resolution of an variance map, assuming that beams are Gaussian
+# def udgrade_variance(map_in, nside_out):
+# 	nside_in = hp.get_nside(map)
+# 	pixarea_in = hp.nside2pixarea(nside_in)
+# 	pixarea_out = hp.nside2pixarea(nside_out)
+# 	Avb = 1
+# 	bv = 1
+# 	return Avb * bv * map_in
+# 	#σ C2 = A v b b v ∗ σ I2 ,
+
