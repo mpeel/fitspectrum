@@ -7,6 +7,7 @@
 # Mike Peel   04-Jan-2016   Formatting
 # Mike Peel   08-Mar-2016   Major expansion, use regions throughout.
 # Mike Peel   29-Mar-2016   Add num_runs and simulation values. Debugging.
+# Mike Peel   19-May-2016   Expand to simultaneously fit multiple frequencies.
 #
 # Requirements:
 # Numpy, healpy, matplotlib, scipy, astropy
@@ -18,21 +19,23 @@ from scipy import special
 from spectra import *
 from astroutils import *
 from tplfit import *
+import scipy.optimize as op
 
 ###
 # Configuration options
 ###
 # Type of template fit to do
-tpl_style = 1 # 1 = I, 2 = Q&U, 3 = P
+tpl_style = 2 # 1 = I (individual freqs), 2 = I (multiple freqs), 3 = I+P (multiple freqs), 4 = Q&U
 debug = 1 # 0 = silent, 1 = prints debug statements
-simulation = 0 # 1 = do a simulation rather than using real data, 0 = use the real data.
+simulation = 1 # 1 = do a simulation rather than using real data, 0 = use the real data.
 num_runs = 1 # Set to 1 for normal use, or more than that if doing a simulation.
 simulation_add_cmb = 0 # Use a simulated CMB map too?
 cmbsub = 0 # Set to 1 to subtract CMB map, or 0 to use the covariance matrix
-cmb_use_covar = 1 # Set to 1 to use the covariance matrix, or 0 to not use it.
+cmb_use_covar = 0 # Set to 1 to use the covariance matrix, or 0 to not use it.
 save_cmbcovar = 0
+calc_beta = 0
 usemask = 1
-outdir = "templatefit_peel_wmap9_3deg/" # Output directory. Will be created if it doesn't already exist.
+outdir = "templatefit_test_mode2/" # Output directory. Will be created if it doesn't already exist.
 # outdir = "templatefit_davies_wmap1_sim_withcmb_output/" # Output directory. Will be created if it doesn't already exist.
 # Input data
 # data_filenames = ['wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', 'wmap9/512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits'] # 
@@ -56,8 +59,12 @@ template_filenames = ["2p3ghz_3deg/64_180.00smoothed_lambda_haslam408_dsds.fits"
 template_frequencies = [0.408, 1.0, 94.0, 1.0] # Only needed if converting units below
 template_units = ['K_CMB', 'R', 'K_CMB', 'K_CMB']
 template_units_use = ['K_CMB', 'R', 'K_CMB', 'K_CMB']
-simulation_values = [10.0, 1.0, 0.0, 0.0]
-simulation_noise = [1.0] # In whichever units are used for the templates
+simulation_values = [100.0, 10.0, 10.0, 10.0]
+simulation_indices = [-3.0, -2.15, 3.0, 0.0]
+simulation_noise = [2.0, 2.0, 2.0, 2.0, 2.0] # In whichever units are used for the templates
+starting_guess_indices = [-2.0, -2.0, 0.0, 0.0]
+indices_bounds = ((-4.0, 0.0), (-6.0, 0.0), (-3.0, 3.0), (-3.0, 3.0))
+maxiter = 4000
 # CMB
 cmbmap_filename = "PR2/512_60.00smoothed_COM_CMB_IQU-commander-field-Int_2048_R2.01_full.fits"
 cmbmap_units = 'mK_CMB' # The CMB map will automatically be converted to data units as needed for the subtraction.
@@ -72,7 +79,7 @@ cmbspectrum_minl = 2
 # mask_filenames = ["wmap1/64_60.00smoothed_map_kp2_mask_yr1_v1_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
 mask_filenames = ["2p3ghz_3deg/64_180.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"]
 #mask_filenames = ["2p3ghz/64_60.00smoothed_wmap_ext_temperature_analysis_mask_r9_7yr_v4_2.fits"] # If you specify multiple masks here, then they will all be multiplied together.
-regions = [ [[220, 300], [25, 40]] ]#[[310, 400], [30, 70]]] # Some of the Peel et al. (2011) regions.
+regions = [ [[220, 240], [25, 40]] ]#[[220, 300], [25, 40]], [[310, 400], [30, 70]]] # Some of the Peel et al. (2011) regions.
 # regions = [ [[245, 260],[21, 31]]]#, [[140, 155],[15, 20]], [[200, 230],[-48, -41]], [[250, 260],[-35, -25]], [[90, 97],[-30, -13]], [[118, 135],[20, 37]], [[300, 315],[35, 45]], [[227, 237],[12, 18]], [[145, 165],[-38, -30]], [[300, 320],[-40, -30]], [[33, 45],[50, 70]], [[270, 310],[55, 70]], [[350, 365],[-50, -35]], [[70, 90],[20, 30]], [[76, 84],[-50, -30]]] # Davies et al. (2006) 15 regions
 # Map configuration
 nside = 64 # Maps will be ud_graded to this as needed.
@@ -193,6 +200,14 @@ if (cmb_use_covar):
 # Loop over runs
 ###
 for r in range(0,num_runs):
+
+	###
+	# Prepare a CMB map for this run, if we need it.
+	###
+	if (simulation_add_cmb == 1):
+		sim_cmb_map = hp.sphtfunc.synfast(cmbspectrum, nside,lmax, fwhm=np.radians(resolution/60.0))
+		hp.write_map(outdir + "cmb_simulation_"+str(r)+".fits", sim_cmb_map)
+
 	###
 	# Prepare the data
 	###
@@ -251,16 +266,16 @@ for r in range(0,num_runs):
 
 		# If we're doing a simulation, use templates instead of the actual data.
 		if (simulation):
-			maps[i] = simulation_values[0] * templates[0]
+			maps[i] = simulation_values[0] * templates[0] * (data_frequencies[i]/data_frequencies[0])**simulation_indices[0]
 			for j in range(1,num_templates):
-				maps[i] += simulation_values[j] * templates[j]
+				maps[i] += simulation_values[j] * templates[j] * (data_frequencies[i]/data_frequencies[0])**simulation_indices[j]
 			maps[i] += np.random.randn(npix) * simulation_noise[i]
 			if (simulation_add_cmb == 1):
-				sim_cmb_map = hp.sphtfunc.synfast(cmbspectrum, nside,lmax, fwhm=np.radians(resolution/60.0))
-				hp.write_map(outdir + "cmb_simulation_"+str(r)+".fits", sim_cmb_map)
 				maps[i] += sim_cmb_map
 				# maps[i] += cmb_map * convertunits(const, cmbmap_units, data_units_use[i], data_frequencies[i])
+			hp.write_map(outdir + "map_simulation_"+str(r)+"_"+str(i)+".fits", maps[i])
 			variance[i] = simulation_noise[i]**2
+
 
 	###
 	# Start the main loop over regions
@@ -307,28 +322,102 @@ for r in range(0,num_runs):
 		outputfile_unc.write('\n')
 		np.savetxt(outputfile_unc, ["freq"] + template_names + ["chisq"], fmt="%s", newline=" ")
 		outputfile_unc.write('\n')
+
+
 		###
 		# Start loop over data maps
+		# We only want to do this if we're in the 'traditional' template fitting mode, i.e. tpl_style == 1. Otherwise skip down a few lines...
 		###
-		if (debug):
-			print ''
-			print '*** Looping over maps'
-		for j in range(0,num_maps):
+		if (tpl_style == 1):
 			if (debug):
 				print ''
-				print '**** Map ' + str(j)
+				print '*** Looping over maps'
+			for j in range(0,num_maps):
+				if (debug):
+					print ''
+					print '**** Map ' + str(j)
 
+				###
+				# Define the CMB covariance matrix
+				###
+				# Just an identity matrix to start with
+				covar = np.identity(npix_region)
+
+				# Covariance matrix containing noise information
+				for i_cov in range(0,npix_region):
+					covar[i_cov,i_cov]=np.sqrt(variance_masked[j][i_cov])
+
+				# CMB covariance matrix - want this where we're not subtracting the CMB.
+				if (cmb_use_covar == 1 and cmb_covar_saved == 0):
+					if (debug):
+						print ''
+						print '**** Calculating CMB covariance matrix'
+					cmb_covar = calc_cmbcovar(const, npix_region, positions_masked, lrange, cmbspectrum, beam_windowfunctionsq, pixel_windowfunctionsq)
+
+					if (save_cmbcovar == 1):
+						cmb_covar_saved = 1
+
+				if (cmb_use_covar == 1):
+					covar += cmb_covar
+
+				if (cmb_use_covar == 1 and save_cmbcovar == 0):
+					del cmb_covar
+
+				###
+				# Calculate the coefficients
+				###
+				if (debug):
+					print ''
+					print '**** Calculating coefficients'
+
+				a[r][i][j], a_err[r][i][j], chisq[r][i][j] = templatefit(covar, templates_masked, data_masked[j])
+
+				# Calculate the difference map between the test map and the templates with coefficients
+				diff = data_masked[j] - a[r][i][j].dot(templates_masked)
+				if (simulation == 0):
+					diffmap = (maps[j] - a[r][i][j].dot(templates)) * mask
+					hp.write_map(outdir + "diff_"+str(i)+"_"+str(j)+".fits", diffmap)
+					origmap = (maps[j]) * mask
+					hp.write_map(outdir + "orig_"+str(i)+"_"+str(j)+".fits", origmap)
+
+				# Calculate spectral indices
+				# This bit isn't working right at the moment, convert_factor isn't correct.
+				if (calc_beta == 1):
+					convert_factor = np.array([convertunits(const, data_units[i], data_units_use[i], data_frequencies[i]) / convertunits(const, template_units[i_temp], data_units_use[i], template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
+					beta = np.log(a[r][i][j] * convert_factor) / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
+					beta_err = a_err[r][i][j] * convert_factor / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp])*a[r][i][j][i_temp]*convert_factor[i_temp] for i_temp in range(0,num_templates)])
+
+				###
+				# Output the results
+				###
+				print str(["freq"] + template_names + ["chisq"])
+				print a[r][i][j]
+				print a_err[r][i][j]
+				print 'Chisq: ' + str(chisq[r][i][j])
+				print 'Reduced chisq: ' + str(chisq[r][i][j]/npix_region)
+				if (calc_beta == 1):
+					print 'Coefficients correspond to spectral indices of:'
+					print beta
+					print beta_err
+				outputfile.write("%.2f val %s %.4g\n" % (data_frequencies[j], str(a[r][i][j])[1:-1], chisq[r][i][j]))
+				outputfile_unc.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
+		elif (tpl_style == 2):
+
+			# We need to reshape the data array so that we can fit them all at once.
+			data_masked = np.reshape(data_masked, (num_maps * npix_region))
+			
 			###
-			# Define the CMB covariance matrix
+			# Define the CMB covariance matrix - for all of the maps at once!
 			###
 			# Just an identity matrix to start with
-			covar = np.identity(npix_region)
+			covar = np.identity(npix_region*num_maps)
 
 			# Covariance matrix containing noise information
-			for i_cov in range(0,npix_region):
-				covar[i_cov,i_cov]=np.sqrt(variance_masked[j][i_cov])
+			for j_cov in range(0,num_maps):
+				for i_cov in range(0,npix_region):
+					covar[j_cov*npix_region+i_cov,j_cov*npix_region+i_cov]=np.sqrt(variance_masked[j_cov][i_cov])
 
-			# CMB covariance matrix - want this where we're not subtracting the CMB.
+			# CMB
 			if (cmb_use_covar == 1 and cmb_covar_saved == 0):
 				if (debug):
 					print ''
@@ -339,10 +428,47 @@ for r in range(0,num_runs):
 					cmb_covar_saved = 1
 
 			if (cmb_use_covar == 1):
-				covar += cmb_covar
+				for j_cov in range(0,num_maps):
+					print 'Hello'
+					print np.shape(cmb_covar)
+					covar[j_cov*npix_region:(j_cov+1)*npix_region,j_cov*npix_region:(j_cov+1)*npix_region] += cmb_covar
 
-			if (save_cmbcovar == 0):
+			if (cmb_use_covar == 1 and save_cmbcovar == 0):
 				del cmb_covar
+
+			if (debug):
+				print ''
+				print '**** Inverting covariance matrix'
+			# Calculate the inverse covariance matrix here, to save time later on.
+			covar_inv = np.linalg.inv(covar)
+
+			# What indices are we using? Just the starting guess for now.
+			indices = starting_guess_indices
+
+			if (debug):
+				print ''
+				print '**** Minimizing chisq'
+			chisq_minimize_indices_fun = lambda *args: chisq_minimize_indices(*args)
+			result = op.minimize(chisq_minimize_indices_fun, indices, args=(num_maps, npix_region, num_templates, templates_masked, data_frequencies, covar, data_masked, covar_inv), bounds=indices_bounds, method='L-BFGS-B', options={'maxiter': maxiter})
+			# maxlikelihood = result["x"]
+			print "Done"
+			print result
+			print indices
+			# print maxlikelihood
+			print result['success']
+			print result['message']
+			indices = result["x"]
+
+
+			###
+			# Now we've found the best indices, get the template coefficients.
+			###
+			# For the templates, we need to do something different - we want to assume a set of spectral indexes, and scale them accordingly.
+			templates_masked_scaled = np.zeros((num_templates, num_maps * npix_region))
+			for j_cov in range(0,num_maps):
+				for i_cov in range(0,npix_region):
+					for k_cov in range(0,num_templates):
+						templates_masked_scaled[k_cov][j_cov*npix_region+i_cov] = templates_masked[k_cov][i_cov] * (data_frequencies[j_cov]/data_frequencies[0])**indices[k_cov]
 
 			###
 			# Calculate the coefficients
@@ -350,37 +476,25 @@ for r in range(0,num_runs):
 			if (debug):
 				print ''
 				print '**** Calculating coefficients'
+			j = 0
 
-			a[r][i][j], a_err[r][i][j], chisq[r][i][j] = templatefit(covar, templates_masked, data_masked[j])
-
-			# Calculate the difference map between the test map and the templates with coefficients
-			diff = data_masked[j] - a[r][i][j].dot(templates_masked)
-			if (simulation == 0):
-				diffmap = (maps[j] - a[r][i][j].dot(templates)) * mask
-				hp.write_map(outdir + "diff_"+str(i)+"_"+str(j)+".fits", diffmap)
-				origmap = (maps[j]) * mask
-				hp.write_map(outdir + "orig_"+str(i)+"_"+str(j)+".fits", origmap)
-
-			# Calculate spectral indices
-			# This bit isn't working right at the moment, convert_factor isn't correct.
-			convert_factor = np.array([convertunits(const, data_units[i], data_units_use[i], data_frequencies[i]) / convertunits(const, template_units[i_temp], data_units_use[i], template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
-			beta = np.log(a[r][i][j] * convert_factor) / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp]) for i_temp in range(0,num_templates)])
-			beta_err = a_err[r][i][j] * convert_factor / np.array([np.log(data_frequencies[i]/template_frequencies[i_temp])*a[r][i][j][i_temp]*convert_factor[i_temp] for i_temp in range(0,num_templates)])
+			a[r][i][j], a_err[r][i][j], chisq[r][i][j] = templatefit(covar, templates_masked_scaled, data_masked)
 
 			###
 			# Output the results
 			###
 			print str(["freq"] + template_names + ["chisq"])
+			print indices
 			print a[r][i][j]
 			print a_err[r][i][j]
 			print 'Chisq: ' + str(chisq[r][i][j])
 			print 'Reduced chisq: ' + str(chisq[r][i][j]/npix_region)
-			print 'Coefficients correspond to spectral indices of:'
-			print beta
-			print beta_err
 			outputfile.write("%.2f val %s %.4g\n" % (data_frequencies[j], str(a[r][i][j])[1:-1], chisq[r][i][j]))
 			outputfile_unc.write("%.2f err %s %.4g\n" % (data_frequencies[j], str(a_err[r][i][j])[1:-1], chisq[r][i][j]))
 
+		else:
+			print "This template fit style hasn't been coded yet!"
+			exit()
 		outputfile.close()
 		outputfile_unc.close()
 
