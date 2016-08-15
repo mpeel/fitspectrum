@@ -16,11 +16,57 @@ def get_spectrum_constants():
 def synchrotron(const, freq, basefreq, sync_amp, sync_spec):
 	return sync_amp * (freq/basefreq)**sync_spec
 
-def freefree(const, freq, EM, Te, solid_angle, equation=1):
+def syncshifted_comm(nu, sync_amplitude, sync_shift, sync_freq, sync_amp):
+	nu_0s = 0.408
+	nu_p0s = 0.0154
+
+	# shift and interpolate
+	synchrotron = sync_amplitude * (nu_0s/nu)**2 * ((np.interp((nu*nu_p0s/sync_shift),sync_freq, sync_amp)) / (np.interp((nu_0s*nu_p0s/sync_shift),sync_freq, sync_amp)))
+
+	# print synchrotron
+
+	# if outside range of synchrotron model, then set to 0
+	if sync_shift != 0:
+		synchrotron[nu < min(sync_freq)*2] = 0.0
+		synchrotron[nu > max(sync_freq)-100.] = 0.0
+
+	# if outside range of spinning dust model, then set to 0
+	# IF (sync_shift NE 0) THEN BEGIN
+	# badvals = where(S LT 0.,nbadvals)
+	# IF (nbadvals GT 0) THEN S[badvals]=0.
+	# ENDIF
+
+	return synchrotron
+
+
+def syncshifted_pol_comm(nu, sync_amplitude, sync_shift, sync_freq, sync_amp):
+	nu_0s = 30.0
+	nu_p0s = 0.0154
+
+	# shift and interpolate
+	synchrotron = sync_amplitude * (nu_0s/nu)**2 * ((np.interp((nu*nu_p0s/sync_shift),sync_freq, sync_amp)) / (np.interp((nu_0s*nu_p0s/sync_shift),sync_freq, sync_amp)))
+
+	# print synchrotron
+
+	# if outside range of synchrotron model, then set to 0
+	if sync_shift != 0:
+		synchrotron[nu < min(sync_freq)*2] = 0.0
+		synchrotron[nu > max(sync_freq)-100.] = 0.0
+
+	# if outside range of spinning dust model, then set to 0
+	# IF (sync_shift NE 0) THEN BEGIN
+	# badvals = where(S LT 0.,nbadvals)
+	# IF (nbadvals GT 0) THEN S[badvals]=0.
+	# ENDIF
+
+	return synchrotron
+
+
+def freefree(const, freq, EM, Te, solid_angle, equation=1,comm=0):
 
 	if equation == 1:
 		# new equations from Draine (2011) book!
-		g_ff = np.log(np.exp(5.960 - (np.sqrt(3.0)/const['pi'])*np.log(1.0*freq*(Te/10000.0)**(-3.0/2.0))) + 2.71828)
+		g_ff = np.log(np.exp(5.960 - (np.sqrt(3.0)/const['pi'])*np.log(freq*(Te/10000.0)**(-3.0/2.0))) + 2.71828)
 		tau_ff = 5.468e-2 * Te**(-1.5) * freq**(-2.0) * EM * g_ff
 		# tau_ff = 1.772d-2 * (Te)^(-1.5) * (freq)^(-2d) * EM * g_ff
 	elif equation == 2:
@@ -38,8 +84,10 @@ def freefree(const, freq, EM, Te, solid_angle, equation=1):
 	# deal with very small tau values in the exponential
 	#smalltau = where(tau_ff < 1.0e-10)
 	#if (smalltau[0] GE 0) THEN T_ff[smalltau] = Te * (tau_ff[smalltau] - (-tau_ff[smalltau])^2.0/ 2.0 - (-tau_ff[smalltau]^3.0)/6.0)
-
-	S = 2.0 * 1381.0 * T_ff * (freq*1e9)**2 / const['c']**2  * solid_angle
+	if comm == 1:
+		S = 1e6 * T_ff
+	else:
+		S = 2.0 * 1381.0 * T_ff * (freq*1e9)**2 / const['c']**2  * solid_angle
 
 	return S
 
@@ -64,12 +112,34 @@ def spinningdust(spd_freq, spd_em, solid_angle, freq, amp, shift):
 	# IF (nbadvals GT 0) THEN S[badvals]=0.
 	# ENDIF
 
+def spinningdust_comm(nu, spinningdust_amp, spdustshift, spinningdust_em_comm, spinningdust_freq_comm, component):
+	nu_p0 = 30.0
+
+	if component == 2:
+		nu_0 = 41.0
+	else:
+		nu_0 = 22.8
+
+	 # shift and interpolate
+	spinningdust = spinningdust_amp * (nu_0/nu)**2 * ((np.interp((nu*nu_p0/spdustshift),spinningdust_freq_comm, spinningdust_em_comm)) / (np.interp((nu_0*nu_p0/spdustshift),spinningdust_freq_comm, spinningdust_em_comm)))
+
+	if spdustshift != 0:
+		spinningdust[nu < min(spinningdust_freq_comm)] = 0.0
+		spinningdust[nu > max(spinningdust_freq_comm)-100.] = 0.0
+
+	return spinningdust
 
 def cmb(const, freq, amp, solid_angle):
 
 	xx = const['h'] * freq*1.0e9 / (const['k'] * const['tcmb'])
 	xx2 = const['h'] * freq*1.0e9 / (const['k'] * (const['tcmb']+deltaT))
 	S = (2.0e26 * const['h'] * (freq*1e9)**3 * solid_angle  / const['c']**2) * ((1.0/(np.exp(xx2)-1.0)) - (1.0/(np.exp(xx)-1.0)))
+	return S
+
+def cmb_comm(const, freq, amp):
+
+	xx = const['h'] * freq*1.0e9 / (const['k'] * const['tcmb'])
+	S = amp / ((np.exp(xx)-1.0)**2 / (xx**2*np.exp(xx)))
 	return S
 
 def thermaldust(const, freq, amp, index, temperature, optical_depth_freq, solid_angle):
@@ -80,6 +150,14 @@ def thermaldust(const, freq, amp, index, temperature, optical_depth_freq, solid_
 	thermaldust = 2.0 * const['h'] * (freq*1e9)**3/(const['c'])**2 * (freq/optical_depth_freq)**index / (np.exp(xx)-1.0)
 	S = amp * thermaldust * solid_angle *1e26
 	return S
+
+def thermaldust_comm(const, freq, amp, index, temperature):
+
+	xx = const['h'] / (const['k'] * temperature)
+	nu_0 = 545.0
+
+	thermaldust = amp * (freq/nu_0)**(index+1.0) * (np.exp(xx*nu_0*1e9)-1.0)/(np.exp(xx*freq*1e9)-1.0)
+	return thermaldust
 
 def paraobla(freq, coeff1, coeff2, coeff3):
 	S = np.exp(coeff1 + coeff2*np.log(freq) + coeff3*np.log(freq)**2 )

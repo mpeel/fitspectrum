@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8  -*-
 # Read in a map, smooth it, and write it out
 #
 # History:
@@ -12,7 +13,7 @@ import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
 
-def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1):
+def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1,maxnummaps=-1):
 	# Slightly convoluted in order to also process the header...
 	maps = hp.read_map(input, field=None, h=True)
 	hdr = maps[-1]
@@ -20,7 +21,9 @@ def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1):
 	map = maps[0:nmaps-1]
 	del maps
 	nmaps -= 1
-
+	if maxnummaps != -1:
+		nmaps = maxnummaps
+		
 	if (nobsmap >=0 ):
 		nobs_sum = np.sum(map[nobsmap])
 
