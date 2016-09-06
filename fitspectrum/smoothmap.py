@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from spectra import *
 import astropy.io.fits as fits
 
-def smoothmap(input, output, fwhm_arcmin, pol=False,nside_out=0,nobsmap=-1,maxnummaps=-1, frequency=0, units_in='JyPix',units_out='JyPix', smoothing_method = 1, windowfunction = []):
+def smoothmap(input, output, fwhm_arcmin, nside_out=0,nobsmap=-1,maxnummaps=-1, frequency=0, units_in='JyPix',units_out='JyPix', windowfunction = []):
 
 	# Read in the fits map, and put it into the format Healpix expects
 	inputfits = fits.open(input)
