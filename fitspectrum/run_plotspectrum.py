@@ -73,8 +73,8 @@ mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 
 plotspectrum(outdir='', name='cbass_fig1', maps=maps_I, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=0.2,maxfreq=2000.0,numxpoints=1000,ymin=1,ymax=5e7,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_I,nside=256,res=60.0,pol=False)
 
-plotspectrum(outdir='', name='cbass_fig1_reproPlanck', maps=maps_I, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=10,maxfreq=2000.0,numxpoints=1000,ymin=2e-2,ymax=8e2,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_I,nside=256,res=60.0,pol=False)
+plotspectrum(outdir='', name='cbass_fig1_reproPlanck', maps=maps_I, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=10,maxfreq=1300.0,numxpoints=1000,ymin=2e-2,ymax=8e2,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_I,nside=256,res=60.0,pol=False,legend=False)
 
 plotspectrum(outdir='', name='cbass_fig1_pol', maps=maps_P, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=0.2,maxfreq=2000.0,numxpoints=1000,ymin=0.1,ymax=5e6,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_P,nside=256,res=60.0,pol=True)
 
-plotspectrum(outdir='', name='cbass_fig1_pol_reproPlanck', maps=maps_P, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=10,maxfreq=2000.0,numxpoints=1000,ymin=2e-2,ymax=8e2,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_P,nside=256,res=60.0,pol=True)
+plotspectrum(outdir='', name='cbass_fig1_pol_reproPlanck', maps=maps_P, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_wim.dat',minfreq=10,maxfreq=1300.0,numxpoints=1000,ymin=2e-2,ymax=8e2,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_P,nside=256,res=60.0,pol=True,legend=False)

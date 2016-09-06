@@ -21,7 +21,7 @@ const = get_spectrum_constants()
 solid_angle = 1.0e-10 # For now
 
 
-def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],spd_file='amemodels/spdust2_wim.dat', minfreq=0, maxfreq=0, numxpoints=1000, ymin=0, ymax=0, nosync=False, nofreefree=False, noame=False, nocmb=False, nodust=False, nodust2=True, nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False):
+def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],spd_file='amemodels/spdust2_wim.dat', minfreq=0, maxfreq=0, numxpoints=1000, ymin=0, ymax=0, nosync=False, nofreefree=False, noame=False, nocmb=False, nodust=False, nodust2=True, nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True):
 
 	ensure_dir(outdir)
 
@@ -106,11 +106,11 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	if pol == False:
 		sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
 		sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
-		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='b',lw=0,zorder=10,label='Synchrotron')
+		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
 
 		freefree_spectrum_min = freefree(const, x, minvals[1], minvals[2], solid_angle, equation=1,comm=1)
 		freefree_spectrum_max = freefree(const, x, maxvals[1], maxvals[2], solid_angle, equation=1,comm=1)
-		plt.fill_between(x, freefree_spectrum_min, freefree_spectrum_max,facecolor='magenta',lw=0,zorder=9,label='Free-free')
+		plt.fill_between(x, freefree_spectrum_min, freefree_spectrum_max,facecolor='blue',lw=0,zorder=9,label='Free-free')
 
 		ame_spectrum_min = spinningdust_comm(x, minvals[4], minvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, minvals[6], 33.35, spd_amp, spd_freq, 2)
 		ame_spectrum_max = spinningdust_comm(x, maxvals[4], maxvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, maxvals[6], 33.35, spd_amp, spd_freq, 2)
@@ -131,7 +131,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	else:
 		sync_spectrum_min = syncshifted_pol_comm(x, np.sqrt(minvals[0]**2+minvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		sync_spectrum_max = syncshifted_pol_comm(x, np.sqrt(maxvals[0]**2+maxvals[1]**2), 4e-3, galprop_freq, galprop_amp)
-		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='b',lw=0,zorder=10,label="Synchrotron")
+		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label="Synchrotron")
 		
 		cmb_spectrum_min = cmb_comm(const, x, np.sqrt(minvals[2]**2+minvals[3]**2))
 		cmb_spectrum_max = cmb_comm(const, x, np.sqrt(maxvals[2]**2+maxvals[3]**2))
@@ -148,10 +148,15 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 
 	numfreqbands = len(freqbands)
 	for i in range (0,numfreqbands):
-		plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=0.2, lw=1.0,zorder=0,label=freqbands[i][2])
+		if (freqbands[i][0] != freqbands[i][1]):
+			plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=0.1, lw=1.0,zorder=0,label=freqbands[i][2])
+		else:
+			plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=0.3, lw=1.0,zorder=0,label=freqbands[i][2])
 		# plt.plot((freqbands[i][0], freqbands[i][1]), (ymin, ymax), freqbands[i][3])
 
-	plt.legend(prop={'size':8})
+	if legend == True:
+		l = plt.legend(prop={'size':8})
+		l.set_zorder(20)
 	plt.savefig(outdir+name+'.pdf')
 	plt.close()
 
