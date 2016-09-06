@@ -220,4 +220,3 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 
 	# Return the ratio of the factors
 	return factor_in/factor_out
-
