@@ -5,6 +5,11 @@ import numpy as np
 output_resolution = 60.0
 output_nside = 512
 
+directory = 'PR2/'
+smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits', np.sqrt(output_resolution**2-32.29**2),nside_out=output_nside)
+
+exit()
+
 # WMAP 1-year maps
 directory = 'wmap/1yr/'
 smoothmap(directory+'map_k_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_k_imap_yr1_v1.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)

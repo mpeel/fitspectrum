@@ -28,7 +28,6 @@ def smoothmap(input, output, fwhm_arcmin, nside_out=0,nobsmap=-1,maxnummaps=-1, 
 		maps.append(inputfits[1].data.field(i))
 	# Check to see whether we have nested data, and switch to ring if that is the case.
 	if (inputfits[1].header['ORDERING'] == 'NESTED'):
-		print 'Reordering!'
 		maps = hp.reorder(maps,n2r=True)
 
 	if maxnummaps != -1:
@@ -53,7 +52,7 @@ def smoothmap(input, output, fwhm_arcmin, nside_out=0,nobsmap=-1,maxnummaps=-1, 
 		# Calculate the alm's, multiply them by the window function, and convert back to the map
 		alms = hp.map2alm(maps[i])
 		alms = hp.almxfl(alms, conv_windowfunction)
-		smoothed_map[i][:] = hp.alm2map(alms, nside)
+		smoothed_map[i][:] = hp.alm2map(alms, nside,verbose=False)
 
 	if (nside_out == 0):
 		nside_out = nside
