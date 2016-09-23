@@ -7,18 +7,21 @@
 # v0.2 Mike Peel   8-Mar-2016    Start to generalise to cover other numbers of maps
 # v0.3 Mike Peel   6-Sep-2016    Switch to using pyfits; use alms and window functions to smooth; add unit conversion functionality
 # v0.4 Mike Peel   23-Sep-2016   Carry fits headers through to the output file. Make fwhm_arcmin optional so that the function can be used solely to ud_grade maps.
+# v0.5 Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
 #
 # Requirements:
 # Numpy, healpy, matplotlib
 
 import numpy as np
 import healpy as hp
+import scipy as sp
 import matplotlib.pyplot as plt
 from spectra import *
 import astropy.io.fits as fits
+from scipy import special
 
 def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = []):
-	ver = "0.4"
+	ver = "0.5"
 
 	# Read in the fits map, and put it into the format Healpix expects
 	inputfits = fits.open(input)
@@ -49,12 +52,19 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 	nside = hp.get_nside(maps)
 	if (fwhm_arcmin != -1):
 		conv_windowfunction = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
-		# conv_windowfunction_variance = hp.gauss_beam(np.radians(fwhm_arcmin/60.0)/np.sqrt(2),3*nside)
-		# sigma = 2.0*np.sqrt(2.0*np.log(2.0))/np.radians(fwhm_arcmin/60.0)
-		# variance_Avb = hp.nside2pixarea(nside)/(4.0*const['pi']*sigma**2)
-
 		if (windowfunction != []):
 			conv_windowfunction /= windowfunction
+
+		print conv_windowfunction
+		# Check whether we'll need to smooth variances too.
+		test = False
+		for i in range(0,nmaps):
+			if 'cov' in inputfits[1].header['TTYPE'+str(i+1)]:
+				test = True
+		if test:
+			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
+			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
+			print 'Done! Onwards...'
 
 	smoothed_map = maps
 	for i in range(0,nmaps):
@@ -62,7 +72,11 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 		if fwhm_arcmin != -1:
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
-			alms = hp.almxfl(alms, conv_windowfunction)
+			if 'cov' in inputfits[1].header['TTYPE'+str(i+1)]:
+				print 'Column '+str(i)+'is a covariance matrix ('+inputfits[1].header['TUNIT'+str(i+1)]+') - smoothing appropriately.'
+				alms = hp.almxfl(alms, conv_windowfunction_variance)
+			else:
+				alms = hp.almxfl(alms, conv_windowfunction)
 			smoothed_map[i][:] = hp.alm2map(alms, nside,verbose=False)
 
 	if (nside_out == 0):
@@ -101,19 +115,60 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 
 	bin_hdu.writeto(output)
 
+# Code to replicate IDL's INT_TABULATED function
+# From http://stackoverflow.com/questions/14345001/idls-int-tabulate-scipy-equivalent
+def int_tabulated(x, f, p=5) :
+    def newton_cotes(x, f) :
+        if x.shape[0] < 2 :
+            return 0
+        rn = (x.shape[0] - 1) * (x - x[0]) / (x[-1] - x[0])
+        weights = sp.integrate.newton_cotes(rn)[0]
+        return (x[-1] - x[0]) / (x.shape[0] - 1) * np.dot(weights, f)
+    ret = 0
+    for idx in xrange(0, x.shape[0], p - 1) :
+        ret += newton_cotes(x[idx:idx + p], f[idx:idx + p])
+    return ret
 
+def calc_variance_windowfunction(conv_windowfunction):
+	# Calculate the window function for variance maps.
+	# Based on IDL code by Paddy Leahy, 'write_cvbl_planck3.pro'
+
+	const = get_spectrum_constants()
+	nbl = len(conv_windowfunction)
+	ll = np.linspace(0,1,nbl)
+	# Choose scale to match size of beam. First find half-power point
+	lhalf = [ n for n,i in enumerate(conv_windowfunction) if i<0.5 ][0]
+
+	# Calculate beam out to about 40 * half-power radius, roughly (note that
+	# this gives 100 points out to the half-power point).
+	numelements = 4000
+	rad = np.linspace(0,1,numelements)*10.0*const['pi']/(float(lhalf)*float(numelements))
+
+	x = np.cos(rad)
+	sinrad = np.sin(rad)
+
+	lgndr = np.zeros((numelements,nbl))
+	for i in range(0,nbl):
+		lgndr[:,i] = special.lpmv(0, i, x)
 	
-# Change the resolution of an nobs map. Simplest just to convert it into a variance map, and smooth that.
-# def udgrade_nobs(map_in, nside_out):
-	# return 1.0/np.pow(udgrade_variance(1.0/np.sqrt(map_in), nside_out), 2.0)
+	# Generate radial profile of convolving beam:
+	conva = np.zeros(numelements)
+	for j in range(0,numelements):
+		conva[j] = np.sum((ll+0.5)*conv_windowfunction*lgndr[j,:])
 
-# # Change the resolution of an variance map, assuming that beams are Gaussian
-# def udgrade_variance(map_in, nside_out):
-# 	nside_in = hp.get_nside(map_in)
-# 	pixarea_in = 
-# 	pixarea_out = hp.nside2pixarea(nside_out)
-# 	Avb = 1
-# 	bv = 1
-# 	return Avb * bv * map_in
-# 	#σ C2 = A v b b v ∗ σ I2 ,
+	conva = conva / (2.0*const['pi'])
 
+	# print 'Peak of convolving beam is ' + str(conva[0]) + + " (check: " + str(np.max(conva)) + ")"
+
+	# Square convolving beam and convert back to window function
+	mult = sinrad*conva**2
+	cvbl = np.zeros(nbl)
+	for l in range(0,nbl):
+		cvbl[l] = int_tabulated(rad,mult*lgndr[:,l])
+
+	# Put in 2pi normalization factor:
+	cvbl = 2.0*const['pi']*cvbl
+
+	return cvbl
+
+# EOF
