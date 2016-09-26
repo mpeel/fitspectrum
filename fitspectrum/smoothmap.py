@@ -8,6 +8,7 @@
 # v0.3 Mike Peel   6-Sep-2016    Switch to using pyfits; use alms and window functions to smooth; add unit conversion functionality
 # v0.4 Mike Peel   23-Sep-2016   Carry fits headers through to the output file. Make fwhm_arcmin optional so that the function can be used solely to ud_grade maps.
 # v0.5 Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
+# v0.6 Mike Peel   26-Sep-2016   Support Nobs maps, and conversion to variance maps, plus debugging/tidying.
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -19,15 +20,23 @@ import matplotlib.pyplot as plt
 from spectra import *
 import astropy.io.fits as fits
 from scipy import special
+import os.path
 
-def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = []):
-	ver = "0.5"
+def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1):
+	ver = "0.6"
+
+	if (os.path.isfile(output)):
+		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or give a new output filename, and try again!"
+		exit()
+
+	# Check to see if we have a sigma_0 value to use when converting from Nobs maps and back.
+	no_sigma_0 = False
+	if (sigma_0 == -1):
+		no_sigma_0 = True
 
 	# Read in the fits map, and put it into the format Healpix expects
 	inputfits = fits.open(input)
 	cols = inputfits[1].columns
-	# print cols
-	# exit()
 	col_names = cols.names
 	nmaps = len(cols)
 	maps = []
@@ -41,9 +50,6 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 		nmaps = maxnummaps
 		maps = maps[0:nmaps]
 
-	if (nobsmap >=0 ):
-		nobs_sum = np.sum(maps[nobsmap])
-
 	# Calculate the unit conversion factor
 	const = get_spectrum_constants()
 
@@ -54,50 +60,95 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 		conv_windowfunction = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
 		if (windowfunction != []):
 			conv_windowfunction /= windowfunction
+		# Normalise window function
+		conv_windowfunction /= conv_windowfunction[0]
 
-		print conv_windowfunction
 		# Check whether we'll need to smooth variances too.
 		test = False
+		nobs = False
 		for i in range(0,nmaps):
 			if 'cov' in inputfits[1].header['TTYPE'+str(i+1)]:
 				test = True
+			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+				test = True
+				nobs = True
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
+			conv_windowfunction_variance /= conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
+			# print conv_windowfunction
+			# print conv_windowfunction_variance
+			# plt.xscale('log')
+			# plt.yscale('log')
+			# plt.plot(conv_windowfunction,label='Window function')
+			# plt.plot(conv_windowfunction_variance,label='Variance window function')
+			# # plt.legend()
+			# plt.savefig('test_plotwindowfunction.png')
+			# # exit()
+
+	# Do the smoothing
 	smoothed_map = maps
 	for i in range(0,nmaps):
 		# Check that we actually want to do smoothing, as opposed to udgrading
 		if fwhm_arcmin != -1:
+			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+				print 'Column '+str(i)+' is an N_OBS map ('+inputfits[1].header['TUNIT'+str(i+1)]+') - converting to variance map.'
+				print np.sum(maps[i])
+				maps[i] = conv_nobs_variance_map(maps[i], sigma_0)
+				print np.sum(maps[i])
+				if (nobs_out == False and no_sigma_0 == False):
+					# We don't want to convert back later.
+					inputfits[1].header['TTYPE'+str(i+1)] = 'COV'
+
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
-			if 'cov' in inputfits[1].header['TTYPE'+str(i+1)]:
-				print 'Column '+str(i)+'is a covariance matrix ('+inputfits[1].header['TUNIT'+str(i+1)]+') - smoothing appropriately.'
+			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]) or ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]):
+				print 'Column '+str(i)+' is a covariance matrix ('+inputfits[1].header['TUNIT'+str(i+1)]+') - smoothing appropriately.'
 				alms = hp.almxfl(alms, conv_windowfunction_variance)
 			else:
 				alms = hp.almxfl(alms, conv_windowfunction)
 			smoothed_map[i][:] = hp.alm2map(alms, nside,verbose=False)
+			print np.sum(smoothed_map[i])
 
+			if ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
+				print 'You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!'
+				print np.sum(smoothed_map[i])
+				smoothed_map[i] = conv_nobs_variance_map(smoothed_map[i], sigma_0)
+				print np.sum(smoothed_map[i])
+				inputfits[1].header['TTYPE'+str(i+1)] = 'N_OBS'
+
+	# Do the ud_grading
+	nobs_sum = 0
 	if (nside_out == 0):
 		nside_out = nside
 	else:
 		for i in range (0,nmaps):
+			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+				nobs_sum = np.sum(smoothed_map[i])
+
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out)
-			if (units_out != ''):
-				if (units_in == ''):
-					unit = inputfits[1].header['TUNIT'+str(i+1)]
-					unit = unit.strip()
-				else:
-					# Assume the user is right to have specified different input units from what is in the file.
-					unit = units_in
-				smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
 
-			if (i == nobsmap): # If we have an nobs map, renormalise to account for the reduction in pixel numbers.
-				smoothed_map[i] *= (nside/nside_out)^2
-				nobs_sum2 = np.sum(smoothed_map[nobsmap])
-				print 'Smoothing nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
+			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+				print nside
+				print nside_out
+				smoothed_map[i] *= (nside/nside_out)**2
+				print 'Rescaling by ' + str((nside/nside_out)**2)
+				nobs_sum2 = np.sum(smoothed_map[i])
+				print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
+			else:
+				# If we don't have an N_OBS map, then we might want to convert the units.
+				if (units_out != ''):
+					if (units_in == ''):
+						unit = inputfits[1].header['TUNIT'+str(i+1)]
+						unit = unit.strip()
+					else:
+						# Assume the user is right to have specified different input units from what is in the file.
+						unit = units_in
+					smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
 
+	# All done - now just need to write it to disk.
 	cols = []
 	for i in range(0,nmaps):
 		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
@@ -114,6 +165,10 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,nobsmap=-1,maxnummaps=-
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
 
 	bin_hdu.writeto(output)
+
+def conv_nobs_variance_map(inputmap, sigma_0):
+	newmap = sigma_0**2 / inputmap
+	return newmap
 
 # Code to replicate IDL's INT_TABULATED function
 # From http://stackoverflow.com/questions/14345001/idls-int-tabulate-scipy-equivalent
@@ -135,15 +190,16 @@ def calc_variance_windowfunction(conv_windowfunction):
 
 	const = get_spectrum_constants()
 	nbl = len(conv_windowfunction)
-	ll = np.linspace(0,1,nbl)
+	ll = np.arange(0,nbl,1)
+	
 	# Choose scale to match size of beam. First find half-power point
 	lhalf = [ n for n,i in enumerate(conv_windowfunction) if i<0.5 ][0]
-
+	
 	# Calculate beam out to about 40 * half-power radius, roughly (note that
 	# this gives 100 points out to the half-power point).
 	numelements = 4000
-	rad = np.linspace(0,1,numelements)*10.0*const['pi']/(float(lhalf)*float(numelements))
-
+	rad = np.arange(0,numelements,1)*10.0*const['pi']/(float(lhalf)*float(numelements))
+	
 	x = np.cos(rad)
 	sinrad = np.sin(rad)
 
@@ -157,7 +213,6 @@ def calc_variance_windowfunction(conv_windowfunction):
 		conva[j] = np.sum((ll+0.5)*conv_windowfunction*lgndr[j,:])
 
 	conva = conva / (2.0*const['pi'])
-
 	# print 'Peak of convolving beam is ' + str(conva[0]) + + " (check: " + str(np.max(conva)) + ")"
 
 	# Square convolving beam and convert back to window function
