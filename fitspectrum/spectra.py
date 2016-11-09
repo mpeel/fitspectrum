@@ -94,9 +94,9 @@ def freefree(const, freq, EM, Te, solid_angle, equation=1,comm=0):
 def spinningdust(spd_freq, spd_em, solid_angle, freq, amp, shift):
 
 	# shift and interpolate
-	interp = sp.interpolate.interp1d(spd_freq, spd_em)
-	spinningdust = interp(freq)
-
+	# interp = sp.interpolate.interp1d(spd_freq, spd_em)
+	# spinningdust = interp(freq)
+	spinningdust = np.interp(freq, spd_freq, spd_em)
 	# ; if outside range of spinning dust model, then set to 0
 	# IF (spdustshift NE 0.) THEN BEGIN
 	# badvals = where(nu LT min(spinningdust_freq)*2. OR nu GT (max(spinningdust_freq)-100.), nbadvals)
@@ -132,7 +132,7 @@ def spinningdust_comm(nu, spinningdust_amp, spdustshift, spinningdust_em_comm, s
 def cmb(const, freq, amp, solid_angle):
 
 	xx = const['h'] * freq*1.0e9 / (const['k'] * const['tcmb'])
-	xx2 = const['h'] * freq*1.0e9 / (const['k'] * (const['tcmb']+deltaT))
+	xx2 = const['h'] * freq*1.0e9 / (const['k'] * (const['tcmb']+amp))
 	S = (2.0e26 * const['h'] * (freq*1e9)**3 * solid_angle  / const['c']**2) * ((1.0/(np.exp(xx2)-1.0)) - (1.0/(np.exp(xx)-1.0)))
 	return S
 
@@ -193,7 +193,7 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 	elif (units_in == 'Jy/pixel' or units_in == 'JY/PIXEL' or units_in == 'JY/PIX' or units_in == 'JyPix' or units_in == 'Jy/Pix'):
 		factor_in = 1.0
 	else:
-		print 'Invalid unit conversion specified for convertunits (units_out='+str(units_out)+'). ***Returning 1.*** Please use one of the following available units:'
+		print 'Invalid unit conversion specified for convertunits (units_in='+str(units_in)+'). ***Returning 1.*** Please use one of the following available units:'
 		print unitslist
 		return 1.0
 

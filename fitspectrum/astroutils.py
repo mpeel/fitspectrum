@@ -47,3 +47,15 @@ def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):
 
 
 	return masked_map
+
+# Create a mask of the Galactic plane. You can do this using healpixmask, but this is a bit more condensed.
+# Original version was galacticmask.pro
+def galacticmask(nside, degrees):
+	npix = hp.nside2npix(nside)
+	mask = np.ones(npix)
+	for i in range(0,npix):
+		pos = hp.pixelfunc.pix2ang(nside, i)
+		if (abs(90.0-(pos[0]*180.0/pi)) <= degrees):
+			mask[i] = 0
+	return mask
+

@@ -2,11 +2,13 @@ from smoothmap import smoothmap
 import numpy as np
 
 
-output_resolution = 60.0
+output_resolution = 240.0
 output_nside = 512
 
 directory = 'PR2/'
-smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits', np.sqrt(output_resolution**2-32.29**2),nside_out=output_nside)
+# smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits',nside_out=output_nside,units_out='mK_CMB')
+smoothmap("/Users/mpeel/Desktop/wmap_band_smth_imap_r9_7yr_K_v4.fits","/Users/mpeel/Desktop/512_240.00smoothed_wmap_band_smth_imap_r9_7yr_K_v4.fits",np.sqrt(output_resolution**2-51.3**2),nside_out=output_nside)
+# smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits', np.sqrt(output_resolution**2-32.29**2),nside_out=output_nside)
 
 exit()
 

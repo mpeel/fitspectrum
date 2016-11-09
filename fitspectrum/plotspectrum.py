@@ -133,6 +133,14 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		sync_spectrum_max = syncshifted_pol_comm(x, np.sqrt(maxvals[0]**2+maxvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label="Synchrotron")
 		
+		print minvals[2]
+		print minvals[3]
+		print maxvals[2]
+		print maxvals[3]
+		minvals[2] = 0.55/np.sqrt(2)
+		minvals[3] = 0.55/np.sqrt(2)
+		maxvals[2] = 0.7/np.sqrt(2)
+		maxvals[3] = 0.7/np.sqrt(2)
 		cmb_spectrum_min = cmb_comm(const, x, np.sqrt(minvals[2]**2+minvals[3]**2))
 		cmb_spectrum_max = cmb_comm(const, x, np.sqrt(maxvals[2]**2+maxvals[3]**2))
 		plt.fill_between(x, cmb_spectrum_min, cmb_spectrum_max,facecolor='k',lw=1.0,zorder=11,label='CMB')
