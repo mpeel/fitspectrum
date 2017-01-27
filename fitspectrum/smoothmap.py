@@ -9,6 +9,7 @@
 # v0.4 Mike Peel   23-Sep-2016   Carry fits headers through to the output file. Make fwhm_arcmin optional so that the function can be used solely to ud_grade maps.
 # v0.5 Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
 # v0.6 Mike Peel   26-Sep-2016   Support Nobs maps, and conversion to variance maps, plus debugging/tidying.
+# v0.7 Mike Peel   27-Jan-2017   Bug fix - ud_grading the variance maps should include a factor of (nside_orig/nside_new)^2
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -23,7 +24,7 @@ from scipy import special
 import os.path
 
 def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1):
-	ver = "0.6"
+	ver = "0.7"
 
 	if (os.path.isfile(output)):
 		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or give a new output filename, and try again!"
@@ -128,16 +129,25 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
 				nobs_sum = np.sum(smoothed_map[i])
 
-			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out)
+			# Check to see which type of map we have, and adjust the factor of (nside/nside_out)^power appropriately
+			power = 0
+			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
+				power = 2
+			elif 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+				power = -2
+
+			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
 
 			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
-				print nside
-				print nside_out
-				smoothed_map[i] *= (nside/nside_out)**2
-				print 'Rescaling by ' + str((nside/nside_out)**2)
-				nobs_sum2 = np.sum(smoothed_map[i])
-				print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
+				# print nside
+				# print nside_out
+				# smoothed_map[i] *= (nside/nside_out)**2
+				# print 'Rescaling by ' + str((nside/nside_out)**2)
+				# nobs_sum2 = np.sum(smoothed_map[i])
+				# print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
+				null = 0
 			else:
+
 				# If we don't have an N_OBS map, then we might want to convert the units.
 				if (units_out != ''):
 					if (units_in == ''):
