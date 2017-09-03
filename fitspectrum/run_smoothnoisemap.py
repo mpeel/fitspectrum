@@ -5,7 +5,8 @@ output_resolution = 0.88*60.0
 output_nside = 512
 numrealisations=100
 # WMAP 9-year maps
-directory = '/Users/mpeel/Desktop/noisetest/'
+# directory = '/Users/mpeel/Desktop/noisetest/'
+directory = '/mirror/data/mpeel/smoothmaps'
 smoothnoisemap(directory, 'wmap_K', 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution**2-(0.88*60.0)**2),sigma_0=1.429)
 # smoothnoisemap(directory, 'wmap_Ka_60', 'wmap_band_imap_r9_9yr_Ka_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution**2-(0.66*60.0)**2),sigma_0=1.466)
 # smoothnoisemap(directory, 'wmap_Q_60', 'wmap_band_imap_r9_9yr_Q_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution**2-(0.51*60.0)**2),sigma_0=2.188)
