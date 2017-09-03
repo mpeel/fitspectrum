@@ -1,8 +1,8 @@
 from smoothnoisemap import smoothnoisemap
 import numpy as np
 
-output_resolution = 0.88*60.0
-output_nside = 512
+output_resolution = 33.16#0.88*60.0
+output_nside = 1024
 numrealisations=100
 # WMAP 9-year maps
 # directory = '/Users/mpeel/Desktop/noisetest/'
