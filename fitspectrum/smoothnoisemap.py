@@ -50,7 +50,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.writeto(indir+"/"+runname+"_actualvariance.fits")
 
     # We want to work with the std not the variance
-    maps[mapnumber] = np.sqrt(maps[mapnumber])
+    #maps[mapnumber] = np.sqrt(maps[mapnumber])
 
     numpixels = len(maps[mapnumber])
     nside = hp.get_nside(maps)
