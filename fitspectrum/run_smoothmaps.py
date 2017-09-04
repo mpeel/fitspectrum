@@ -2,12 +2,29 @@ from smoothmap import smoothmap
 import numpy as np
 
 
-output_resolution = 240.0
+output_resolution = 60.0
 output_nside = 512
 
-directory = 'PR2/'
+directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
+
+# WMAP 9-year maps
+smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap9K.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'wmap_band_imap_r9_9yr_Ka_v5.fits',directory+'512_60.00smoothed_wmap9Ka.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'wmap_band_imap_r9_9yr_Q_v5.fits',directory+'512_60.00smoothed_wmap9Q.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'wmap_band_imap_r9_9yr_V_v5.fits',directory+'512_60.00smoothed_wmap9V.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'wmap_band_imap_r9_9yr_W_v5.fits',directory+'512_60.00smoothed_wmap9W.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=False,nside_out=output_nside,nobsmap=1)
+
+smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits',np.sqrt(output_resolution**2-34.2**2),nside_out=output_nside,units_out='mK_RJ')
+
+exit()
+
+
 # smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits',nside_out=output_nside,units_out='mK_CMB')
-smoothmap("/Users/mpeel/Desktop/wmap_band_smth_imap_r9_7yr_K_v4.fits","/Users/mpeel/Desktop/512_240.00smoothed_wmap_band_smth_imap_r9_7yr_K_v4.fits",np.sqrt(output_resolution**2-51.3**2),nside_out=output_nside)
+#smoothmap("/Users/mpeel/Desktop/wmap_band_smth_imap_r9_7yr_K_v4.fits","/Users/mpeel/Desktop/512_240.00smoothed_wmap_band_smth_imap_r9_7yr_K_v4.fits",np.sqrt(output_resolution**2-51.3**2),nside_out=output_nside)
 # smoothmap(directory+'LFI_SkyMap_030-field-IQU_1024_R2.01_full.fits',directory+'512_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits', np.sqrt(output_resolution**2-32.29**2),nside_out=output_nside)
 
 exit()
@@ -26,19 +43,6 @@ smoothmap(directory+'map_w_imap_yr1_v1.fits',directory+'512_60.00smoothed_map_w_
 
 exit()
 
-# WMAP 9-year maps
-directory = 'wmap/9yr/'
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_K_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_K_v5.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
-
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_Ka_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Ka_v5.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
-
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_Q_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_Q_v5.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
-
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_V_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_V_v5.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
-
-smoothmap(directory+'wmap_band_iqumap_r9_9yr_W_v5.fits',directory+'512_60.00smoothed_wmap_band_iqumap_r9_9yr_W_v5.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),pol=True,nside_out=output_nside,nobsmap=3)
-
-exit()
 
 # Planck PR2 maps
 directory = 'PR2/'
