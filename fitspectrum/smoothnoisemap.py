@@ -3,7 +3,7 @@
 # Make noise maps from the variance maps, smooth them, and then work out the new variance map
 #
 # Mike Peel    03 Sep 2017    Start
-
+# Mike Peel    07 Sep 2017    Bug fixes / tidying running order
 
 import numpy as np
 import healpy as hp
@@ -12,11 +12,8 @@ import astropy.io.fits as fits
 
 def noiserealisation(inputmap, numpixels):
     newmap = np.zeros(numpixels)
-    test = 0
     for i in range(0,numpixels):
         newmap[i] = np.random.normal(scale=inputmap[i])
-        test += 1
-    # print test, numpixels, len(newmap)
     return newmap
 
 
@@ -29,17 +26,21 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     maps = []
     for i in range(0,nmaps):
         maps.append(inputfits[1].data.field(i))
+
     # Check to see whether we have nested data, and switch to ring if that is the case.
     if (inputfits[1].header['ORDERING'] == 'NESTED'):
         maps = hp.reorder(maps,n2r=True)
 
-    # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
     if sigma_0 != 0.0:
+        # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
         maps[mapnumber] = np.sqrt(conv_nobs_variance_map(maps[mapnumber], sigma_0))
+    else:
+        # We just want to sqrt it to get a noise rms map
+        maps[mapnumber] = np.sqrt(maps[mapnumber])
 
     # Write the variance map to disk so we can compare to it later.
     cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=maps[mapnumber]))
+    cols.append(fits.Column(name='II_cov', format='E', array=np.square(maps[mapnumber])))
     cols = fits.ColDefs(cols)
     bin_hdu = fits.new_table(cols)
     bin_hdu.header['ORDERING']='RING'
@@ -58,19 +59,20 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     # print hp.nside2npix(nside)
 
     returnmap = np.zeros(numpixels)
+    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
+    conv_windowfunction /= conv_windowfunction[0]
     for i in range(0,numrealisations):
         print i
         # Generate the noise realisation
         newmap = noiserealisation(maps[mapnumber], numpixels)
         # smooth it
-        conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
         # newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm))
         alms = hp.map2alm(newmap)
         alms = hp.almxfl(alms, conv_windowfunction)
         newmap = hp.alm2map(alms, nside,verbose=False)
-        returnmap = returnmap + np.square(np.abs(newmap))
+        returnmap = returnmap + np.square(newmap)
 
-    returnmap = returnmap/numrealisations
+    returnmap = returnmap/(numrealisations-1)
 
     # All done - now just need to write it to disk.
     cols = []

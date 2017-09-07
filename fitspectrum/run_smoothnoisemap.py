@@ -3,7 +3,8 @@ import numpy as np
 
 output_resolution = 60.0
 output_nside = 512
-numrealisations=1000
+numrealisations=10
+#numrealisations=1000
 # directory = '/Users/mpeel/Desktop/noisetest/'
 directory = '/mirror/data/mpeel/smoothmaps'
 
