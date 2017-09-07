@@ -52,7 +52,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     # Also save the input nobs map, as a cross-check.
     cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(maps[mapnumber], sigma_0)))
+    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(maps[mapnumber], sigma_0))))
     cols = fits.ColDefs(cols)
     bin_hdu = fits.new_table(cols)
     bin_hdu.header['ORDERING']='RING'
