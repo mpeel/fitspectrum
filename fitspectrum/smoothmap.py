@@ -24,7 +24,7 @@ from scipy import special
 import os.path
 
 def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1):
-	ver = "0.7"
+	ver = "0.8"
 
 	if (os.path.isfile(output)):
 		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or give a new output filename, and try again!"
@@ -60,6 +60,15 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	if (fwhm_arcmin != -1):
 		conv_windowfunction = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
 		if (windowfunction != []):
+			window_len = len(conv_windowfunction)
+			beam_len = len(windowfunction)
+
+			if (beam_len > window_len):
+				windowfunction  = windowfunction[0:len(conv_windowfunction)]
+			else:
+				conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
+	
+
 			conv_windowfunction /= windowfunction
 		# Normalise window function
 		conv_windowfunction /= conv_windowfunction[0]
@@ -132,7 +141,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			# Check to see which type of map we have, and adjust the factor of (nside/nside_out)^power appropriately
 			power = 0
 			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
-				power = 2
+				power = 6
 			elif 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
 				power = -2
 
@@ -161,7 +170,16 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	# All done - now just need to write it to disk.
 	cols = []
 	for i in range(0,nmaps):
-		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+		if col_names[i]=='I_Stokes': 
+			smoothed_map[i] = smoothed_map[i]*1000
+			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+		elif col_names[i]=='II_cov':
+			smoothed_map[i] = smoothed_map[i]*1000*1000
+			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+		else:
+			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+
+		
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.new_table(cols)
 	bin_hdu.header = inputfits[1].header.copy(strip=False)
@@ -169,7 +187,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['POLCONV']='COSMO'
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
-	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver
+	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +"modified by Adam Barr"
 	for i in range (0,nmaps):
 		if (units_out != ''):
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
