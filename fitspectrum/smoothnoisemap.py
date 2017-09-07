@@ -72,6 +72,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     returnmap = np.zeros(numpixels)
     conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
+    print conv_windowfunction[0]
     conv_windowfunction /= conv_windowfunction[0]
     for i in range(0,numrealisations):
         print i
