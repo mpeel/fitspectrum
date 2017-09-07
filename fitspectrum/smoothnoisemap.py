@@ -50,6 +50,18 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualvariance.fits")
 
+    # Also save the input nobs map, as a cross-check.
+    cols = []
+    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(maps[mapnumber], sigma_0)))
+    cols = fits.ColDefs(cols)
+    bin_hdu = fits.new_table(cols)
+    bin_hdu.header['ORDERING']='RING'
+    bin_hdu.header['POLCONV']='COSMO'
+    bin_hdu.header['PIXTYPE']='HEALPIX'
+    # bin_hdu.header['NSIDE']=nside_out
+    bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
+    bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
+
     # We want to work with the std not the variance
     #maps[mapnumber] = np.sqrt(maps[mapnumber])
 
@@ -72,7 +84,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         newmap = hp.alm2map(alms, nside,verbose=False)
         returnmap = returnmap + np.square(newmap)
 
-    returnmap = returnmap/(numrealisations-1)
+    returnmap = returnmap/numrealisations
 
     # All done - now just need to write it to disk.
     cols = []
