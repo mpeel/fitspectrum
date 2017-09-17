@@ -4,6 +4,7 @@
 #
 # Mike Peel    03 Sep 2017    Start
 # Mike Peel    07 Sep 2017    Bug fixes / tidying running order
+# Mike Peel    17 Sep 2017    ud_grade to use constant nsides
 
 import numpy as np
 import healpy as hp
@@ -17,7 +18,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0):
+def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=512):
     # Read in the input map
     inputfits = fits.open(indir+"/"+inputmap)
     cols = inputfits[1].columns
@@ -33,10 +34,13 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     if sigma_0 != 0.0:
         # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
-        maps[mapnumber] = np.sqrt(conv_nobs_variance_map(maps[mapnumber], sigma_0))
-    else:
-        # We just want to sqrt it to get a noise rms map
-        maps[mapnumber] = np.sqrt(maps[mapnumber])
+        maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
+
+    # ud_grade it
+    noisemap = hp.ud_grade(maps[mapnumber], nside, power=2)
+
+    # We want to sqrt it to get a noise rms map
+    noisemap = np.sqrt(noisemap)
 
     # Write the variance map to disk so we can compare to it later.
     cols = []
@@ -62,13 +66,8 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
 
-    # We want to work with the std not the variance
-    #maps[mapnumber] = np.sqrt(maps[mapnumber])
-
     numpixels = len(maps[mapnumber])
     nside = hp.get_nside(maps)
-    # print 'Number of pixels should be: '
-    # print hp.nside2npix(nside)
 
     returnmap = np.zeros(numpixels)
     conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
