@@ -44,7 +44,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     # Write the variance map to disk so we can compare to it later.
     cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=np.square(maps[mapnumber])))
+    cols.append(fits.Column(name='II_cov', format='E', array=np.square(noisemap)))
     cols = fits.ColDefs(cols)
     bin_hdu = fits.new_table(cols)
     bin_hdu.header['ORDERING']='RING'
@@ -56,7 +56,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     # Also save the input nobs map, as a cross-check.
     cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(maps[mapnumber]), sigma_0)))
+    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(noisemap), sigma_0)))
     cols = fits.ColDefs(cols)
     bin_hdu = fits.new_table(cols)
     bin_hdu.header['ORDERING']='RING'
@@ -66,8 +66,8 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
 
-    numpixels = len(maps[mapnumber])
-    nside = hp.get_nside(maps)
+    numpixels = len(noisemap)
+    # nside = hp.get_nside(maps)
 
     returnmap = np.zeros(numpixels)
     conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
@@ -76,7 +76,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     for i in range(0,numrealisations):
         print i
         # Generate the noise realisation
-        newmap = noiserealisation(maps[mapnumber], numpixels)
+        newmap = noiserealisation(noisemap, numpixels)
         # smooth it
         # newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm))
         alms = hp.map2alm(newmap)
