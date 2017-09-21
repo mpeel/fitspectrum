@@ -77,7 +77,6 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 
 		# Check whether we'll need to smooth variances too.
 		test = False
-		nobs = False
 		for i in range(0,nmaps):
 			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]) or ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]):
 				test = True
@@ -98,6 +97,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			# # exit()
 
 	# Do the smoothing
+	print "Smoothing the maps"
 	smoothed_map = maps
 	for i in range(0,nmaps):
 		# Check that we actually want to do smoothing, as opposed to udgrading
@@ -129,6 +129,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				inputfits[1].header['TTYPE'+str(i+1)] = 'N_OBS'
 
 	# Do the ud_grading
+	print "ud_grading the maps (if needed)"
 	nobs_sum = 0
 	if (nside_out == 0):
 		nside_out = nside
@@ -167,6 +168,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 					smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
 
 	# All done - now just need to write it to disk.
+	print "Writing maps to disk: " + output
 	cols = []
 	for i in range(0,nmaps):
 		if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
@@ -189,6 +191,8 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
 
 	bin_hdu.writeto(output)
+
+	return
 
 def conv_nobs_variance_map(inputmap, sigma_0):
 	newmap = sigma_0**2 / inputmap
