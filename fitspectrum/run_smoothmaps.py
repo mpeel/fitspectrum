@@ -11,9 +11,9 @@ directory = '/mirror/data/mpeel/smoothmaps/'
 # WMAP 9-year maps
 smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'256_60.00smoothed_wmap9K.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside,sigma_0=1.429)
 
+smoothmap(directory+'wmap_band_imap_r9_9yr_Ka_v5.fits',directory+'256_60.00smoothed_wmap9Ka.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),nside_out=output_nside,sigma_0=1.466)
 exit()
 
-smoothmap(directory+'wmap_band_imap_r9_9yr_Ka_v5.fits',directory+'256_60.00smoothed_wmap9Ka.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),nside_out=output_nside,sigma_0=1.466)
 
 smoothmap(directory+'wmap_band_imap_r9_9yr_Q_v5.fits',directory+'256_60.00smoothed_wmap9Q.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),nside_out=output_nside,sigma_0=2.188)
 
