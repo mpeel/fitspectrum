@@ -3,15 +3,16 @@
 # Read in a map, smooth it, and write it out
 #
 # History:
-# v0.1 Mike Peel   10-Jan-2016   Initial version.
-# v0.2 Mike Peel   8-Mar-2016    Start to generalise to cover other numbers of maps
-# v0.3 Mike Peel   6-Sep-2016    Switch to using pyfits; use alms and window functions to smooth; add unit conversion functionality
-# v0.4 Mike Peel   23-Sep-2016   Carry fits headers through to the output file. Make fwhm_arcmin optional so that the function can be used solely to ud_grade maps.
-# v0.5 Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
-# v0.6 Mike Peel   26-Sep-2016   Support Nobs maps, and conversion to variance maps, plus debugging/tidying.
-# v0.7 Mike Peel   27-Jan-2017   Bug fix - ud_grading the variance maps should include a factor of (nside_orig/nside_new)^2
-# V0.8 Adam Barr   Various       Various tweaks
-# v0.9 Mike Peel   17 Sep 2017   Tweaks, add rescale parameter
+# v0.1  Mike Peel   10-Jan-2016   Initial version.
+# v0.2  Mike Peel   8-Mar-2016    Start to generalise to cover other numbers of maps
+# v0.3  Mike Peel   6-Sep-2016    Switch to using pyfits; use alms and window functions to smooth; add unit conversion functionality
+# v0.4  Mike Peel   23-Sep-2016   Carry fits headers through to the output file. Make fwhm_arcmin optional so that the function can be used solely to ud_grade maps.
+# v0.5  Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
+# v0.6  Mike Peel   26-Sep-2016   Support Nobs maps, and conversion to variance maps, plus debugging/tidying.
+# v0.7  Mike Peel   27-Jan-2017   Bug fix - ud_grading the variance maps should include a factor of (nside_orig/nside_new)^2
+# V0.8  Adam Barr   Various       Various tweaks
+# v0.9  Mike Peel   17 Sep 2017   Tweaks, add rescale parameter
+# v0.9a Mike Peel   21 Sep 2017   More bug fixes
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -26,8 +27,8 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, rescale=1.0):
-	ver = "0.9"
+def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0):
+	ver = "0.9a"
 
 	if (os.path.isfile(output)):
 		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
@@ -113,6 +114,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 					# We don't want to convert back later.
 					print 'test'
 					newheader['TTYPE'+str(i+1)] = 'cov'
+					newheader['TUNIT'+str(i+1)] = '('+sigma_0_unit+')^2'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
@@ -150,25 +152,26 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			print power
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
 
-			# if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
-			# 	# print nside
-			# 	# print nside_out
-			# 	# smoothed_map[i] *= (nside/nside_out)**2
-			# 	# print 'Rescaling by ' + str((nside/nside_out)**2)
-			# 	# nobs_sum2 = np.sum(smoothed_map[i])
-			# 	# print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
-			# 	null = 0
-			# else:
+			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
+				null = 0
+			else:
+				# If we don't have an N_OBS map, then we might want to convert the units.
+				if (units_out != ''):
+					if (units_in == ''):
+						unit = newheader['TUNIT'+str(i+1)]
+						unit = unit.strip()
+					else:
+						# Assume the user is right to have specified different input units from what is in the file.
+						unit = units_in
 
-			# 	# If we don't have an N_OBS map, then we might want to convert the units.
-			# 	if (units_out != ''):
-			# 		if (units_in == ''):
-			# 			unit = newheader['TUNIT'+str(i+1)]
-			# 			unit = unit.strip()
-			# 		else:
-			# 			# Assume the user is right to have specified different input units from what is in the file.
-			# 			unit = units_in
-			# 		smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
+					power = 1
+					if ('^2' in unit):
+						power = 2
+						unit = unit.replace(")^2",'').replace('(','')
+					print unit + " " + str(power)
+					conversion = convertunits(const, unit, units_out, frequency, pix_area)
+					print conversion
+					smoothed_map[i] *= 	conversion**power
 
 	# All done - now just need to write it to disk.
 	print "Writing maps to disk: " + output
