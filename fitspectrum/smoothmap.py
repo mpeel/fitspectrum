@@ -147,7 +147,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			power = 0
 			if ('cov' in newheader['TTYPE'+str(i+1)]):
 				power = 2
-			elif 'N_OBS' in newheader['TTYPE'+str(i+1)]:
+			elif ('N_OBS' in newheader['TTYPE'+str(i+1)]) or ('Hits' in newheader['TTYPE'+str(i+1)]):
 				power = -2
 			print power
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
@@ -164,14 +164,14 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 						# Assume the user is right to have specified different input units from what is in the file.
 						unit = units_in
 
-					power = 1
+					power = 1.0
 					if ('^2' in unit):
-						power = 2
+						power = 2.0
 						unit = unit.replace(")^2",'').replace('(','')
 					print unit + " " + str(power)
 					conversion = convertunits(const, unit, units_out, frequency, pix_area)
 					print conversion
-					smoothed_map[i] *= 	conversion**power
+					smoothed_map[i] = smoothed_map[i] * conversion**power
 
 	# All done - now just need to write it to disk.
 	print "Writing maps to disk: " + output
