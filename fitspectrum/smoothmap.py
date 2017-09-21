@@ -84,7 +84,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
-			conv_windowfunction_variance /= conv_windowfunction_variance[0]
+			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
 			# print conv_windowfunction
@@ -190,11 +190,11 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
-	print bin_hdu.header
 	for i in range (0,nmaps):
 		if (units_out != ''):
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
-
+	print bin_hdu.header
+	
 	bin_hdu.writeto(output)
 
 	return
