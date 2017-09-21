@@ -109,7 +109,8 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				print np.sum(maps[i])
 				if (nobs_out == False and no_sigma_0 == False):
 					# We don't want to convert back later.
-					inputfits[1].header['TTYPE'+str(i+1)] = 'COV'
+					print 'test'
+					inputfits[1].header['TTYPE'+str(i+1)] = 'cov'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
