@@ -8,6 +8,8 @@ output_nside = 256
 #directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
 directory = '/mirror/data/mpeel/smoothmaps/'
 
+smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'256_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits',np.sqrt(output_resolution**2-34.2**2),nside_out=output_nside,units_out='mK_RJ')
+
 # WMAP 9-year maps
 smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'256_60.00smoothed_wmap9K.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside,sigma_0=1.429)
 
@@ -20,8 +22,6 @@ smoothmap(directory+'wmap_band_imap_r9_9yr_Q_v5.fits',directory+'256_60.00smooth
 smoothmap(directory+'wmap_band_imap_r9_9yr_V_v5.fits',directory+'256_60.00smoothed_wmap9V.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),nside_out=output_nside,sigma_0=3.131)
 
 smoothmap(directory+'wmap_band_imap_r9_9yr_W_v5.fits',directory+'256_60.00smoothed_wmap9W.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),nside_out=output_nside,sigma_0=6.544)
-
-smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'256_60.00smoothed_LFI_SkyMap_30_256_PR2.01_full.fits',np.sqrt(output_resolution**2-34.2**2),nside_out=output_nside,units_out='mK_RJ')
 
 exit()
 
