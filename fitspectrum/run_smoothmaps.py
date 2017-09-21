@@ -8,7 +8,7 @@ output_nside = 256
 #directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
 directory = '/mirror/data/mpeel/smoothmaps/'
 
-smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'256_60.00smoothed_LFI_30_256_PR2.01_full.fits',np.sqrt(output_resolution**2-34.2**2),nside_out=output_nside,units_out='mK_RJ')
+smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'256_60.00smoothed_LFI_30_256_PR2.01.fits',np.sqrt(output_resolution**2-34.2**2),nside_out=output_nside)#,units_out='mK_RJ')
 
 # WMAP 9-year maps
 smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'256_60.00smoothed_wmap9K.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside,sigma_0=1.429,sigma_0_unit='mK')

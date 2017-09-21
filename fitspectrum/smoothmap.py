@@ -85,7 +85,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
-			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
+			conv_windowfunction_variance /= conv_windowfunction_variance[0]
 			print conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
@@ -164,10 +164,12 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 						# Assume the user is right to have specified different input units from what is in the file.
 						unit = units_in
 
+					bin_hdu.header['TUNIT'+str(i+1)] = units_out
 					power = 1.0
 					if ('^2' in unit):
 						power = 2.0
 						unit = unit.replace(")^2",'').replace('(','')
+						bin_hdu.header['TUNIT'+str(i+1)] = '('+units_out+")^2"
 					print unit + " " + str(power)
 					conversion = convertunits(const, unit, units_out, frequency, pix_area)
 					print conversion
@@ -194,9 +196,6 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
-	for i in range (0,nmaps):
-		if (units_out != ''):
-			bin_hdu.header['TUNIT'+str(i+1)] = units_out
 	# print bin_hdu.header
 	
 	bin_hdu.writeto(output)
