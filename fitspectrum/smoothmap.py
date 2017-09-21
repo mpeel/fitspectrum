@@ -46,8 +46,9 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	maps = []
 	for i in range(0,nmaps):
 		maps.append(inputfits[1].data.field(i))
+	newheader = inputfits[1].header.copy(strip=False)
 	# Check to see whether we have nested data, and switch to ring if that is the case.
-	if (inputfits[1].header['ORDERING'] == 'NESTED'):
+	if (newheader['ORDERING'] == 'NESTED'):
 		maps = hp.reorder(maps,n2r=True)
 
 	if maxnummaps != -1:
@@ -78,7 +79,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		# Check whether we'll need to smooth variances too.
 		test = False
 		for i in range(0,nmaps):
-			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]) or ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]):
+			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
 				test = True
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
@@ -102,32 +103,32 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	for i in range(0,nmaps):
 		# Check that we actually want to do smoothing, as opposed to udgrading
 		if fwhm_arcmin != -1:
-			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
-				print 'Column '+str(i)+' is an N_OBS map ('+inputfits[1].header['TUNIT'+str(i+1)]+') - converting to variance map.'
+			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
+				print 'Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.'
 				print np.sum(maps[i])
 				maps[i] = conv_nobs_variance_map(maps[i], sigma_0)
 				print np.sum(maps[i])
 				if (nobs_out == False and no_sigma_0 == False):
 					# We don't want to convert back later.
 					print 'test'
-					inputfits[1].header['TTYPE'+str(i+1)] = 'cov'
+					newheader['TTYPE'+str(i+1)] = 'cov'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
-			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]) or ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]):
-				print 'Column '+str(i)+' is a covariance matrix ('+inputfits[1].header['TUNIT'+str(i+1)]+') - smoothing appropriately.'
+			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
+				print 'Column '+str(i)+' is a covariance matrix ('+newheader['TUNIT'+str(i+1)]+') - smoothing appropriately.'
 				alms = hp.almxfl(alms, conv_windowfunction_variance)
 			else:
 				alms = hp.almxfl(alms, conv_windowfunction)
 			smoothed_map[i][:] = hp.alm2map(alms, nside,verbose=False)
 			print np.sum(smoothed_map[i])
 
-			if ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
+			if ('N_OBS' in newheader['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
 				print 'You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!'
 				print np.sum(smoothed_map[i])
 				smoothed_map[i] = conv_nobs_variance_map(smoothed_map[i], sigma_0)
 				print np.sum(smoothed_map[i])
-				inputfits[1].header['TTYPE'+str(i+1)] = 'N_OBS'
+				newheader['TTYPE'+str(i+1)] = 'N_OBS'
 
 	# Do the ud_grading
 	print "ud_grading the maps (if needed)"
@@ -136,19 +137,19 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		nside_out = nside
 	else:
 		for i in range (0,nmaps):
-			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				nobs_sum = np.sum(smoothed_map[i])
 
 			# Check to see which type of map we have, and adjust the factor of (nside/nside_out)^power appropriately
 			power = 0
-			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
+			if ('cov' in newheader['TTYPE'+str(i+1)]):
 				power = 2
-			elif 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+			elif 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				power = -2
-
+			print power
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
 
-			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
+			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				# print nside
 				# print nside_out
 				# smoothed_map[i] *= (nside/nside_out)**2
@@ -161,7 +162,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				# If we don't have an N_OBS map, then we might want to convert the units.
 				if (units_out != ''):
 					if (units_in == ''):
-						unit = inputfits[1].header['TUNIT'+str(i+1)]
+						unit = newheader['TUNIT'+str(i+1)]
 						unit = unit.strip()
 					else:
 						# Assume the user is right to have specified different input units from what is in the file.
@@ -172,7 +173,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	print "Writing maps to disk: " + output
 	cols = []
 	for i in range(0,nmaps):
-		if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
+		if ('cov' in newheader['TTYPE'+str(i+1)]):
 			smoothed_map[i] = smoothed_map[i] * rescale**2
 		else:
 			smoothed_map[i] = smoothed_map[i] * rescale
@@ -181,7 +182,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.new_table(cols)
-	bin_hdu.header = inputfits[1].header.copy(strip=False)
+	bin_hdu.header = newheader
 	bin_hdu.header['ORDERING']='RING'
 	bin_hdu.header['POLCONV']='COSMO'
 	bin_hdu.header['PIXTYPE']='HEALPIX'
