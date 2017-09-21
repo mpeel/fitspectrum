@@ -10,6 +10,8 @@
 # v0.5 Mike Peel   23-Sep-2016   Adding calc_variance_windowfunction (port of Paddy Leahy's IDL code) to properly smooth variance maps.
 # v0.6 Mike Peel   26-Sep-2016   Support Nobs maps, and conversion to variance maps, plus debugging/tidying.
 # v0.7 Mike Peel   27-Jan-2017   Bug fix - ud_grading the variance maps should include a factor of (nside_orig/nside_new)^2
+# V0.8 Adam Barr   Various       Various tweaks
+# v0.9 Mike Peel   17 Sep 2017   Tweaks, add rescale parameter
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -17,17 +19,18 @@
 import numpy as np
 import healpy as hp
 import scipy as sp
+import math as m
 import matplotlib.pyplot as plt
 from spectra import *
 import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1):
-	ver = "0.8"
+def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, rescale=1.0):
+	ver = "0.9"
 
 	if (os.path.isfile(output)):
-		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or give a new output filename, and try again!"
+		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
 		exit()
 
 	# Check to see if we have a sigma_0 value to use when converting from Nobs maps and back.
@@ -67,7 +70,6 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				windowfunction  = windowfunction[0:len(conv_windowfunction)]
 			else:
 				conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
-	
 
 			conv_windowfunction /= windowfunction
 		# Normalise window function
@@ -77,11 +79,8 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		test = False
 		nobs = False
 		for i in range(0,nmaps):
-			if 'cov' in inputfits[1].header['TTYPE'+str(i+1)]:
+			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]) or ('N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]):
 				test = True
-			if 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
-				test = True
-				nobs = True
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
@@ -141,7 +140,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			# Check to see which type of map we have, and adjust the factor of (nside/nside_out)^power appropriately
 			power = 0
 			if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
-				power = 6
+				power = 2
 			elif 'N_OBS' in inputfits[1].header['TTYPE'+str(i+1)]:
 				power = -2
 
@@ -170,15 +169,12 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	# All done - now just need to write it to disk.
 	cols = []
 	for i in range(0,nmaps):
-		if col_names[i]=='I_Stokes': 
-			smoothed_map[i] = smoothed_map[i]*1000
-			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
-		elif col_names[i]=='II_cov':
-			smoothed_map[i] = smoothed_map[i]*1000*1000
-			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+		if ('cov' in inputfits[1].header['TTYPE'+str(i+1)]):
+			smoothed_map[i] = smoothed_map[i] * rescaled**2
 		else:
-			cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+			smoothed_map[i] = smoothed_map[i] * rescaled
 
+		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
 		
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.new_table(cols)
@@ -187,7 +183,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['POLCONV']='COSMO'
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
-	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +"modified by Adam Barr"
+	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
 	for i in range (0,nmaps):
 		if (units_out != ''):
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out

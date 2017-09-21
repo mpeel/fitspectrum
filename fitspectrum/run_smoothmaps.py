@@ -3,7 +3,7 @@ import numpy as np
 
 
 output_resolution = 60.0
-output_nside = 512
+output_nside = 256
 
 directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
 
