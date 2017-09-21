@@ -85,16 +85,17 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
 			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
+			print conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
-			# print conv_windowfunction
-			# print conv_windowfunction_variance
-			# plt.xscale('log')
-			# plt.yscale('log')
-			# plt.plot(conv_windowfunction,label='Window function')
-			# plt.plot(conv_windowfunction_variance,label='Variance window function')
-			# # plt.legend()
-			# plt.savefig('test_plotwindowfunction.png')
+			print conv_windowfunction
+			print conv_windowfunction_variance
+			plt.xscale('log')
+			plt.yscale('log')
+			plt.plot(conv_windowfunction,label='Window function')
+			plt.plot(conv_windowfunction_variance,label='Variance window function')
+			# plt.legend()
+			plt.savefig('test_plotwindowfunction.png')
 			# # exit()
 
 	# Do the smoothing
@@ -182,9 +183,9 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.new_table(cols)
-	print newheader
+	# print newheader
 	bin_hdu.header = newheader
-	print bin_hdu.header
+	# print bin_hdu.header
 	bin_hdu.header['ORDERING']='RING'
 	bin_hdu.header['POLCONV']='COSMO'
 	bin_hdu.header['PIXTYPE']='HEALPIX'
@@ -193,7 +194,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	for i in range (0,nmaps):
 		if (units_out != ''):
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
-	print bin_hdu.header
+	# print bin_hdu.header
 	
 	bin_hdu.writeto(output)
 
@@ -246,7 +247,7 @@ def calc_variance_windowfunction(conv_windowfunction):
 		conva[j] = np.sum((ll+0.5)*conv_windowfunction*lgndr[j,:])
 
 	conva = conva / (2.0*const['pi'])
-	# print 'Peak of convolving beam is ' + str(conva[0]) + + " (check: " + str(np.max(conva)) + ")"
+	print 'Peak of convolving beam is ' + str(conva[0]) + + " (check: " + str(np.max(conva)) + ")"
 
 	# Square convolving beam and convert back to window function
 	mult = sinrad*conva**2
