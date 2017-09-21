@@ -150,25 +150,25 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			print power
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
 
-			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
-				# print nside
-				# print nside_out
-				# smoothed_map[i] *= (nside/nside_out)**2
-				# print 'Rescaling by ' + str((nside/nside_out)**2)
-				# nobs_sum2 = np.sum(smoothed_map[i])
-				# print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
-				null = 0
-			else:
+			# if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
+			# 	# print nside
+			# 	# print nside_out
+			# 	# smoothed_map[i] *= (nside/nside_out)**2
+			# 	# print 'Rescaling by ' + str((nside/nside_out)**2)
+			# 	# nobs_sum2 = np.sum(smoothed_map[i])
+			# 	# print 'ud_grading nobs map: total before was ' + str(nobs_sum) + ', now is ' + str(nobs_sum2)
+			# 	null = 0
+			# else:
 
-				# If we don't have an N_OBS map, then we might want to convert the units.
-				if (units_out != ''):
-					if (units_in == ''):
-						unit = newheader['TUNIT'+str(i+1)]
-						unit = unit.strip()
-					else:
-						# Assume the user is right to have specified different input units from what is in the file.
-						unit = units_in
-					smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
+			# 	# If we don't have an N_OBS map, then we might want to convert the units.
+			# 	if (units_out != ''):
+			# 		if (units_in == ''):
+			# 			unit = newheader['TUNIT'+str(i+1)]
+			# 			unit = unit.strip()
+			# 		else:
+			# 			# Assume the user is right to have specified different input units from what is in the file.
+			# 			unit = units_in
+			# 		smoothed_map[i] *= 	convertunits(const, unit, units_out, frequency, pix_area)
 
 	# All done - now just need to write it to disk.
 	print "Writing maps to disk: " + output
@@ -252,6 +252,7 @@ def calc_variance_windowfunction(conv_windowfunction):
 	# Square convolving beam and convert back to window function
 	mult = sinrad*conva**2
 	cvbl = np.zeros(nbl)
+	print nbl
 	for l in range(0,nbl):
 		cvbl[l] = int_tabulated(rad,mult*lgndr[:,l])
 
