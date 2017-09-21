@@ -247,7 +247,7 @@ def calc_variance_windowfunction(conv_windowfunction):
 		conva[j] = np.sum((ll+0.5)*conv_windowfunction*lgndr[j,:])
 
 	conva = conva / (2.0*const['pi'])
-	print 'Peak of convolving beam is ' + str(conva[0]) + + " (check: " + str(np.max(conva)) + ")"
+	print 'Peak of convolving beam is ' + str(conva[0]) + " (check: " + str(np.max(conva)) + ")"
 
 	# Square convolving beam and convert back to window function
 	mult = sinrad*conva**2
