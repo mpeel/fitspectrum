@@ -5,7 +5,8 @@ import numpy as np
 output_resolution = 60.0
 output_nside = 256
 
-directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
+#directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
+directory = '/mirror/data/mpeel/smoothmaps/'
 
 # WMAP 9-year maps
 smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'256_60.00smoothed_wmap9K.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside,sigma_0=1.429)
