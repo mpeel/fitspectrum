@@ -174,7 +174,7 @@ def planckcorr(const, nu_ghz):
 # Mike Peel, 1 October 2014 - Forked from haperflux.pro
 # Mike Peel, 15 February 2016 - converted from IDL to python
 def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
-	unitslist = ['K','mK','uK','K_RJ','mK_RJ','uK_RJ','K_CMB','mK_CMB','uK_CMB', 'MJy/sr', 'Jy/pix' ]
+	unitslist = ['K','mK','uK','K_RJ','mK_RJ','uK_RJ','K_CMB','mK_CMB','uK_CMB', 'MJy/sr', 'Jy/pix', 'none']
 	# get conversion from the input units to Jy/pix
 	if (units_in == 'K' or units_in == 'K_RJ' or units_in == 'KRJ'):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area
@@ -190,7 +190,7 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6 / planckcorr(const, frequency)
 	elif (units_in == 'MJy/sr' or units_in == "MJY/SR" or units_in == "MjySr"):
 		factor_in = pix_area * 1.0e6
-	elif (units_in == 'Jy/pixel' or units_in == 'JY/PIXEL' or units_in == 'JY/PIX' or units_in == 'JyPix' or units_in == 'Jy/Pix'):
+	elif (units_in == 'Jy/pixel' or units_in == 'JY/PIXEL' or units_in == 'JY/PIX' or units_in == 'JyPix' or units_in == 'Jy/Pix' or units_in='none'):
 		factor_in = 1.0
 	else:
 		print 'Invalid unit conversion specified for convertunits (units_in='+str(units_in)+'). ***Returning 1.*** Please use one of the following available units:'
@@ -211,7 +211,7 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 		factor_out = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6 / planckcorr(const, frequency)
 	elif (units_out == 'MJy/sr' or units_out == "MJY/SR" or units_out == "MjySr"):
 		factor_out = pix_area * 1.0e6
-	elif (units_out == 'Jy/pixel' or units_out == 'JY/PIXEL' or units_out == 'JY/PIX' or units_out == 'JyPix' or units_out == 'Jy/Pix'):
+	elif (units_out == 'Jy/pixel' or units_out == 'JY/PIXEL' or units_out == 'JY/PIX' or units_out == 'JyPix' or units_out == 'Jy/Pix' or units_in='none'):
 		factor_out = 1.0
 	else:
 		print 'Invalid unit conversion specified for convertunits (units_out='+str(units_out)+'). ***Returning 1.*** Please use one of the following available units:'
