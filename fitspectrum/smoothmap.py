@@ -182,12 +182,15 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.new_table(cols)
+	print newheader
 	bin_hdu.header = newheader
+	print bin_hdu.header
 	bin_hdu.header['ORDERING']='RING'
 	bin_hdu.header['POLCONV']='COSMO'
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
+	print bin_hdu.header
 	for i in range (0,nmaps):
 		if (units_out != ''):
 			bin_hdu.header['TUNIT'+str(i+1)] = units_out
