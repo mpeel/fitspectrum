@@ -58,7 +58,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		nmaps = maxnummaps
 	if outputmaps == []:
 		outputmaps = range(0,nmaps)
-	maps=maps[outputmaps]
+	maps = [maps[i] for i in outputmaps]
 	noutputmaps = len(outputmaps)
 	newheader = inputfits[1].header.copy(strip=False)
 	for i in range(0,nmaps_orig):
