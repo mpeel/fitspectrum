@@ -208,7 +208,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
 		
 	cols = fits.ColDefs(cols)
-	bin_hdu = fits.PrimaryHDU(cols)
+	bin_hdu = fits.BinTableHDU.from_columns(cols)
 	# bin_hdu = fits.new_table(cols)
 	# print newheader
 	bin_hdu.header = newheader
