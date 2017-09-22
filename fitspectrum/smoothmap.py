@@ -63,7 +63,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	newheader = inputfits[1].header.copy(strip=False)
 	print newheader
 	for i in range(0,nmaps_orig):
-		if i < noutputmaps-1:
+		if i < noutputmaps:
 			newheader['TTYPE'+str(i+1)] = newheader['TTYPE'+str(outputmaps[i]+1)]
 			newheader['TFORM'+str(i+1)] = newheader['TFORM'+str(outputmaps[i]+1)]
 			newheader['TUNIT'+str(i+1)] = newheader['TUNIT'+str(outputmaps[i]+1)]
