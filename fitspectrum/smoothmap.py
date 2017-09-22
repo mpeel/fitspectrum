@@ -13,6 +13,7 @@
 # V0.8  Adam Barr   Various       Various tweaks
 # v0.9  Mike Peel   17 Sep 2017   Tweaks, add rescale parameter
 # v0.9a Mike Peel   21 Sep 2017   More bug fixes
+# v0.9b Mike Peel   22 Sep 2017   Add nosmooth and outputmaps parameters
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -27,7 +28,7 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0):
+def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[]):
 	ver = "0.9a"
 
 	if (os.path.isfile(output)):
@@ -44,17 +45,34 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	cols = inputfits[1].columns
 	col_names = cols.names
 	nmaps = len(cols)
+	nmaps_orig = nmaps
 	maps = []
 	for i in range(0,nmaps):
 		maps.append(inputfits[1].data.field(i))
-	newheader = inputfits[1].header.copy(strip=False)
 	# Check to see whether we have nested data, and switch to ring if that is the case.
-	if (newheader['ORDERING'] == 'NESTED'):
+	if (inputfits[1].header['ORDERING'] == 'NESTED'):
 		maps = hp.reorder(maps,n2r=True)
 
+	# Crop to just have the maps we want to output
 	if maxnummaps != -1:
 		nmaps = maxnummaps
-		maps = maps[0:nmaps]
+	if outputmaps = []:
+		outputmaps = np.range(0,nmaps)
+	maps=maps[outputmaps]
+	noutputmaps = len(outputmaps)
+	newheader = inputfits[1].header.copy(strip=False)
+	for i in range(0,nmaps_orig):
+		if i < noutputmaps-1:
+			newheader['TTYPE'+str(i+1)] = newheader['TTYPE'+str(outputmaps[i]+1)]
+			newheader['TFORM'+str(i+1)] = newheader['TFORM'+str(outputmaps[i]+1)]
+			newheader['TUNIT'+str(i+1)] = newheader['TUNIT'+str(outputmaps[i]+1)]
+		else:
+			del newheader['TTYPE'+str(i+1)]
+			del newheader['TFORM'+str(i+1)]
+			del newheader['TUNIT'+str(i+1)]
+	newheader['TFIELDS'] = noutputmaps
+	nmaps = noutputmaps
+	print newheader
 
 	# Calculate the unit conversion factor
 	const = get_spectrum_constants()
@@ -103,8 +121,8 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	print "Smoothing the maps"
 	smoothed_map = maps
 	for i in range(0,nmaps):
-		# Check that we actually want to do smoothing, as opposed to udgrading
-		if fwhm_arcmin != -1:
+		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
+		if fwhm_arcmin != -1 && (i not in nosmooth):
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				print 'Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.'
 				print np.sum(maps[i])
