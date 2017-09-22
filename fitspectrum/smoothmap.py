@@ -61,6 +61,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	maps = [maps[i] for i in outputmaps]
 	noutputmaps = len(outputmaps)
 	newheader = inputfits[1].header.copy(strip=False)
+	inputfits.close()
 	print newheader
 	for i in range(0,nmaps_orig):
 		if i < noutputmaps:
@@ -216,7 +217,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
-	# print bin_hdu.header
+	print bin_hdu.header
 	
 	bin_hdu.writeto(output)
 
