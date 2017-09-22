@@ -72,6 +72,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			del newheader['TFORM'+str(i+1)]
 			del newheader['TUNIT'+str(i+1)]
 	newheader['TFIELDS'] = noutputmaps
+	newheader['NAXIS1'] = noutputmaps*4
 	nmaps = noutputmaps
 	print newheader
 
