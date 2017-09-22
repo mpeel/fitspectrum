@@ -56,7 +56,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	# Crop to just have the maps we want to output
 	if maxnummaps != -1:
 		nmaps = maxnummaps
-	if outputmaps = []:
+	if outputmaps == []:
 		outputmaps = np.range(0,nmaps)
 	maps=maps[outputmaps]
 	noutputmaps = len(outputmaps)
@@ -122,7 +122,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	smoothed_map = maps
 	for i in range(0,nmaps):
 		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
-		if fwhm_arcmin != -1 && (i not in nosmooth):
+		if fwhm_arcmin != -1 and (i not in nosmooth):
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				print 'Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.'
 				print np.sum(maps[i])
