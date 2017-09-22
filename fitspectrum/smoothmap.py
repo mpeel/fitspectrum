@@ -92,7 +92,9 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			if (beam_len > window_len):
 				windowfunction  = windowfunction[0:len(conv_windowfunction)]
 			else:
-				conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
+				# We want to pad the window function rather than crop the convolution
+				# conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
+				windowfunction = np.pad(windowfunction, (1e-20, window_len - beam_len), 'constant')
 
 			conv_windowfunction /= windowfunction
 		# Normalise window function
