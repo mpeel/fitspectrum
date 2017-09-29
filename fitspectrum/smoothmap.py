@@ -14,6 +14,7 @@
 # v0.9  Mike Peel   17 Sep 2017   Tweaks, add rescale parameter
 # v0.9a Mike Peel   21 Sep 2017   More bug fixes
 # v0.9b Mike Peel   22 Sep 2017   Add nosmooth and outputmaps parameters
+# v0.9c Mike Peel   29 Sep 2017   More bug fixes
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -29,7 +30,7 @@ from scipy import special
 import os.path
 
 def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[]):
-	ver = "0.9a"
+	ver = "0.9c"
 
 	if (os.path.isfile(output)):
 		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
@@ -113,15 +114,15 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			print conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
-			print conv_windowfunction
-			print conv_windowfunction_variance
-			plt.xscale('log')
-			plt.yscale('log')
-			plt.plot(conv_windowfunction,label='Window function')
-			plt.plot(conv_windowfunction_variance,label='Variance window function')
-			# plt.legend()
-			plt.savefig('test_plotwindowfunction.png')
-			# # exit()
+			# print conv_windowfunction
+			# print conv_windowfunction_variance
+			# plt.xscale('log')
+			# plt.yscale('log')
+			# plt.plot(conv_windowfunction,label='Window function')
+			# plt.plot(conv_windowfunction_variance,label='Variance window function')
+			# # plt.legend()
+			# plt.savefig('test_plotwindowfunction.png')
+			# # # exit()
 
 	# Do the smoothing
 	print "Smoothing the maps"
@@ -137,7 +138,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				if (nobs_out == False and no_sigma_0 == False):
 					# We don't want to convert back later.
 					print 'test'
-					newheader['TTYPE'+str(i+1)] = 'cov'
+					newheader['TTYPE'+str(i+1)] = 'II_cov'
 					newheader['TUNIT'+str(i+1)] = '('+sigma_0_unit+')^2'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
