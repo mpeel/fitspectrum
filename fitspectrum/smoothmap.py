@@ -64,7 +64,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	noutputmaps = len(outputmaps)
 	newheader = inputfits[1].header.copy(strip=False)
 	inputfits.close()
-	print newheader
+	# print newheader
 	for i in range(0,nmaps_orig):
 		if i < noutputmaps:
 			newheader['TTYPE'+str(i+1)] = newheader['TTYPE'+str(outputmaps[i]+1)]
@@ -173,13 +173,13 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				nobs_sum = np.sum(smoothed_map[i])
 
 			# Check to see which type of map we have, and adjust the factor of (nside/nside_out)^power appropriately
-			power = 0
+			power = 0.0
 			if ('cov' in newheader['TTYPE'+str(i+1)]):
-				power = 2
+				power = 2.0
 			elif ('N_OBS' in newheader['TTYPE'+str(i+1)]) or ('Hits' in newheader['TTYPE'+str(i+1)]):
-				power = -2
+				power = -2.0
 			print power
-			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out, power=power)
+			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out=nside_out, power=power)
 
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				null = 0
