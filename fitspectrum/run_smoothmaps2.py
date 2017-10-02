@@ -16,7 +16,7 @@ beamtf_p44 = beamtf_p44[0]
 beamtf_p70 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R2.50.fits',hdu=30)
 beamtf_p70 = beamtf_p70[0]
 
-HFIbeams = fits.open('HFI_RIMO_Beams-100pc_R2.00.fits')
+HFIbeams = fits.open(directory+'HFI_RIMO_Beams-100pc_R2.00.fits')
 beamtf_p100 = inputfits[3].data[0][0]
 beamtf_p143 = inputfits[4].data[0][0]
 beamtf_p217 = inputfits[5].data[0][0]
