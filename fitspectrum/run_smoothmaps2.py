@@ -1,6 +1,6 @@
 from smoothmap import smoothmap
 import numpy as np
-
+import healpy as hp
 
 output_resolution = 60.0
 output_nside = 256
