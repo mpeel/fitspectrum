@@ -98,7 +98,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				# conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
 				windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
 
-			conv_windowfunction /= windowfunction
+			conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
 			conv_windowfunction[windowfunction==0] = 0.0
 		# Normalise window function
 		conv_windowfunction /= conv_windowfunction[0]
