@@ -17,12 +17,12 @@ beamtf_p70 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R2.50.fits',hdu=30)
 beamtf_p70 = beamtf_p70[0]
 
 HFIbeams = fits.open(directory+'HFI_RIMO_Beams-100pc_R2.00.fits')
-beamtf_p100 = inputfits[3].data[0][0]
-beamtf_p143 = inputfits[4].data[0][0]
-beamtf_p217 = inputfits[5].data[0][0]
-beamtf_p353 = inputfits[6].data[0][0]
-beamtf_p545 = inputfits[7].data[0][0]
-beamtf_p857 = inputfits[8].data[0][0]
+beamtf_p100 = HFIbeams[3].data[0][0]
+beamtf_p143 = HFIbeams[4].data[0][0]
+beamtf_p217 = HFIbeams[5].data[0][0]
+beamtf_p353 = HFIbeams[6].data[0][0]
+beamtf_p545 = HFIbeams[7].data[0][0]
+beamtf_p857 = HFIbeams[8].data[0][0]
 
 smoothmap(directory+'LFI_SkyMap_030_1024_R2.01_full.fits',directory+'256_60.00smoothed_PlanckR2full_28.4_1024_2015_KCMBunits.fits', np.sqrt(output_resolution**2-(33.16)**2),nside_out=output_nside,outputmaps=[0,4])
 smoothmap(directory+'LFI_SkyMap_044_1024_R2.01_full.fits',directory+'256_60.00smoothed_PlanckR2full_44.1_1024_2015_KCMBunits.fits', np.sqrt(output_resolution**2-(28.09)**2),nside_out=output_nside,outputmaps=[0,4])
