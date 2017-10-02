@@ -96,9 +96,9 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 				# We want to pad the window function rather than crop the convolution
 				# conv_windowfunction = conv_windowfunction[0:len(windowfunction)]
 				windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
-				windowfunction[windowfunction==0] = 1e-20
 
 			conv_windowfunction /= windowfunction
+			conv_windowfunction[windowfunction==0] = 0.0
 		# Normalise window function
 		conv_windowfunction /= conv_windowfunction[0]
 
@@ -110,19 +110,22 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		if test:
 			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
-			conv_windowfunction_variance /= conv_windowfunction_variance[0]
+			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
 			print conv_windowfunction_variance[0]
 			print 'Done! Onwards...'
 
-			# print conv_windowfunction
-			# print conv_windowfunction_variance
-			# plt.xscale('log')
-			# plt.yscale('log')
-			# plt.plot(conv_windowfunction,label='Window function')
-			# plt.plot(conv_windowfunction_variance,label='Variance window function')
-			# # plt.legend()
-			# plt.savefig('test_plotwindowfunction.png')
-			# # # exit()
+			plt.xscale('log')
+			plt.yscale('log')
+			plt.plot(conv_windowfunction,label='Window function')
+			plt.plot(conv_windowfunction_variance,label='Variance window function')
+			plt.legend()
+			plt.savefig('wf_'+output+'.png')
+			plt.xscale('log')
+			plt.yscale('linear')
+			plt.plot(conv_windowfunction,label='Window function')
+			plt.plot(conv_windowfunction_variance,label='Variance window function')
+			plt.legend()
+			plt.savefig('wf_lin_'+output+'.png')
 
 	# Do the smoothing
 	print "Smoothing the maps"
@@ -286,6 +289,8 @@ def calc_variance_windowfunction(conv_windowfunction):
 
 	# Put in 2pi normalization factor:
 	cvbl = 2.0*const['pi']*cvbl
+
+	print 'Max in the window function is ' + str(cvbl[0]) + " (check: " + str(np.max(cvbl)) + ")"
 
 	return cvbl
 
