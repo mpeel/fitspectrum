@@ -15,6 +15,7 @@
 # v0.9a Mike Peel   21 Sep 2017   More bug fixes
 # v0.9b Mike Peel   22 Sep 2017   Add nosmooth and outputmaps parameters
 # v0.9c Mike Peel   29 Sep 2017   More bug fixes
+# v0.9d Mike Peel   01 Oct 2017   Input/output dir improvements. Fix bug in beam window functions.
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -29,11 +30,11 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[]):
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[]):
 	ver = "0.9c"
 
-	if (os.path.isfile(output)):
-		print "You already have a file with the output name " + output + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
+	if (os.path.isfile(outdir+outputfile)):
+		print "You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
 		exit()
 
 	# Check to see if we have a sigma_0 value to use when converting from Nobs maps and back.
@@ -42,7 +43,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 		no_sigma_0 = True
 
 	# Read in the fits map, and put it into the format Healpix expects
-	inputfits = fits.open(input)
+	inputfits = fits.open(indir+inputfile)
 	cols = inputfits[1].columns
 	col_names = cols.names
 	nmaps = len(cols)
@@ -119,13 +120,13 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 			plt.plot(conv_windowfunction,label='Window function')
 			plt.plot(conv_windowfunction_variance,label='Variance window function')
 			plt.legend()
-			plt.savefig('wf_'+output+'.png')
+			plt.savefig(outdir+'wf_'+outputfile+'.png')
 			plt.xscale('log')
 			plt.yscale('linear')
 			plt.plot(conv_windowfunction,label='Window function')
 			plt.plot(conv_windowfunction_variance,label='Variance window function')
 			plt.legend()
-			plt.savefig('wf_lin_'+output+'.png')
+			plt.savefig(outdir+'wf_lin_'+outputfile+'.png')
 
 	# Do the smoothing
 	print "Smoothing the maps"
@@ -204,7 +205,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 					smoothed_map[i] = smoothed_map[i] * conversion**power
 
 	# All done - now just need to write it to disk.
-	print "Writing maps to disk: " + output
+	print "Writing maps to disk: " + outdir+outputfile
 	cols = []
 	for i in range(0,nmaps):
 		if ('cov' in newheader['TTYPE'+str(i+1)]):
@@ -227,7 +228,7 @@ def smoothmap(input, output, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequenc
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
 	print bin_hdu.header
 	
-	bin_hdu.writeto(output)
+	bin_hdu.writeto(outdir+outputfile)
 
 	return
 

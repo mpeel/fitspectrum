@@ -10,7 +10,6 @@ output_nside = 256
 #directory = '/scratch/nas_cbass/scratch/mpeel/smoothmaps/'
 directory = '/mirror/data/mpeel/smoothmaps/'
 
-
 beamtf_K = np.loadtxt(directory+'wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Ka = np.loadtxt(directory+'wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Q = np.loadtxt(directory+'wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
@@ -35,11 +34,11 @@ beamtf_W = np.loadtxt(directory+'wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 # smoothmap(directory+'wmap_band_imap_r9_9yr_V_v5.fits',directory+'256_60.00smoothed_wmap9_60.7_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),nside_out=output_nside,sigma_0=3.131,sigma_0_unit='mK')
 # smoothmap(directory+'wmap_band_imap_r9_9yr_W_v5.fits',directory+'256_60.00smoothed_wmap9_93.5_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),nside_out=output_nside,sigma_0=6.544,sigma_0_unit='mK')
 
-smoothmap(directory+'wmap_band_imap_r9_9yr_K_v5.fits',directory+'256_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=1.429,sigma_0_unit='mK',windowfunction=beamtf_K)
-smoothmap(directory+'wmap_band_imap_r9_9yr_Ka_v5.fits',directory+'256_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=1.466,sigma_0_unit='mK',windowfunction=beamtf_Ka)
-smoothmap(directory+'wmap_band_imap_r9_9yr_Q_v5.fits',directory+'256_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=2.188,sigma_0_unit='mK',windowfunction=beamtf_Q)
-smoothmap(directory+'wmap_band_imap_r9_9yr_V_v5.fits',directory+'256_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=3.131,sigma_0_unit='mK',windowfunction=beamtf_V)
-smoothmap(directory+'wmap_band_imap_r9_9yr_W_v5.fits',directory+'256_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=6.544,sigma_0_unit='mK',windowfunction=beamtf_W)
+smoothmap(directory,directory,'wmap_band_imap_r9_9yr_K_v5.fits','256_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=1.429,sigma_0_unit='mK',windowfunction=beamtf_K)
+smoothmap(directory,directory,'wmap_band_imap_r9_9yr_Ka_v5.fits','256_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=1.466,sigma_0_unit='mK',windowfunction=beamtf_Ka)
+smoothmap(directory,directory,'wmap_band_imap_r9_9yr_Q_v5.fits','256_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=2.188,sigma_0_unit='mK',windowfunction=beamtf_Q)
+smoothmap(directory,directory'wmap_band_imap_r9_9yr_V_v5.fits','256_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=3.131,sigma_0_unit='mK',windowfunction=beamtf_V)
+smoothmap(directory,directory'wmap_band_imap_r9_9yr_W_v5.fits','256_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside,sigma_0=6.544,sigma_0_unit='mK',windowfunction=beamtf_W)
 
 # For Planck, see run_smoothmaps2.py
 exit()
