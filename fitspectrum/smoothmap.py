@@ -132,13 +132,16 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	print "Smoothing the maps"
 	smoothed_map = maps
 	for i in range(0,nmaps):
+		print 'map ' + str(i)
 		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
 		if fwhm_arcmin != -1 and (i not in nosmooth):
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
 				print 'Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.'
 				print np.sum(maps[i])
+				print np.median(maps[i])
 				maps[i] = conv_nobs_variance_map(maps[i], sigma_0)
 				print np.sum(maps[i])
+				print np.median(maps[i])
 				if (nobs_out == False and no_sigma_0 == False):
 					# We don't want to convert back later.
 					print 'test'
@@ -155,6 +158,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			newmap = hp.alm2map(alms, nside,verbose=False)
 			smoothed_map[i] = newmap
 			print np.sum(smoothed_map[i])
+			print np.median(smoothed_maps[i])
 
 			if ('N_OBS' in newheader['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
 				print 'You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!'
@@ -164,7 +168,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				newheader['TTYPE'+str(i+1)] = 'N_OBS'
 	maps = 0
 	newmap = 0
-	
+
 	# Do the ud_grading
 	print "ud_grading the maps (if needed)"
 	nobs_sum = 0
