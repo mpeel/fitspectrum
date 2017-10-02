@@ -158,7 +158,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			newmap = hp.alm2map(alms, nside,verbose=False)
 			smoothed_map[i] = newmap
 			print np.sum(smoothed_map[i])
-			print np.median(smoothed_maps[i])
+			print np.median(smoothed_map[i])
 
 			if ('N_OBS' in newheader['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
 				print 'You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!'
