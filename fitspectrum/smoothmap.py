@@ -152,7 +152,8 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				alms = hp.almxfl(alms, conv_windowfunction_variance)
 			else:
 				alms = hp.almxfl(alms, conv_windowfunction)
-			smoothed_map[i][:] = hp.alm2map(alms, nside,verbose=False)
+			newmap = hp.alm2map(alms, nside,verbose=False)
+			smoothed_map[i] = newmap
 			print np.sum(smoothed_map[i])
 
 			if ('N_OBS' in newheader['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
@@ -161,7 +162,9 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				smoothed_map[i] = conv_nobs_variance_map(smoothed_map[i], sigma_0)
 				print np.sum(smoothed_map[i])
 				newheader['TTYPE'+str(i+1)] = 'N_OBS'
-
+	maps = 0
+	newmap = 0
+	
 	# Do the ud_grading
 	print "ud_grading the maps (if needed)"
 	nobs_sum = 0
