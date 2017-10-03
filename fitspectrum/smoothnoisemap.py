@@ -68,11 +68,10 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     # nside = hp.get_nside(maps)
 
     returnmap = np.zeros(numpixels)
-    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside_in)
+    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside_in-1)
     print conv_windowfunction[0]
     conv_windowfunction /= conv_windowfunction[0]
     print conv_windowfunction
-    exit()
     for i in range(0,numrealisations):
         print i
         # Generate the noise realisation
@@ -84,7 +83,10 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         newmap = hp.alm2map(alms, nside_in,verbose=False)
         returnmap = returnmap + np.square(newmap)
 
-    returnmap = returnmap/(numrealisations-1)
+    returnmap = returnmap/(numrealisations)
+    print np.median(returnmap)
+    print np.median(np.square(noisemap))
+    print np.median(np.square(noisemap))/np.median(returnmap)
 
     # All done - now just need to write it to disk.
     cols = []
