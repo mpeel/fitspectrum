@@ -27,6 +27,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     maps = []
     for i in range(0,nmaps):
         maps.append(inputfits[1].data.field(i))
+    nside_in = hp.get_nside(maps)
 
     # Check to see whether we have nested data, and switch to ring if that is the case.
     if (inputfits[1].header['ORDERING'] == 'NESTED'):
@@ -67,7 +68,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     # nside = hp.get_nside(maps)
 
     returnmap = np.zeros(numpixels)
-    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
+    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside_in)
     print conv_windowfunction[0]
     conv_windowfunction /= conv_windowfunction[0]
     for i in range(0,numrealisations):
@@ -78,7 +79,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         # newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm))
         alms = hp.map2alm(newmap)
         alms = hp.almxfl(alms, conv_windowfunction)
-        newmap = hp.alm2map(alms, nside,verbose=False)
+        newmap = hp.alm2map(alms, nside_in,verbose=False)
         returnmap = returnmap + np.square(newmap)
 
     returnmap = returnmap/numrealisations
