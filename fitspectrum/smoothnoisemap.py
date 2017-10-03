@@ -13,8 +13,9 @@ import astropy.io.fits as fits
 
 def noiserealisation(inputmap, numpixels):
     newmap = np.zeros(numpixels)
-    for i in range(0,numpixels):
-        newmap[i] = np.random.normal(scale=inputmap[i])
+    newmap = np.random.normal(scale=1.0, size=numpixels) * inputmap
+#    for i in range(0,numpixels):
+#        newmap[i] = np.random.normal(scale=inputmap[i])
     return newmap
 
 
