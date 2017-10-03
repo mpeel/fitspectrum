@@ -123,7 +123,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['PIXTYPE']='HEALPIX'
         # bin_hdu.header['NSIDE']=nside_out
         bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's code for testing purposes only."
-        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])"_variance.fits")
+        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+"_variance.fits")
 
         # Also do an Nobs map for a consistency check.
         nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
