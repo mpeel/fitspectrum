@@ -84,6 +84,8 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         alms = hp.almxfl(alms, conv_windowfunction)
         newmap = hp.alm2map(alms, nside_in,verbose=False)
         returnmap = returnmap + np.square(newmap)
+        print np.median(returnmap/i)
+
 
     returnmap = returnmap/(numrealisations-1)
     print np.median(returnmap)
