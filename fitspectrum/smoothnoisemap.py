@@ -73,18 +73,19 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     print conv_windowfunction[0]
     conv_windowfunction /= conv_windowfunction[0]
     print conv_windowfunction
+    print fwhm
     for i in range(0,numrealisations):
         print i
         # Generate the noise realisation
         newmap = noiserealisation(noisemap, numpixels)
         # smooth it
-        # newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm))
+        newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm/60.0))
         # alms = hp.map2alm(newmap)
         # alms = hp.almxfl(alms, conv_windowfunction)
         # newmap = hp.alm2map(alms, nside_in,verbose=False)
         returnmap = returnmap + np.square(newmap)
 
-    returnmap = returnmap/(numrealisations)
+    returnmap = returnmap/(numrealisations-1)
     print np.median(returnmap)
     print np.median(np.square(noisemap))
     print np.median(np.square(noisemap))/np.median(returnmap)
