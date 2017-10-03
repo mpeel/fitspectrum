@@ -18,7 +18,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=512):
+def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512]):
     # Read in the input map
     inputfits = fits.open(indir+"/"+inputmap)
     cols = inputfits[1].columns
@@ -36,11 +36,8 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
         maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
 
-    # ud_grade it
-    noisemap = hp.ud_grade(maps[mapnumber], nside, power=2)
-
     # We want to sqrt it to get a noise rms map
-    noisemap = np.sqrt(noisemap)
+    noisemap = np.sqrt(maps[mapnumber])
 
     # Write the variance map to disk so we can compare to it later.
     cols = []
@@ -110,5 +107,37 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     # bin_hdu.header['NSIDE']=nside_out
     bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's code for testing purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_nobs.fits")
+
+    # Do ud_graded versions
+    num_nside = len(nside)
+    for i in range(0,num_nside):
+        # ud_grade it
+        returnmap_ud = hp.ud_grade(returnmap, nside[i], power=0)
+
+        cols = []
+        cols.append(fits.Column(name='II_cov', format='E', array=returnmap_ud))
+        cols = fits.ColDefs(cols)
+        bin_hdu = fits.new_table(cols)
+        bin_hdu.header['ORDERING']='RING'
+        bin_hdu.header['POLCONV']='COSMO'
+        bin_hdu.header['PIXTYPE']='HEALPIX'
+        # bin_hdu.header['NSIDE']=nside_out
+        bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's code for testing purposes only."
+        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])"_variance.fits")
+
+        # Also do an Nobs map for a consistency check.
+        nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
+        cols = []
+        cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
+        cols = fits.ColDefs(cols)
+        bin_hdu = fits.new_table(cols)
+        bin_hdu.header['ORDERING']='RING'
+        bin_hdu.header['POLCONV']='COSMO'
+        bin_hdu.header['PIXTYPE']='HEALPIX'
+        # bin_hdu.header['NSIDE']=nside_out
+        bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's code for testing purposes only."
+        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+_"nobs.fits")
+
+
 
     return
