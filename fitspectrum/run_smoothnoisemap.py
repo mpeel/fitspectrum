@@ -1,7 +1,7 @@
 from smoothnoisemap import smoothnoisemap
 import numpy as np
 
-output_resolution = 60.0
+output_resolution = 52.8
 output_nside = [512, 256, 128, 64]
 numrealisations=1000
 # directory = '/Users/mpeel/Desktop/noisetest/'
