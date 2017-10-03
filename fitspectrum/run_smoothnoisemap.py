@@ -7,7 +7,7 @@ numrealisations=1000
 # directory = '/Users/mpeel/Desktop/noisetest/'
 directory = '/mirror/data/mpeel/smoothmaps'
 
-smoothnoisemap(directory, 'wmap_K_'+str(output_resolution), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution**2-(0.88*60.0)**2),sigma_0=1.429,nside=output_nside)
+smoothnoisemap(directory, 'test_wmap_K_'+str(output_resolution), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution**2-(0.88*60.0)**2),sigma_0=1.429,nside=output_nside)
 
 exit()
 
