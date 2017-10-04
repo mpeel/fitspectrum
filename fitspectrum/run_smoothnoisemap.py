@@ -4,7 +4,7 @@ import numpy as np
 output_resolution = [60.0,120.0,240.0]
 output_nside = [512, 256, 128, 64]
 numrealisations=1000
-directory = '/mirror/data/mpeel/smoothmaps'
+directory = '/mirror/data/mpeel/smoothmaps/'
 
 beamtf_K = np.loadtxt(directory+'wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Ka = np.loadtxt(directory+'wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
