@@ -5,6 +5,7 @@
 # Mike Peel    03 Sep 2017    Start
 # Mike Peel    07 Sep 2017    Bug fixes / tidying running order
 # Mike Peel    17 Sep 2017    ud_grade to use constant nsides
+# Mike Peel    04 Oct 2017    Optimising and debugging. Added multiple nside support.
 
 import numpy as np
 import healpy as hp
@@ -14,12 +15,10 @@ import astropy.io.fits as fits
 def noiserealisation(inputmap, numpixels):
     newmap = np.zeros(numpixels)
     newmap = np.random.normal(scale=1.0, size=numpixels) * inputmap
-#    for i in range(0,numpixels):
-#        newmap[i] = np.random.normal(scale=inputmap[i])
     return newmap
 
 
-def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512]):
+def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = []):
     # Read in the input map
     inputfits = fits.open(indir+"/"+inputmap)
     cols = inputfits[1].columns
@@ -49,7 +48,6 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
-    # bin_hdu.header['NSIDE']=nside_out
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualvariance.fits")
 
@@ -61,36 +59,36 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
-    # bin_hdu.header['NSIDE']=nside_out
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
 
-    numpixels = len(noisemap)
-    # nside = hp.get_nside(maps)
-
-    returnmap = np.zeros(numpixels)
-    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),3*nside_in-1)
-    print conv_windowfunction[0]
+    # Calculate the window function
+    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),4*nside_in)
+    if (windowfunction != []):
+        window_len = len(conv_windowfunction)
+        beam_len = len(windowfunction)
+        if (beam_len > window_len):
+            windowfunction  = windowfunction[0:len(conv_windowfunction)]
+        else:
+            windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
+        conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
+        conv_windowfunction[windowfunction==0] = 0.0
     conv_windowfunction /= conv_windowfunction[0]
-    print conv_windowfunction
-    print fwhm
+
+    # Now generate the noise realisations
+    numpixels = len(noisemap)
+    returnmap = np.zeros(numpixels)
     for i in range(0,numrealisations):
-        print i
+        if i%10==0:
+            print i
         # Generate the noise realisation
         newmap = noiserealisation(noisemap, numpixels)
         # smooth it
-        # newmap = hp.smoothing(newmap, fwhm=np.radians(fwhm/60.0))
-        alms = hp.map2alm(newmap)
-        # alms = hp.almxfl(alms, conv_windowfunction)
-        newmap = hp.alm2map(alms, nside_in)
+        alms = hp.map2alm(newmap,lmax=4*nside_in)
+        alms = hp.almxfl(alms, conv_windowfunction)
+        newmap = hp.alm2map(alms, nside_in,lmax=4*nside_in)
         returnmap = returnmap + np.square(newmap)
-        print np.median(returnmap/i)
-
-
     returnmap = returnmap/(numrealisations-1)
-    print np.median(returnmap)
-    print np.median(np.square(noisemap))
-    print np.median(np.square(noisemap))/np.median(returnmap)
 
     # All done - now just need to write it to disk.
     cols = []
@@ -100,7 +98,6 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
-    # bin_hdu.header['NSIDE']=nside_out
     bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's code for testing purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_variance.fits")
 
@@ -113,16 +110,16 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
-    # bin_hdu.header['NSIDE']=nside_out
     bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's code for testing purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_nobs.fits")
 
     # Do ud_graded versions
     num_nside = len(nside)
     for i in range(0,num_nside):
-        # ud_grade it
+        # ud_grade it using power=0 (assuming correlated pixels)
         returnmap_ud = hp.ud_grade(returnmap, nside[i], power=0)
 
+        # Output the variance map
         cols = []
         cols.append(fits.Column(name='II_cov', format='E', array=returnmap_ud))
         cols = fits.ColDefs(cols)
@@ -130,7 +127,6 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['ORDERING']='RING'
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
-        # bin_hdu.header['NSIDE']=nside_out
         bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's code for testing purposes only."
         bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+"_variance.fits")
 
@@ -143,7 +139,6 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['ORDERING']='RING'
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
-        # bin_hdu.header['NSIDE']=nside_out
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's code for testing purposes only."
         bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+"_nobs.fits")
 
