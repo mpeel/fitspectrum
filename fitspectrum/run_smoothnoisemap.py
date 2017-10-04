@@ -29,7 +29,7 @@ beamtf_p857 = HFIbeams[8].data[0][0]
 
 numres = len(output_resolution[i])
 for i in range(0,numres):
-	smoothnoisemap(directory, 'wmap_K_'+str(output_resolution[i][]), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.88*60.0)**2),sigma_0=1.429,nside=output_nside)
+	smoothnoisemap(directory, 'wmap_K_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.88*60.0)**2),sigma_0=1.429,nside=output_nside)
 	# smoothnoisemap(directory, 'wmap_Ka_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_Ka_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.66*60.0)**2),sigma_0=1.466,nside=output_nside)
 	# smoothnoisemap(directory, 'wmap_Q_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_Q_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.51*60.0)**2),sigma_0=2.188,nside=output_nside)
 	# smoothnoisemap(directory, 'wmap_V_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_V_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.35*60.0)**2),sigma_0=3.131,nside=output_nside)
@@ -45,7 +45,7 @@ for i in range(0,numres):
 	# smoothnoisemap(directory, 'planck545_'+str(output_resolution[i]), 'HFI_SkyMap_545_2048_R2.02_full.fits',mapnumber=2,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(4.73)**2),nside=output_nside)
 	# smoothnoisemap(directory, 'planck857_'+str(output_resolution[i]), 'HFI_SkyMap_857_2048_R2.02_full.fits',mapnumber=2,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(4.51)**2),nside=output_nside)
 
-	smoothnoisemap(directory, 'wmap_K_beam_'+str(output_resolution[i][]), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=1.429,nside=output_nside,windowfunction=beamtf_K)
+	smoothnoisemap(directory, 'wmap_K_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=1.429,nside=output_nside,windowfunction=beamtf_K)
 	# smoothnoisemap(directory, 'wmap_Ka_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_Ka_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=1.466,nside=output_nside,windowfunction=beamtf_Ka)
 	# smoothnoisemap(directory, 'wmap_Q_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_Q_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=2.188,nside=output_nside,windowfunction=beamtf_Q)
 	# smoothnoisemap(directory, 'wmap_V_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_V_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=3.131,nside=output_nside,windowfunction=beamtf_V)
