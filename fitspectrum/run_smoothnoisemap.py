@@ -29,7 +29,7 @@ beamtf_p353 = HFIbeams[6].data[0][0]
 beamtf_p545 = HFIbeams[7].data[0][0]
 beamtf_p857 = HFIbeams[8].data[0][0]
 
-numres = len(output_resolution[i])
+numres = len(output_resolution)
 for i in range(0,numres):
 	smoothnoisemap(directory, 'wmap_K_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_K_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.88*60.0)**2),sigma_0=1.429,nside=output_nside)
 	# smoothnoisemap(directory, 'wmap_Ka_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_Ka_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=np.sqrt(output_resolution[i]**2-(0.66*60.0)**2),sigma_0=1.466,nside=output_nside)
