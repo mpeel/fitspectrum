@@ -1,5 +1,7 @@
 from smoothnoisemap import smoothnoisemap
 import numpy as np
+import healpy as hp
+import astropy.io.fits as fits
 
 output_resolution = [60.0,120.0,240.0]
 output_nside = [512, 256, 128, 64]
