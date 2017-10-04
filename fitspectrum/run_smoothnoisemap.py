@@ -53,8 +53,8 @@ for i in range(0,numres):
 	smoothnoisemap(directory, 'wmap_V_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_V_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=3.131,nside=output_nside,windowfunction=beamtf_V)
 	smoothnoisemap(directory, 'wmap_W_beam_'+str(output_resolution[i]), 'wmap_band_imap_r9_9yr_W_v5.fits',mapnumber=1,numrealisations=numrealisations,fwhm=output_resolution[i],sigma_0=6.544,nside=output_nside,windowfunction=beamtf_W)
 
-	smoothnoisemap(directory, 'planck30_beam_'+str(output_resolution[i]), 'LFI_SkyMap_030_1024_R2.01_full.fits',mapnumber=4,numrealisations=numrealisations,output_resolution[i],nside=output_nside,windowfunction=beamtf_p30)
-	smoothnoisemap(directory, 'planck44_beam_'+str(output_resolution[i]), 'LFI_SkyMap_044_1024_R2.01_full.fits',mapnumber=4,numrealisations=numrealisations,output_resolution[i],nside=output_nside,windowfunction=beamtf_p44)
+	smoothnoisemap(directory, 'planck30_beam_'+str(output_resolution[i]), 'LFI_SkyMap_030_1024_R2.01_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p30)
+	smoothnoisemap(directory, 'planck44_beam_'+str(output_resolution[i]), 'LFI_SkyMap_044_1024_R2.01_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p44)
 	smoothnoisemap(directory, 'planck70_beam_'+str(output_resolution[i]), 'LFI_SkyMap_070_1024_R2.01_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p70)
 	smoothnoisemap(directory, 'planck100_beam_'+str(output_resolution[i]), 'HFI_SkyMap_100_2048_R2.02_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100)
 	smoothnoisemap(directory, 'planck143_beam_'+str(output_resolution[i]), 'HFI_SkyMap_143_2048_R2.02_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143)
