@@ -16,6 +16,7 @@
 # v0.9b Mike Peel   22 Sep 2017   Add nosmooth and outputmaps parameters
 # v0.9c Mike Peel   29 Sep 2017   More bug fixes
 # v0.9d Mike Peel   01 Oct 2017   Input/output dir improvements. Fix bug in beam window functions.
+# v1.0  Mike Peel   06 Oct 207    Version 1.0. Add option to append maps (e.g. MC output)
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -30,8 +31,8 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[]):
-	ver = "0.9c"
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit=''):
+	ver = "1.0"
 
 	if (os.path.isfile(outdir+outputfile)):
 		print "You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
@@ -221,7 +222,16 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			smoothed_map[i] = smoothed_map[i] * rescale
 
 		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
-		
+	
+	if appendmap != '':
+		addmap = hp.read_map(appendmap)
+		cols.append(fits.Column(name=appendmapname, format='E', array=addmap))
+		newheader['TTYPE'+str(nmaps+1)] = appendmapname
+		newheader['TUNIT'+str(nmaps+1)] = appendmapunit
+		newheader['TFIELDS'] = newheader['TFIELDS']+1
+		newheader['NAXIS1'] = newheader['TFIELDS']*4
+
+
 	cols = fits.ColDefs(cols)
 	bin_hdu = fits.BinTableHDU.from_columns(cols)
 	# bin_hdu = fits.new_table(cols)
