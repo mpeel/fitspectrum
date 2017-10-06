@@ -227,7 +227,8 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		addmap = hp.read_map(appendmap)
 		cols.append(fits.Column(name=appendmapname, format='E', array=addmap))
 		newheader['TTYPE'+str(nmaps+1)] = appendmapname
-		newheader['TUNIT'+str(nmaps+1)] = appendmapunit
+		newheader['TFORM'+str(nmaps+1)] = 'E'
+		newheader['TTYPE'+str(nmaps+1)] = appendmapname
 		newheader['TFIELDS'] = newheader['TFIELDS']+1
 		newheader['NAXIS1'] = newheader['TFIELDS']*4
 
