@@ -6,7 +6,7 @@
 # Mike Peel    07 Sep 2017    Bug fixes / tidying running order
 # Mike Peel    17 Sep 2017    ud_grade to use constant nsides
 # Mike Peel    04 Oct 2017    Optimising and debugging. Added multiple nside support.
-# Mike Peel    06 Oct 2017    Return to older variance calculation
+# Mike Peel    06 Oct 2017    Return to older variance calculation, add rescale param and change output name format
 
 import numpy as np
 import healpy as hp
@@ -19,7 +19,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = []):
+def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0):
     ver = "0.3"
 
     # Read in the input map
@@ -42,6 +42,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     # We want to sqrt it to get a noise rms map
     noisemap = np.sqrt(maps[mapnumber])
+    noisemap = noisemap * rescale
 
     # Write the variance map to disk so we can compare to it later.
     cols = []
@@ -131,7 +132,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+"_variance.fits")
+        bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_variance.fits")
 
         # Also do an Nobs map for a consistency check.
         nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
@@ -143,7 +144,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(indir+"/"+runname+"_"+str(nside[i])+"_nobs.fits")
+        bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_nobs.fits")
 
 
 
