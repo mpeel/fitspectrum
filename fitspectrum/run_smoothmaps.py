@@ -15,7 +15,8 @@ beamtf_Q = np.loadtxt(directory+'wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
 beamtf_V = np.loadtxt(directory+'wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
 beamtf_W = np.loadtxt(directory+'wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
-for i in range(0,numres):
+numnside = len(output_nside)
+for i in range(0,numnside):
 	# smoothmap(directory,directory,'wmap_band_smth_deconv_imap_r9_9yr_K_v5.fits','256_60.00smoothed_wmap9dec_22.8_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside,sigma_0=1.429,sigma_0_unit='mK',nosmooth=[0])
 	# smoothmap(directory,directory,'wmap_band_smth_deconv_imap_r9_9yr_Ka_v5.fits','256_60.00smoothed_wmap9dec_33.0_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),nside_out=output_nside,sigma_0=1.466,sigma_0_unit='mK',nosmooth=[0])
 	# smoothmap(directory,directory,'wmap_band_smth_deconv_imap_r9_9yr_Q_v5.fits','256_60.00smoothed_wmap9dec_40.7_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.51*60.0)**2),nside_out=output_nside,sigma_0=2.188,sigma_0_unit='mK',nosmooth=[0])
