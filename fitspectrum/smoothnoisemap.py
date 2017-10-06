@@ -52,6 +52,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
+    bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualvariance.fits")
 
@@ -63,6 +64,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
+    bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
     bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
 
@@ -102,6 +104,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
+    bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's smoothnoisemap version "+ver +"."
     bin_hdu.writeto(indir+"/"+runname+"_variance.fits")
 
@@ -114,6 +117,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['ORDERING']='RING'
     bin_hdu.header['POLCONV']='COSMO'
     bin_hdu.header['PIXTYPE']='HEALPIX'
+    bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
     bin_hdu.writeto(indir+"/"+runname+"_nobs.fits")
 
@@ -131,6 +135,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['ORDERING']='RING'
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
+        bin_hdu.header['NSIDE']=nside[i]
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
         bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_variance.fits")
 
@@ -143,6 +148,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['ORDERING']='RING'
         bin_hdu.header['POLCONV']='COSMO'
         bin_hdu.header['PIXTYPE']='HEALPIX'
+        bin_hdu.header['NSIDE']=nside[i]
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
         bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_nobs.fits")
 
