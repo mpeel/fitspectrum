@@ -6,6 +6,7 @@
 # Mike Peel    07 Sep 2017    Bug fixes / tidying running order
 # Mike Peel    17 Sep 2017    ud_grade to use constant nsides
 # Mike Peel    04 Oct 2017    Optimising and debugging. Added multiple nside support.
+# Mike Peel    06 Oct 2017    Return to older variance calculation
 
 import numpy as np
 import healpy as hp
@@ -19,7 +20,7 @@ def noiserealisation(inputmap, numpixels):
 
 
 def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = []):
-    ver = "0.2"
+    ver = "0.3"
 
     # Read in the input map
     inputfits = fits.open(indir+"/"+inputmap)
@@ -90,9 +91,8 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         alms = hp.almxfl(alms, conv_windowfunction)
         newmap = hp.alm2map(alms, nside_in,lmax=4*nside_in)
         returnmap = returnmap + np.square(newmap)
-    returnmap = np.sqrt(returnmap)/(numrealisations-1)
-    returnmap = np.square(returnmap)
-
+    returnmap = returnmap/(numrealisations-1)
+    
     # All done - now just need to write it to disk.
     cols = []
     cols.append(fits.Column(name='II_cov', format='E', array=returnmap))
