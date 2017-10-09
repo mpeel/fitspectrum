@@ -16,7 +16,8 @@
 # v0.9b Mike Peel   22 Sep 2017   Add nosmooth and outputmaps parameters
 # v0.9c Mike Peel   29 Sep 2017   More bug fixes
 # v0.9d Mike Peel   01 Oct 2017   Input/output dir improvements. Fix bug in beam window functions.
-# v1.0  Mike Peel   06 Oct 207    Version 1.0. Add option to append maps (e.g. MC output)
+# v1.0  Mike Peel   06 Oct 2017   Version 1.0. Add option to append maps (e.g. MC output)
+# v1.1  Mike Peel   09 Oct 2017   Add CMB subtraction
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -31,8 +32,8 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit=''):
-	ver = "1.0"
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units=''):
+	ver = "1.1"
 
 	if (os.path.isfile(outdir+outputfile)):
 		print "You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
@@ -222,6 +223,31 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			smoothed_map[i] = smoothed_map[i] * rescale
 
 		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+
+	# If we want to subtract another map (e.g., a CMB map) then we need to read it in, check nside and units, and then subtract.
+	if subtractmap != '':
+		sub_inputfits = fits.open(indir+subtractmap)
+		sub_cols = sub_inputfits[1].columns
+		sub_col_names = sub_cols.names
+		sub_nmaps = len(sub_cols)
+		sub_nmaps_orig = sub_nmaps
+		sub_maps = []
+		for i in range(0,sub_nmaps):
+			sub_maps.append(sub_inputfits[1].data.field(i))
+		# Check to see whether we have nested data, and switch to ring if that is the case.
+		if (sub_inputfits[1].header['ORDERING'] == 'NESTED'):
+			sub_maps = hp.reorder(sub_maps,n2r=True)
+		# We want a maximum of one map to subtract (could be extended in the future)
+		sub_maps = sub_maps[0]
+		# We want to use the same output Nside - we'll assume they have the same resolution.
+		sub_maps = hp.ud_grade(sub_maps, nside_out=nside_out)
+		# Calculate a rescaling factor if needed
+		conversion = 1.0
+		if subtractmap_units != '':
+			conversion = convertunits(const, subtractmap_units, units_out, frequency, pix_area)
+		# ... and do the subtraction
+		smoothed_map[0] = smoothed_map[0] - sub_maps * conversion
+		sub_inputfits.close()
 	
 	if appendmap != '':
 		addmap = hp.read_map(appendmap)
