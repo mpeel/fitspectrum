@@ -222,10 +222,9 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		else:
 			smoothed_map[i] = smoothed_map[i] * rescale
 
-		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
-
 	# If we want to subtract another map (e.g., a CMB map) then we need to read it in, check nside and units, and then subtract.
 	if subtractmap != '':
+		print 'Subtracting CMB map ' + subtractmap
 		sub_inputfits = fits.open(indir+subtractmap)
 		sub_cols = sub_inputfits[1].columns
 		sub_col_names = sub_cols.names
@@ -243,12 +242,15 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		sub_maps = hp.ud_grade(sub_maps, nside_out=nside_out)
 		# Calculate a rescaling factor if needed
 		conversion = 1.0
-		if subtractmap_units != '':
-			conversion = convertunits(const, subtractmap_units, units_out, frequency, pix_area)
+		# if subtractmap_units != '':
+			# conversion = convertunits(const, subtractmap_units, units_out, frequency, pix_area)
 		# ... and do the subtraction
 		smoothed_map[0] = smoothed_map[0] - sub_maps * conversion
 		sub_inputfits.close()
 	
+	for i in range(0,nmaps):
+		cols.append(fits.Column(name=col_names[i], format='E', array=smoothed_map[i]))
+
 	if appendmap != '':
 		addmap = hp.read_map(appendmap)
 		cols.append(fits.Column(name=appendmapname, format='E', array=addmap))

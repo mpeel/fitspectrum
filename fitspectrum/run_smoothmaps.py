@@ -39,8 +39,8 @@ for i in range(0,numnside):
 		smoothmap(directory,directory,'COM_CMB_IQU-sevem-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
 		smoothmap(directory,directory,'COM_CMB_IQU-smica-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
 
-	subtractmaps = ['', str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits']
-	subtractmaps_name = ['', 'CMBcommandersub', 'CMBNILCsub', 'CMBSevemsub', 'CMBSmicasub']
+	subtractmaps = [str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits','']
+	subtractmaps_name = ['CMBcommandersub', 'CMBNILCsub', 'CMBSevemsub', 'CMBSmicasub','']
 	numsubtract = 5
 	for j in range(0,numsubtract):
 		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9dec_22.8_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK',nosmooth=[0])
