@@ -33,10 +33,11 @@ beamtf_p857 = HFIbeams[8].data[0][0]
 numnside = len(output_nside)
 for i in range(0,numnside):
 	# Smooth CMB maps
-	smoothmap(directory,outdirectory,'COM_CMB_IQU-commander-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
-	smoothmap(directory,outdirectory,'COM_CMB_IQU-nilc-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
-	smoothmap(directory,outdirectory,'COM_CMB_IQU-sevem-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
-	smoothmap(directory,outdirectory,'COM_CMB_IQU-smica-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
+	if i != 0:
+		smoothmap(directory,directory,'COM_CMB_IQU-commander-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
+		smoothmap(directory,directory,'COM_CMB_IQU-nilc-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
+		smoothmap(directory,directory,'COM_CMB_IQU-sevem-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
+		smoothmap(directory,directory,'COM_CMB_IQU-smica-field-Int_2048_R2.01_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
 
 	subtractmaps = ['', str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSevem_0.0_2048_2015_mKCMBunits.fits', str(output_nside[i])+'_60.00smoothed_PlanckCMBSmica_0.0_2048_2015_mKCMBunits.fits']
 	subtractmaps_name = ['', 'CMBcommandersub', 'CMBNILCsub', 'CMBSevemsub', 'CMBSmicasub']
