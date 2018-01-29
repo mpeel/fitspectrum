@@ -55,7 +55,7 @@ def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/s
 	cmb = np.zeros(npix)
 	thermaldust = np.zeros(npix)
 	total_fg = np.zeros(npix)
-	for i in range(0,npix):
+	for i in range(0,npix-1):
 		sync[i] = syncshifted_comm(freq, mapdata[0][i], 4e-3, galprop_freq, galprop_amp)
 		ff[i] = freefree(const, freq, mapdata[1][i], mapdata[2][i], solid_angle, equation=1,comm=1)
 		ame[i] = spinningdust_comm(freq, mapdata[4][i], mapdata[5][i], spd_amp, spd_freq, 1) + spinningdust_comm(freq, mapdata[6][i], 33.35, spd_amp, spd_freq, 2)
