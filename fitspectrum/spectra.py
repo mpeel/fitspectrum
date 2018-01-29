@@ -24,9 +24,8 @@ def syncshifted_comm(nu, sync_amplitude, sync_shift, sync_freq, sync_amp):
 	synchrotron = sync_amplitude * (nu_0s/nu)**2 * ((np.interp((nu*nu_p0s/sync_shift),sync_freq, sync_amp)) / (np.interp((nu_0s*nu_p0s/sync_shift),sync_freq, sync_amp)))
 
 	# print synchrotron
-
 	# if outside range of synchrotron model, then set to 0
-	if sync_shift != 0:
+	if sync_shift != 0 and isinstance(synchrotron,list):
 		synchrotron[nu < min(sync_freq)*2] = 0.0
 		synchrotron[nu > max(sync_freq)-100.] = 0.0
 
@@ -123,7 +122,7 @@ def spinningdust_comm(nu, spinningdust_amp, spdustshift, spinningdust_em_comm, s
 	 # shift and interpolate
 	spinningdust = spinningdust_amp * (nu_0/nu)**2 * ((np.interp((nu*nu_p0/spdustshift),spinningdust_freq_comm, spinningdust_em_comm)) / (np.interp((nu_0*nu_p0/spdustshift),spinningdust_freq_comm, spinningdust_em_comm)))
 
-	if spdustshift != 0:
+	if spdustshift != 0 and isinstance(spinningdust,list):
 		spinningdust[nu < min(spinningdust_freq_comm)] = 0.0
 		spinningdust[nu > max(spinningdust_freq_comm)-100.] = 0.0
 
