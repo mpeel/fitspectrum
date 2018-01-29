@@ -73,7 +73,7 @@ mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 # mask_min=[['commander2015/commander_dx11d2_mask_temp_n2048_fullres_v3_n0256.fits',256,0]]
 # mask_max=[['commander2015/commander_mask_n256_likelihood_v1.fits',256,0]]
 
-commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_wim.dat',nside=256,res=60.0,freq=30.0)
-#commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_wim.dat',nside=256,res=60.0,freq=4.7)
-#commander_repro_maps(outdir='commander_freq_maps/', name='wmap', maps=maps_I, spd_file='amemodels/spdust2_wim.dat',nside=256,res=60.0,freq=22.8)
+commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=30.0)
+commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=4.7)
+commander_repro_maps(outdir='commander_freq_maps/', name='wmap', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=22.8)
 
