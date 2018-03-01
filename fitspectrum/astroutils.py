@@ -2,6 +2,7 @@ import os
 import numpy as np
 import healpy as hp
 from math import pi
+import matplotlib.pyplot as plt
 
 # Ensure that a directory exists
 # Function from http://stackoverflow.com/questions/273192/in-python-check-if-a-directory-exists-and-create-it-if-necessary
@@ -13,6 +14,15 @@ def ensure_dir(f):
 		d = os.path.dirname(f)
 		if not os.path.exists(d):
 			os.makedirs(d)
+
+
+# Plot the maps
+def plotmap(mapname,outputname):
+	mapdata_temp = hp.read_map(mapname)
+	fig = plt.figure(1)
+	hp.mollview(mapdata_temp,fig=1)
+	plt.savefig(outputname)
+	plt.close()
 
 # Create a healpix mask given an nside, min/max longitudes and latitudes, and a coordinate system
 def healpixmask(nside, long_min, long_max, lat_min, lat_max, coordsystem='G'):

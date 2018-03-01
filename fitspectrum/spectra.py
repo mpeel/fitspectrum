@@ -81,8 +81,9 @@ def freefree(const, freq, EM, Te, solid_angle, equation=1,comm=0):
 	T_ff = Te * (1.0 - np.exp(-tau_ff))
 
 	# deal with very small tau values in the exponential
-	#smalltau = where(tau_ff < 1.0e-10)
-	#if (smalltau[0] GE 0) THEN T_ff[smalltau] = Te * (tau_ff[smalltau] - (-tau_ff[smalltau])^2.0/ 2.0 - (-tau_ff[smalltau]^3.0)/6.0)
+	# if tau_ff < 1.0e-10:
+	# 	T_ff = Te * (tau_ff - (-tau_ff)**2.0 / 2.0 - (-tau_ff^3.0)/6.0)
+
 	if comm == 1:
 		S = 1e6 * T_ff
 	else:
