@@ -32,12 +32,13 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units=''):
-	ver = "1.1"
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False):
+	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
 		print "You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
-		exit()
+		# exit()
+		return
 
 	# Check to see if we have a sigma_0 value to use when converting from Nobs maps and back.
 	no_sigma_0 = False
@@ -45,27 +46,46 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		no_sigma_0 = True
 
 	# Read in the fits map, and put it into the format Healpix expects
+	# if usehealpixfits:
+	# 	maps, newheader = hp.read_map(indir+inputfile,field=None,h=True)
+	# 	nmaps = len(maps)
+	# 	print newheader
+	# else:
 	inputfits = fits.open(indir+inputfile)
+	print inputfits.info()
 	cols = inputfits[1].columns
 	col_names = cols.names
 	nmaps = len(cols)
-	nmaps_orig = nmaps
 	maps = []
-	for i in range(0,nmaps):
-		maps.append(inputfits[1].data.field(i))
+	if usehealpixfits:
+		maps = hp.read_map(indir+inputfile,field=None)
+	else:
+		for i in range(0,nmaps):
+			maps.append(inputfits[1].data.field(i))
+			print len(maps[i])
+	print len(maps[0])
 	# Check to see whether we have nested data, and switch to ring if that is the case.
 	if (inputfits[1].header['ORDERING'] == 'NESTED'):
 		maps = hp.reorder(maps,n2r=True)
+	newheader = inputfits[1].header.copy(strip=False)
+	inputfits.close()
+
+	# Do some cleanup of the new header to avoid issues later
+	try:
+		print newheader['TUNIT1']
+	except:
+		for i in range(0,nmaps):
+			newheader['TUNIT'+str(i+1)] = 'None'
+
 
 	# Crop to just have the maps we want to output
+	nmaps_orig = nmaps
 	if maxnummaps != -1:
 		nmaps = maxnummaps
 	if outputmaps == []:
 		outputmaps = range(0,nmaps)
 	maps = [maps[i] for i in outputmaps]
 	noutputmaps = len(outputmaps)
-	newheader = inputfits[1].header.copy(strip=False)
-	inputfits.close()
 	# print newheader
 	for i in range(0,nmaps_orig):
 		if i < noutputmaps:
