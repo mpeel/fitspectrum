@@ -13,10 +13,13 @@ import matplotlib.pyplot as plt
 from astroutils import *
 from smoothmap import smoothmap
 
+def polmap(inmap):
+	return np.sqrt(inmap[1]**2+inmap[2]**2)
+
 directory = 'cmb_dx12v3/'
 plot = True # Change to True to output plots of the initial maps, False to not do so
-smooth = 120.0 # arcmin, just for the pol maps, set to False to disable
-
+smooth = 180.0 # arcmin, just for the pol maps, set to False to disable
+smooth_plot = 120.0
 
 ## Read in the maps, and have a look at them
 commander = hp.read_map(directory+'dx12_v3_commander_cmb_005a_2048.fits',field=None)
@@ -36,6 +39,11 @@ nummaps = len(commander)
 numpix = len(commander[0])
 print numpix
 nside = hp.npix2nside(numpix)
+
+# We also need the flare mask
+flare_mask = hp.read_map(directory+'flare_mask_n1024.fits')
+# ... at the same nside as before
+flare_mask = hp.pixelfunc.ud_grade(flare_mask,nside_out=nside)
 
 # Do we want to smooth the maps?
 if smooth:
@@ -57,6 +65,27 @@ if smooth:
 	nilc_noise_smooth = hp.read_map(directory+str(smooth)+'smoothed_dx12_v3_nilc_cmb_hmhd_005a_2048.fits',field=None)
 	sevem_noise_smooth = hp.read_map(directory+str(smooth)+'smoothed_dx12_v3_sevem_cmb_hmhd_005a_2048.fits',field=None)
 	smica_noise_smooth = hp.read_map(directory+str(smooth)+'smoothed_dx12_v3_smica_cmb_hmhd_005a_2048.fits',field=None)
+
+# Do we want to smooth the maps that we plot?
+if smooth_plot:
+	# Do the smoothing
+	smoothmap(directory,directory,'dx12_v3_commander_cmb_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_commander_cmb_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_nilc_cmb_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_nilc_cmb_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_sevem_cmb_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_sevem_cmb_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_smica_cmb_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_smica_cmb_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_commander_cmb_hmhd_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_commander_cmb_hmhd_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_nilc_cmb_hmhd_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_nilc_cmb_hmhd_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_sevem_cmb_hmhd_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_sevem_cmb_hmhd_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	smoothmap(directory,directory,'dx12_v3_smica_cmb_hmhd_005a_2048.fits',str(smooth_plot)+'smoothed_dx12_v3_smica_cmb_hmhd_005a_2048.fits', np.sqrt(smooth_plot**2-(5.0)**2),nside_out=nside,usehealpixfits=True)
+	# Read in the smoothed maps
+	commander_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_commander_cmb_005a_2048.fits',field=None)
+	nilc_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_nilc_cmb_005a_2048.fits',field=None)
+	sevem_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_sevem_cmb_005a_2048.fits',field=None)
+	smica_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_smica_cmb_005a_2048.fits',field=None)
+	commander_noise_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_commander_cmb_hmhd_005a_2048.fits',field=None)
+	nilc_noise_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_nilc_cmb_hmhd_005a_2048.fits',field=None)
+	sevem_noise_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_sevem_cmb_hmhd_005a_2048.fits',field=None)
+	smica_noise_smooth_plot = hp.read_map(directory+str(smooth_plot)+'smoothed_dx12_v3_smica_cmb_hmhd_005a_2048.fits',field=None)
 
 if plot:
 	for i in range(0,3):
@@ -108,9 +137,10 @@ if plot:
 		plt.close('all')
 
 ## Create the mask
-mask = np.ones((nummaps+1, numpix))
+mask = np.ones((nummaps+2, numpix))
 # Straight cuts on the maximum in the difference
-cut = [0.0001, 0.0000015, 0.0000015]
+cut = [0.0001, 0.0000011, 0.0000011, 0.0000010]
+polcut = 1.5e-6
 for i in range(0,3):
 	if i == 0 or smooth == False:
 		print str(i) + "raw"
@@ -152,12 +182,63 @@ for i in range(0,3):
 		mask[i][smica_mask == 0] = 0
 	else:
 		mask[i][smica_mask_pol == 0] = 0
+		mask[i][flare_mask == 0] = 0
+
+# Then do a mask in P
+i = 3
+if smooth == False:
+	print str(i) + "raw"
+	mask[i][polmap(commander)-polmap(nilc) > cut[i]] = 0
+	mask[i][polmap(commander)-polmap(nilc) < -cut[i]] = 0
+	mask[i][polmap(commander)-polmap(sevem) > cut[i]] = 0
+	mask[i][polmap(commander)-polmap(sevem) < -cut[i]] = 0
+	mask[i][polmap(commander)-polmap(smica) > cut[i]] = 0
+	mask[i][polmap(commander)-polmap(smica) < -cut[i]] = 0
+	# and on the noise levels
+	mask[i][polmap(commander_noise) > cut[i]] = 0
+	mask[i][polmap(commander_noise) < -cut[i]] = 0
+	mask[i][polmap(nilc_noise) > cut[i]] = 0
+	mask[i][polmap(nilc_noise) < -cut[i]] = 0
+	mask[i][polmap(sevem_noise) > cut[i]] = 0
+	mask[i][polmap(sevem_noise) < -cut[i]] = 0
+	mask[i][polmap(smica_noise) > cut[i]] = 0
+	mask[i][polmap(smica_noise) < -cut[i]] = 0
+	# And the cut in pol amplitude
+	mask[i][polmap(commander) > polcut] = 0
+	mask[i][polmap(nilc) > polcut] = 0
+	mask[i][polmap(sevem) > polcut] = 0
+	mask[i][polmap(smica) > polcut] = 0
+	mask[i][flare_mask == 0] = 0
+else:
+	print str(i) + "smooth"
+	mask[i][polmap(commander_smooth)-polmap(nilc_smooth) > cut[i]] = 0
+	mask[i][polmap(commander_smooth)-polmap(nilc_smooth) < -cut[i]] = 0
+	mask[i][polmap(commander_smooth)-polmap(sevem_smooth) > cut[i]] = 0
+	mask[i][polmap(commander_smooth)-polmap(sevem_smooth) < -cut[i]] = 0
+	mask[i][polmap(commander_smooth)-polmap(smica_smooth) > cut[i]] = 0
+	mask[i][polmap(commander_smooth)-polmap(smica_smooth) < -cut[i]] = 0
+	# and on the noise levels
+	mask[i][polmap(commander_noise_smooth) > cut[i]] = 0
+	mask[i][polmap(commander_noise_smooth) < -cut[i]] = 0
+	mask[i][polmap(nilc_noise_smooth) > cut[i]] = 0
+	mask[i][polmap(nilc_noise_smooth) < -cut[i]] = 0
+	mask[i][polmap(sevem_noise_smooth) > cut[i]] = 0
+	mask[i][polmap(sevem_noise_smooth) < -cut[i]] = 0
+	mask[i][polmap(smica_noise_smooth) > cut[i]] = 0
+	mask[i][polmap(smica_noise_smooth) < -cut[i]] = 0
+	# And the cut in pol amplitude
+	mask[i][polmap(commander_smooth) > polcut] = 0
+	mask[i][polmap(nilc_smooth) > polcut] = 0
+	mask[i][polmap(sevem_smooth) > polcut] = 0
+	mask[i][polmap(smica_smooth) > polcut] = 0
+	mask[i][flare_mask == 0] = 0
 
 # Also combine the masks
-mask[3][mask[1] == 0] = 0
-mask[3][mask[2] == 0] = 0
+mask[4][mask[1] == 0] = 0
+mask[4][mask[2] == 0] = 0
+mask[4][mask[3] == 0] = 0
 
-for i in range(0,4):
+for i in range(0,5):
 	hp.mollview(mask[i], xsize=4000)
 	plt.savefig(directory+'mask_inpainting_'+str(i)+'.pdf')
 	print str(100.0 - np.sum(mask[i])/len(mask[i]) * 100) + "% masked in the inpainting mask " + str(i)
@@ -170,6 +251,17 @@ for i in range(0,4):
 
 ## Output the mask
 hp.write_map(directory+"mask_inpainting.fits", mask,overwrite=True)
+plt.close('all')
+
+# Also some polarised maps
+hp.mollview(polmap(commander_smooth)*mask[4], xsize=4000)
+plt.savefig(directory+'pol_masked_dx12_v3_commander_smooth_cmb_005a_2048_polmap_4.pdf')
+hp.mollview(polmap(nilc_smooth)*mask[4], xsize=4000)
+plt.savefig(directory+'pol_masked_dx12_v3_nilc_smooth_cmb_005a_2048_polmap_4.pdf')
+hp.mollview(polmap(sevem_smooth)*mask[4], xsize=4000)
+plt.savefig(directory+'pol_masked_dx12_v3_sevem_smooth_cmb_005a_2048_polmap_4.pdf')
+hp.mollview(polmap(smica_smooth)*mask[4], xsize=4000)
+plt.savefig(directory+'pol_masked_dx12_v3_smica_smooth_cmb_005a_2048_polmap_4.pdf')
 plt.close('all')
 
 
@@ -185,24 +277,33 @@ for i in range(0,3):
 	hp.mollview(smica[i]*mask[i], xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_smica_cmb_005a_2048_'+str(i)+'.pdf')
 	plt.close('all')
-	hp.mollview(commander_smooth[i]*mask[i], xsize=4000)
+	hp.mollview(commander_smooth_plot[i]*mask[i], xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_commander_smooth_cmb_005a_2048_'+str(i)+'.pdf')
-	hp.mollview(nilc_smooth[i]*mask[i], xsize=4000)
+	hp.mollview(nilc_smooth_plot[i]*mask[i], xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_nilc_smooth_cmb_005a_2048_'+str(i)+'.pdf')
-	hp.mollview(sevem_smooth[i]*mask[i], xsize=4000)
+	hp.mollview(sevem_smooth_plot[i]*mask[i], xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_sevem_smooth_cmb_005a_2048_'+str(i)+'.pdf')
-	hp.mollview(smica_smooth[i]*mask[i], xsize=4000)
+	hp.mollview(smica_smooth_plot[i]*mask[i], xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_smica_smooth_cmb_005a_2048_'+str(i)+'.pdf')
 	plt.close('all')
 	if i > 0:
-		hp.mollview(commander_smooth[i]*mask[3], xsize=4000)
+		hp.mollview(commander_smooth_plot[i]*mask[3], xsize=4000)
 		plt.savefig(directory+'masked_dx12_v3_commander_smooth_cmb_005a_2048_'+str(i)+'_3.pdf')
-		hp.mollview(nilc_smooth[i]*mask[3], xsize=4000)
+		hp.mollview(nilc_smooth_plot[i]*mask[3], xsize=4000)
 		plt.savefig(directory+'masked_dx12_v3_nilc_smooth_cmb_005a_2048_'+str(i)+'_3.pdf')
-		hp.mollview(sevem_smooth[i]*mask[3], xsize=4000)
+		hp.mollview(sevem_smooth_plot[i]*mask[3], xsize=4000)
 		plt.savefig(directory+'masked_dx12_v3_sevem_smooth_cmb_005a_2048_'+str(i)+'_3.pdf')
-		hp.mollview(smica_smooth[i]*mask[3], xsize=4000)
+		hp.mollview(smica_smooth_plot[i]*mask[3], xsize=4000)
 		plt.savefig(directory+'masked_dx12_v3_smica_smooth_cmb_005a_2048_'+str(i)+'_3.pdf')
+		plt.close('all')
+		hp.mollview(commander_smooth_plot[i]*mask[4], xsize=4000)
+		plt.savefig(directory+'masked_dx12_v3_commander_smooth_cmb_005a_2048_'+str(i)+'_4.pdf')
+		hp.mollview(nilc_smooth_plot[i]*mask[4], xsize=4000)
+		plt.savefig(directory+'masked_dx12_v3_nilc_smooth_cmb_005a_2048_'+str(i)+'_4.pdf')
+		hp.mollview(sevem_smooth_plot[i]*mask[4], xsize=4000)
+		plt.savefig(directory+'masked_dx12_v3_sevem_smooth_cmb_005a_2048_'+str(i)+'_4.pdf')
+		hp.mollview(smica_smooth_plot[i]*mask[4], xsize=4000)
+		plt.savefig(directory+'masked_dx12_v3_smica_smooth_cmb_005a_2048_'+str(i)+'_4.pdf')
 		plt.close('all')
 
 	# Noise maps
@@ -214,13 +315,13 @@ for i in range(0,3):
 	plt.savefig(directory+'masked_dx12_v3_sevem_cmb_005a_2048_noise_'+str(i)+'.pdf')
 	hp.mollview(smica_noise[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_smica_cmb_005a_2048_noise_'+str(i)+'.pdf')
-	hp.mollview(commander_noise_smooth[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
+	hp.mollview(commander_noise_smooth_plot[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_commander_smooth_cmb_005a_2048_noise_'+str(i)+'.pdf')
-	hp.mollview(nilc_noise_smooth[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
+	hp.mollview(nilc_noise_smooth_plot[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_nilc_smooth_cmb_005a_2048_noise_'+str(i)+'.pdf')
-	hp.mollview(sevem_noise_smooth[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
+	hp.mollview(sevem_noise_smooth_plot[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_sevem_smooth_cmb_005a_2048_noise_'+str(i)+'.pdf')
-	hp.mollview(smica_noise_smooth[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
+	hp.mollview(smica_noise_smooth_plot[i]*mask[i],min=-0.00002,max=0.00002, xsize=4000)
 	plt.savefig(directory+'masked_dx12_v3_smica_smooth_cmb_005a_2048_noise_'+str(i)+'.pdf')
 	plt.close('all')
 	# M31
