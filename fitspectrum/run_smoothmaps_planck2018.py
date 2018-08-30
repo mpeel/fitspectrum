@@ -34,12 +34,12 @@ beamtf_p70 = beamtf_p70[0]
 # beamtf_p545 = HFIbeams[7].data[0][0]
 # beamtf_p857 = HFIbeams[8].data[0][0]
 
-beamtf_p100 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
-beamtf_p143 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
-beamtf_p217 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
-beamtf_p353 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
-beamtf_p545 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_545x545.fits')
-beamtf_p857 = get_hfi_beam('BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_857x857.fits')
+beamtf_p100 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
+beamtf_p143 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
+beamtf_p217 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
+beamtf_p353 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
+beamtf_p545 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_545x545.fits')
+beamtf_p857 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_857x857.fits')
 
 smoothmap(directory,directory,'LFI_SkyMap_030_1024_R3.00_full.fits','256_60.00smoothed_PlanckR3full_28.4_1024_2018_KCMBunits.fits', np.sqrt(output_resolution**2-(33.16)**2),nside_out=output_nside,outputmaps=[0,4])
 smoothmap(directory,directory,'LFI_SkyMap_044_1024_R3.00_full.fits','256_60.00smoothed_PlanckR3full_44.1_1024_2018_KCMBunits.fits', np.sqrt(output_resolution**2-(28.09)**2),nside_out=output_nside,outputmaps=[0,4])
