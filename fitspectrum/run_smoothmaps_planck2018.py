@@ -5,8 +5,8 @@ import astropy.io.fits as fits
 
 def get_hfi_beam(FITSfile):
 	fits.info(FITSfile) # print list of extensions found in FITSfile
-	data, header = fits.getdata(FITSfile, 10, header=True) # read extension #10 (data and header)
-	data, header = fits.getdata(FITSfile, 'ABC', header=True) # read extension having EXTNAME='ABC' (data and header)
+	data, header = fits.getdata(FITSfile, 0, header=True) # read extension #10 (data and header)
+	# data, header = fits.getdata(FITSfile, 'ABC', header=True) # read extension having EXTNAME='ABC' (data and header)
 	print header # print header
 	print data.names # print column names
 	# pylab.plot( data.field(0).flatten() ) # plot 1st column of binary table
