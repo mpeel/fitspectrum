@@ -51,7 +51,7 @@ beamtf_p857 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_857x85
 
 numnside = len(output_nside)
 for i in range(0,numnside):
-	Smooth CMB maps
+	# Smooth CMB maps
 	if i != 0:
 		smoothmap(directory,directory,'COM_CMB_IQU-commander_2048_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBCommander_0.0_2048_2018_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
 		smoothmap(directory,directory,'COM_CMB_IQU-nilc_2048_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckCMBNILC_0.0_2048_2018_mKCMBunits.fits', np.sqrt(output_resolution**2-5.0**2),nside_out=output_nside[i],units_out='mKCMB')
