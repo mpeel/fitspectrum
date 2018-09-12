@@ -6,4 +6,4 @@ maps = ['128_60.00smoothed_PlanckR3fullbeam_100_2048_2018_mKCMBunits.fits', '128
 for filename in maps:
 	mapdata = hp.read_map(filename,field=None)
 	hp.mollview(mapdata,norm='hist')
-		plt.savefig(filename+'_plot.pdf')
+	plt.savefig(filename+'_plot.pdf')
