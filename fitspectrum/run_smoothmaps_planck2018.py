@@ -10,7 +10,10 @@ def get_hfi_beam(FITSfile):
 	print header # print header
 	print data.names # print column names
 	# pylab.plot( data.field(0).flatten() ) # plot 1st column of binary table
-	return data
+	newdata = np.zeros(len(data))
+	for i in range(0,len(data)):
+		newdata[i] = data[i][0]
+	return newdata
 
 output_resolution = 60.0
 output_nside = [512, 256, 128, 64]
