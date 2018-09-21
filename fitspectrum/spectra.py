@@ -174,6 +174,7 @@ def planckcorr(const, nu_ghz):
 # Mike Peel, 1 October 2014 - Forked from haperflux.pro
 # Mike Peel, 15 February 2016 - converted from IDL to python
 # Mike Peel, 21 September 2017 - add special case of 'none'
+# Mike Peel, 21 September 2018 - also handle 'Kcmb' format (used in new HFI maps)
 def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 	unitslist = ['K','mK','uK','K_RJ','mK_RJ','uK_RJ','K_CMB','mK_CMB','uK_CMB', 'MJy/sr', 'Jy/pix', 'none']
 	# get conversion from the input units to Jy/pix
@@ -183,11 +184,11 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3
 	elif (units_in == 'uK' or units_in == 'uK_RJ' or units_in == 'uKRJ'):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6
-	elif (units_in == 'K_CMB' or units_in == 'KCMB'):
+	elif (units_in == 'K_CMB' or units_in == 'KCMB' or units_in == 'Kcmb'):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / planckcorr(const, frequency)
-	elif (units_in == 'mK_CMB' or units_in == 'mKCMB'):
+	elif (units_in == 'mK_CMB' or units_in == 'mKCMB' or units_in == 'mKCmb'):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e3 / planckcorr(const, frequency)
-	elif (units_in == 'uK_CMB' or units_in == 'uKCMB'):
+	elif (units_in == 'uK_CMB' or units_in == 'uKCMB' or units_in == 'uKCmb'):
 		factor_in = 2.*1381.*(frequency*1.0e9)**2/(const['c'])**2 * pix_area / 1.0e6 / planckcorr(const, frequency)
 	elif (units_in == 'MJy/sr' or units_in == "MJY/SR" or units_in == "MjySr"):
 		factor_in = pix_area * 1.0e6
