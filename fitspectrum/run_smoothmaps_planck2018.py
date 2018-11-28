@@ -22,18 +22,18 @@ output_nside = [512, 256, 128, 64]
 directory = '/mirror/data/mpeel/smoothmaps/'
 outdirectory = directory+"to_clive_R3_CMB_noise/"
 
-# beamtf_K = np.loadtxt(directory+'wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
-# beamtf_Ka = np.loadtxt(directory+'wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
-# beamtf_Q = np.loadtxt(directory+'wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
-# beamtf_V = np.loadtxt(directory+'wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
-# beamtf_W = np.loadtxt(directory+'wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
+beamtf_K = np.loadtxt(directory+'wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
+beamtf_Ka = np.loadtxt(directory+'wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
+beamtf_Q = np.loadtxt(directory+'wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
+beamtf_V = np.loadtxt(directory+'wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
+beamtf_W = np.loadtxt(directory+'wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
-beamtf_p30 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=28)
-beamtf_p30 = beamtf_p30[0]
-beamtf_p44 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=29)
-beamtf_p44 = beamtf_p44[0]
-beamtf_p70 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=30)
-beamtf_p70 = beamtf_p70[0]
+# beamtf_p30 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=28)
+# beamtf_p30 = beamtf_p30[0]
+# beamtf_p44 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=29)
+# beamtf_p44 = beamtf_p44[0]
+# beamtf_p70 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R3.31.fits',hdu=30)
+# beamtf_p70 = beamtf_p70[0]
 
 
 # HFIbeams = fits.open(directory+'HFI_RIMO_Beams_R2.00.fits')
@@ -44,13 +44,13 @@ beamtf_p70 = beamtf_p70[0]
 # beamtf_p545 = HFIbeams[7].data[0][0]
 # beamtf_p857 = HFIbeams[8].data[0][0]
 
-beamtf_p100 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
-print len(beamtf_p100)
-beamtf_p143 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
-beamtf_p217 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
-beamtf_p353 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
-beamtf_p545 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_545x545.fits')
-beamtf_p857 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_857x857.fits')
+# beamtf_p100 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
+# print len(beamtf_p100)
+# beamtf_p143 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
+# beamtf_p217 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
+# beamtf_p353 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
+# beamtf_p545 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_545x545.fits')
+# beamtf_p857 = get_hfi_beam(directory+'BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_857x857.fits')
 
 numnside = len(output_nside)
 for i in range(0,numnside):
@@ -71,11 +71,11 @@ for i in range(0,numnside):
 		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9dec_60.7_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK',nosmooth=[0])
 		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9dec_93.5_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK',nosmooth=[0])
 
-		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_22.8_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_K,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_Ka_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_33.0_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.466,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_Ka,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_Q_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_40.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=2.188,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_Q,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_60.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_V,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_93.5_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_W,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_22.8_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_K,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_Ka_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_33.0_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.466,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_Ka,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_Q_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_40.7_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=2.188,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_Q,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_60.7_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_V,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_smth_deconv_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9decbeam'+subtractmaps_name[j]+'_93.5_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK',nosmooth=[0],windowfunction=beamtf_W,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
 
 		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9_22.8_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.88*60.0)**2),nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK')
 		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_Ka_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9_33.0_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.66*60.0)**2),nside_out=output_nside[i],sigma_0=1.466,sigma_0_unit='mK')
@@ -83,11 +83,11 @@ for i in range(0,numnside):
 		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9_60.7_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.35*60.0)**2),nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK')
 		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9_93.5_512_2013_mKCMBunits.fits', np.sqrt(output_resolution**2-(0.22*60.0)**2),nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK')
 
-		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_22.8_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK',windowfunction=beamtf_K,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_Ka_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_33.0_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.466,sigma_0_unit='mK',windowfunction=beamtf_Ka,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_Q_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_40.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=2.188,sigma_0_unit='mK',windowfunction=beamtf_Q,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_60.7_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK',windowfunction=beamtf_V,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
-		# smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_93.5_512_2013_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK',windowfunction=beamtf_W,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_K_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_22.8_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.429,sigma_0_unit='mK',windowfunction=beamtf_K,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_22.8_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_Ka_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_33.0_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=1.466,sigma_0_unit='mK',windowfunction=beamtf_Ka,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_33.0_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_Q_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_40.7_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=2.188,sigma_0_unit='mK',windowfunction=beamtf_Q,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_40.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_V_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_60.7_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=3.131,sigma_0_unit='mK',windowfunction=beamtf_V,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_60.7_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
+		smoothmap(directory,outdirectory,'wmap_band_imap_r9_9yr_W_v5.fits',str(output_nside[i])+'_60.00smoothed_wmap9beam'+subtractmaps_name[j]+'_93.5_512_20132018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],sigma_0=6.544,sigma_0_unit='mK',windowfunction=beamtf_W,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_wmap9beam_93.5_512_2013_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2",subtractmap=subtractmaps[j])
 
 		# smoothmap(directory,outdirectory,'LFI_SkyMap_030-BPassCorrected_1024_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckR3full_28.4_1024_2018_KCMBunits.fits', np.sqrt(output_resolution**2-(33.16)**2),nside_out=output_nside[i],outputmaps=[0,4])
 		# smoothmap(directory,outdirectory,'LFI_SkyMap_044-BPassCorrected_1024_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckR3full_44.1_1024_2018_KCMBunits.fits', np.sqrt(output_resolution**2-(28.09)**2),nside_out=output_nside[i],outputmaps=[0,4])
