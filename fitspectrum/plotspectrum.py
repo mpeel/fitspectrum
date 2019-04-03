@@ -96,13 +96,15 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	# 	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
 
 	# Formatting, and output
+	plt.style.use('classic')
 	plt.xscale('log')
 	plt.yscale('log')
-	plt.xlabel('Frequency (GHz)')
-	plt.ylabel('Brightness temperature r.m.s. (uK)')
+	plt.xlabel('Frequency (GHz)', fontsize=17)
+	plt.ylabel('Brightness temperature rms ($\mu$K)', fontsize=17)
 	plt.xlim(xmin=minfreq,xmax=maxfreq)
 	plt.ylim(ymin=ymin,ymax=ymax)
-
+	plt.xticks(fontsize=17)
+	plt.yticks(fontsize=17)
 	if pol == False:
 		sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
 		sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
@@ -126,7 +128,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 
 		fd_min = sync_spectrum_min + freefree_spectrum_min + ame_spectrum_min + thermaldust_spectrum_min
 		fd_max = sync_spectrum_max + freefree_spectrum_max + ame_spectrum_max + thermaldust_spectrum_max
-		plt.plot(x, fd_min, 'k--',zorder=12,label='Total-CMB')
+		plt.plot(x, fd_min, 'k--',zorder=12,label='Total foreground')
 		plt.plot(x, fd_max, 'k--',zorder=12)
 	else:
 		sync_spectrum_min = syncshifted_pol_comm(x, np.sqrt(minvals[0]**2+minvals[1]**2), 4e-3, galprop_freq, galprop_amp)
@@ -151,19 +153,18 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 
 		fd_min = sync_spectrum_min + thermaldust_spectrum_min
 		fd_max = sync_spectrum_max + thermaldust_spectrum_max
-		plt.plot(x, fd_min, 'k--',zorder=12,label='Total-CMB')
+		plt.plot(x, fd_min, 'k--',zorder=12,label='Total foreground')
 		plt.plot(x, fd_max, 'k--',zorder=12)
 
 	numfreqbands = len(freqbands)
 	for i in range (0,numfreqbands):
 		if (freqbands[i][0] != freqbands[i][1]):
-			plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=0.1, lw=1.0,zorder=0,label=freqbands[i][2])
+			plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=freqbands[i][4], lw=1.0,zorder=0,label=freqbands[i][2])
 		else:
-			plt.axvspan(freqbands[i][0], freqbands[i][1], color=freqbands[i][3], alpha=0.3, lw=1.0,zorder=0,label=freqbands[i][2])
-		# plt.plot((freqbands[i][0], freqbands[i][1]), (ymin, ymax), freqbands[i][3])
+			plt.plot((freqbands[i][0], freqbands[i][1]), (ymin, ymax), freqbands[i][3], alpha=freqbands[i][4], lw=1.0,zorder=0,label=freqbands[i][2],linestyle=freqbands[i][5])
 
 	if legend == True:
-		l = plt.legend(prop={'size':8})
+		l = plt.legend(prop={'size':11})
 		l.set_zorder(20)
 	plt.savefig(outdir+name+'.pdf')
 	plt.close()
