@@ -59,15 +59,18 @@ import matplotlib.pyplot as plt
 import emcee
 import corner
 
+def calc_beam_area(beam1,beam2):
+	return (np.pi * (beam1*np.pi/180.0)*(beam2*np.pi/180.0))/(4.0*np.log(2.0))
+
+
 # Define some constants, used later in the SED functions
 const = get_spectrum_constants()
-solid_angle = 1.0e-5 # For now
+solid_angle = calc_beam_area(100.0/60.0,0.7*100.0/60.0)#1.0e-5 # For now
 spd_freq = []
 spd_amp = []
 
 def spectrum(p, fjac=None, x=None):
-
-	model = synchrotron(const, x, 1.0, p[7], p[8]) + freefree(const, x, p[0], p[1], solid_angle) + spinningdust(spd_freq, spd_amp, solid_angle, x, p[5], p[9]) + cmb(const, x, p[6], solid_angle) + thermaldust(const, x, p[2], p[3], p[4], const['dust_optical_depth_freq'], solid_angle)# + thermaldust(const, x, p[10], p[11], p[12], const['dust_optical_depth_freq'], solid_angle)
+	model = synchrotron(const, x, 1.0, p[7], p[8]) + freefree(const, x, p[0], p[1], solid_angle) + spinningdust(spd_freq, spd_amp, solid_angle, x, p[5], p[9]) + cmb(const, x, p[6]*1e-6, solid_angle) + thermaldust(const, x, p[2]*1e-5, p[3], p[4], const['dust_optical_depth_freq'], solid_angle)# + thermaldust(const, x, p[10]*1e-5, p[11], p[12], const['dust_optical_depth_freq'], solid_angle)
 
 	return model
 
@@ -97,13 +100,75 @@ def lnprob(p, bounds, x, y, yerr):
         return -np.inf
     return lp + lnlike(p, x, y, yerr)
 
+def plot_results(outfile,srcname,minfreq,maxfreq,params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux):
+	
+	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/1000.0)
+
+	# Generate the model and plot it
+	# if nosync == False:
+	model_sync = synchrotron(const, x, 1.0, params[7], params[8])
+	plt.plot(x, model_sync, 'r')
+	# if nofreefree == False:
+	model_freefree = freefree(const, x, params[0], params[1], solid_angle)
+	plt.plot(x, model_freefree, 'b')
+	# if noame == False:
+	model_spd = spinningdust(spd_freq, spd_amp, solid_angle, x, params[5], params[9])
+	plt.plot(x, model_spd, 'black')
+	# if nodust == False:
+	model_dust1 = thermaldust(const, x, params[2]*1e-5, params[3], params[4], const['dust_optical_depth_freq'], solid_angle)
+	plt.plot(x, model_dust1, 'g')
+	# if nodust2 == False:
+	# model_dust2 = thermaldust(const, x, params[10]*1e-5, params[11], params[12], const['dust_optical_depth_freq'], solid_angle)
+	# plt.plot(x, model_dust2, 'y')
+
+	model_overall = spectrum(params, x=x)
+	plt.plot(x, model_overall, 'orange')
+	# Add the data to the plot
+	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1],fmt='+')
+	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
+
+	# Formatting, and output
+	plt.title(srcname)
+	plt.xscale('log')
+	plt.yscale('log')
+	plt.xlabel('Frequency (GHz)')
+	plt.ylabel('Flux density (Jy)')
+	plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
+	plt.savefig(outfile)
+	plt.close()
+	return
+
+def write_results(outfile,srcname,freqs,fd,fd_err,params,perror):
+	outputfile = open(outfile, "w")
+	outputfile.write("# " + srcname + "\n")
+	for i in range(0,len(freqs)):
+		outputfile.write(str(freqs[i]) + "	" + str(fd[i]) + "	" + str(fd_err[i]) + "\n")
+
+	outputfile.write('# Sync amplitude: ' + str(params[7]) + " +- " + str(perror[7]) + '\n')
+	outputfile.write('# Sync index: ' + str(params[8]) + " +- " + str(perror[8]) + '\n')
+	outputfile.write('# Freefree amplitude: ' + str(params[0]) + " +- " + str(perror[0]) + '\n')
+	outputfile.write('# Freefree temp: ' + str(params[1]) + " +- " + str(perror[1]) + '\n')
+	outputfile.write('# AME amplitude: ' + str(params[5]) + " +- " + str(perror[5]) + '\n')
+	outputfile.write('# AME shift: ' + str(params[9]) + " +- " + str(perror[9]) + '\n')
+	outputfile.write('# CMB amplitude: ' + str(params[6]*1e-6) + " +- " + str(perror[6]*1e-6) + '\n')
+	# outputfile.write('# AME at 25GHz: ' + str(spinningdust(spd_freq, spd_amp, solid_angle, 25.0, m.params[5], m.params[9])) + '\n')
+	# outputfile.write('# AME at 30GHz: ' + str(spinningdust(spd_freq, spd_amp, solid_angle, 30.0, m.params[5], m.params[9])) + '\n')
+	outputfile.write('# Dust amplitude: ' + str(params[2]*1e-5) + " +- " + str(perror[2]*1e-5) + '\n')
+	outputfile.write('# Dust index: ' + str(params[3]) + " +- " + str(perror[3]) + '\n')
+	outputfile.write('# Dust temperature: ' + str(params[4]) + " +- " + str(perror[4]) + '\n')
+	# outputfile.write('# Dust2 amplitude: ' + str(params[10]) + " +- " + str(perror[10]) + '\n')
+	# outputfile.write('# Dust2 index: ' + str(params[11]) + " +- " + str(perror[11]) + '\n')
+	# outputfile.write('# Dust2 temperature: ' + str(params[12]) + " +- " + str(perror[12]) + '\n')
+
+	outputfile.close()
+	return
+
 def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/spdust2_wim.dat',
 	format=1, inunits='Jy',fitunits='Jy',minfitfreq=0,maxfitfreq=0,
-	nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,
-	fixdust2temp=0,
-	startparams=0,mcmc=True,quiet=False):
+	nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,
+	startparams=0,mcmc=True,quiet=False):#,nodust2=True, fixdust2temp=0
 
-	print outdir
+	print(outdir)
 	ensure_dir(outdir)
 
 	# Read in the spinning dust curve
@@ -111,6 +176,8 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	global spd_amp
 	spd_freq, spd_amp = np.loadtxt(spd_file, dtype=float,usecols=(0,1),comments=';',unpack=True)
 
+	# solid_angle = calc_beam_area(100.0/60.0,0.7*100.0/60.0)
+	# print(solid_angle)
 
 	###
 	# Read in the file containing the SED data
@@ -138,7 +205,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 
 
 	num_datapoints = len(freqs)
-	print 'Fitting ' + str(num_datapoints) + ' data points'
+	print('Fitting ' + str(num_datapoints) + ' data points')
 
 	minfreq = min(freqs)
 	maxfreq = max(freqs)
@@ -163,14 +230,14 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	###
 
 	# Set up the initial parameters
-	num_params = 13
+	num_params = 10
 	parbase={'value':0., 'fixed':0, 'limited':[0,0], 'limits':[0.,0.]}
 	parinfo=[]
 	for i in range(0,num_params):
 		parinfo.append(copy.deepcopy(parbase))
 
 	# Starting parameters
-	p0 = [1.0,8000.,1e-6,1.7,20.,1.,0.,1.0 ,-1.0, 0, 1e-6,1.7,1000.]  # standard starting values
+	p0 = [10.0,8000.,1.0,1.7,20.,1.,0.,10.0,-1.0, 0]#, 1.0,1.7,1000.]  # standard starting values
 	if startparams != 0:
 		p0 = startparams
 
@@ -214,7 +281,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 
 	# CMB delta T (CMB) in K
 	parinfo[6]['limited'] = [1,1]
-	parinfo[6]['limits'] = [-150e-6,150e-6]
+	parinfo[6]['limits'] = [-150.0,150.0]#*1e-6
 	if nocmb == True:
 		p0[6] = 0
 		parinfo[6]['fixed'] = 1
@@ -228,92 +295,46 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		p0[7] = 0
 		parinfo[7]['fixed'] = 1
 		parinfo[8]['fixed'] = 1
+	p0[8] = -1.0
+	# parinfo[8]['fixed'] = 1
 
 	# Second thermal dust component: optical depth, then index, then temperature. Disabled by default.
-	parinfo[10]['limited'] = [1,1]
-	parinfo[10]['limits'] = [0.0,100.]
-	parinfo[11]['limited'] = [1,1]
-	parinfo[11]['limits'] = [0.0,3.5]
-	parinfo[12]['limited'] = [1,1]
-	parinfo[12]['limits'] = [5.,10000.] 
-	if nodust2 == True:
-		p0[10] = 0
-		parinfo[10]['fixed'] = 1
-		parinfo[11]['fixed'] = 1
-		parinfo[12]['fixed'] = 1
-	if fixdust2temp != 0:
-		p0[12] = fixdust2temp
-		parinfo[12]['fixed'] = 1
+	# parinfo[10]['limited'] = [1,1]
+	# parinfo[10]['limits'] = [0.0,100.]
+	# parinfo[11]['limited'] = [1,1]
+	# parinfo[11]['limits'] = [0.0,3.5]
+	# parinfo[12]['limited'] = [1,1]
+	# parinfo[12]['limits'] = [5.,10000.] 
+	# if nodust2 == True:
+	# 	p0[10] = 0
+	# 	parinfo[10]['fixed'] = 1
+	# 	parinfo[11]['fixed'] = 1
+	# 	parinfo[12]['fixed'] = 1
+	# if fixdust2temp != 0:
+	# 	p0[12] = fixdust2temp
+	# 	parinfo[12]['fixed'] = 1
 
-	print 'Full info:'
-	print parinfo
+	print('Full info:')
+	print(parinfo)
 
 	# Do the fit
 	fa = {'x':freqs[goodvals == 1], 'y':fd[goodvals == 1], 'err':fd_err[goodvals == 1]}
 	m = mpfit(mpfitfunction, p0, parinfo=parinfo,functkw=fa,xtol=1e-30,quiet=True)
 
-	print 'status = ', m.status
+	print('status = ', m.status)
 	if (m.status <= 0): 
-		print 'error message = ', m.errmsg
+		print('error message = ', m.errmsg)
 	
-	print 'Number of iterations: ', m.niter
+	print('Number of iterations: ', m.niter)
 	dof = len(freqs[goodvals == 1]) - len(m.params)
-	print 'Degrees of freedom: ', dof
-	print 'Chisq: ', m.fnorm / dof
-	print 'Parameters: ', m.params
+	print('Degrees of freedom: ', dof)
+	print('Chisq: ', m.fnorm / dof)
+	print('Parameters: ', m.params)
 
 
+	plot_results(outdir+srcname+'.pdf',srcname,minfreq,maxfreq,m.params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
 
-	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/1000.0)
-
-	# Generate the model and plot it
-	if nosync == False:
-		model_sync = synchrotron(const, x, 1.0, m.params[7], m.params[8])
-		plt.plot(x, model_sync, 'r')
-	if nofreefree == False:
-		model_freefree = freefree(const, x, m.params[0], m.params[1], solid_angle)
-		plt.plot(x, model_freefree, 'b')
-	if nodust == False:
-		model_dust1 = thermaldust(const, x, m.params[2], m.params[3], m.params[4], const['dust_optical_depth_freq'], solid_angle)
-		plt.plot(x, model_dust1, 'g')
-	if nodust2 == False:
-		model_dust2 = thermaldust(const, x, m.params[10], m.params[11], m.params[12], const['dust_optical_depth_freq'], solid_angle)
-		plt.plot(x, model_dust2, 'y')
-
-	model_overall = spectrum(m.params, x=x)
-	plt.plot(x, model_overall, 'black')
-	# Add the data to the plot
-	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-	if badvals:
-		plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
-
-	# Formatting, and output
-	plt.title(srcname)
-	plt.xscale('log')
-	plt.yscale('log')
-	plt.xlabel('Frequency (GHz)')
-	plt.ylabel('Flux density (Jy)')
-	plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
-	plt.savefig(outdir+srcname+'.pdf')
-	plt.close()
-
-	outputfile = open(outdir+srcname+".dat", "w")
-	outputfile.write("# " + srcname + "\n")
-	for i in range(0,num_datapoints):
-		outputfile.write(str(freqs[i]) + "	" + str(fd[i]) + "	" + str(fd_err[i]) + "\n")
-
-	if nodust == False:
-		outputfile.write('# Dust amplitude: ' + str(m.params[2]) + " +- " + str(m.perror[2]) + '\n')
-		outputfile.write('# Dust index: ' + str(m.params[3]) + " +- " + str(m.perror[3]) + '\n')
-		outputfile.write('# Dust temperature: ' + str(m.params[4]) + " +- " + str(m.perror[4]) + '\n')
-	if nodust2 == False:
-		outputfile.write('# Dust2 amplitude: ' + str(m.params[10]) + " +- " + str(m.perror[10]) + '\n')
-		outputfile.write('# Dust2 index: ' + str(m.params[11]) + " +- " + str(m.perror[11]) + '\n')
-		outputfile.write('# Dust2 temperature: ' + str(m.params[12]) + " +- " + str(m.perror[12]) + '\n')
-
-
-
-	outputfile.close()
+	write_results(outdir+srcname+".txt",srcname,freqs,fd,fd_err,m.params,m.perror)
 
 	###
 	# MCMC fitting
@@ -321,60 +342,42 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	if mcmc == True:
 
 		nll = lambda *args: -lnlike(*args)
-		# p = p0
-		p = m.params
+		p = p0
+		# p = m.params
 		# x = freqs[goodvals == 1]
 		# y = fd[goodvals == 1]
 		# yerr = fd_err[goodvals == 1]
 		bounds = np.zeros((num_params,2))
 		for i in range(0,num_params):
-			if parinfo[i]['limited'][0] == 1:
+			if parinfo[i]['fixed'] == 1:
+				if p0[i] == 0:
+					bounds[i][0] = -1e-5
+				else:
+					bounds[i][0] = p0[i]*0.999
+			elif parinfo[i]['limited'][0] == 1:
 				bounds[i][0] = parinfo[i]['limits'][0]
 			else:
 				bounds[i][0] = None
-			if parinfo[i]['limited'][1] == 1:
+			if parinfo[i]['fixed'] == 1:
+				if p0[i] == 0:
+					bounds[i][1] = 1e-5
+				else:
+					bounds[i][1] = p0[i]*1.0001
+			elif parinfo[i]['limited'][1] == 1:
 				bounds[i][1] = parinfo[i]['limits'][1]
 			else:
 				bounds[i][1] = None
-		print bounds
-		result = op.minimize(nll, p, args=(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1]), bounds=bounds, method='L-BFGS-B', options={'gtol': 1e-30, 'disp': False, 'maxiter': 4000})
+		print(bounds)
+		result = op.minimize(nll, p, args=(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1]), bounds=bounds, method='L-BFGS-B')#, options={'gtol': 1e-30, 'disp': False, 'maxiter': 4000})
 		maxlikelihood = result["x"]
-		print "Done"
-		print m.params
-		print maxlikelihood
-		print result['success']
-		print result['message']
+		print("Done")
+		print(m.params)
+		print(maxlikelihood)
+		print(result['success'])
+		print(result['message'])
 
-		# Generate the model and plot it
-		if nosync == False:
-			model_sync = synchrotron(const, x, 1.0, maxlikelihood[7], maxlikelihood[8])
-			plt.plot(x, model_sync, 'r')
-		if nofreefree == False:
-			model_freefree = freefree(const, x, maxlikelihood[0], maxlikelihood[1], solid_angle)
-			plt.plot(x, model_freefree, 'b')
-		if nodust == False:
-			model_dust1 = thermaldust(const, x, maxlikelihood[2], maxlikelihood[3], maxlikelihood[4], const['dust_optical_depth_freq'], solid_angle)
-			plt.plot(x, model_dust1, 'g')#, freqs, fd, 'g')
-		if nodust2 == False:
-			model_dust2 = thermaldust(const, x, maxlikelihood[10], maxlikelihood[11], maxlikelihood[12], const['dust_optical_depth_freq'], solid_angle)
-			plt.plot(x, model_dust2, 'y')#, freqs, fd, 'g')
-
-		model_overall = spectrum(maxlikelihood, x=x)
-		plt.plot(x, model_overall, 'black')
-		# Add the data to the plot
-		plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-		if badvals:
-			plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
-
-		# Formatting, and output
-		plt.title(srcname)
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.xlabel('Frequency (GHz)')
-		plt.ylabel('Flux density (Jy)')
-		plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
-		plt.savefig(outdir+srcname+'_likelihood.pdf')
-		plt.close()
+		plot_results(outdir+srcname+'_likelihood.pdf',srcname,minfreq,maxfreq,maxlikelihood,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
+		write_results(outdir+srcname+"_likelihood.txt",srcname,freqs,fd,fd_err,maxlikelihood,np.zeros(len(maxlikelihood)))
 
 		# Let's do some MCMC fitting!
 		ndim = num_params
@@ -400,61 +403,65 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 
 
 		# samples[:, 2] = np.exp(samples[:, 2])
-		vals = np.array(map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+		p1,p2,p3,p4,p5,p6,p7,p8,p9,p10 = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                              zip(*np.percentile(samples, [16, 50, 84],
-                                                axis=0))))
-		print vals
+                                                axis=0)))
+		vals = np.zeros(num_params)
+		vals[0] = p1[0]
+		vals[1] = p2[0]
+		vals[2] = p3[0]
+		vals[3] = p4[0]
+		vals[4] = p5[0]
+		vals[5] = p6[0]
+		vals[6] = p7[0]
+		vals[7] = p8[0]
+		vals[8] = p9[0]
+		vals[9] = p10[0]
+		# vals[10] = p11[0]
+		# vals[11] = p12[0]
+		# vals[12] = p13[0]
+		errs = np.zeros(num_params)
+		errs[0] = p1[1]
+		errs[1] = p2[1]
+		errs[2] = p3[1]
+		errs[3] = p4[1]
+		errs[4] = p5[1]
+		errs[5] = p6[1]
+		errs[6] = p7[1]
+		errs[7] = p8[1]
+		errs[8] = p9[1]
+		errs[9] = p10[1]
+		# errs[10] = p11[1]
+		# errs[11] = p12[1]
+		# errs[12] = p13[1]
+		print(errs)
+		# print(m_mcmc)
+		# print(b_mcmc)
+		# print(f_mcmc)
+		# print(vals)
+		# print(np.shape(vals))
 		# exit()
-		# plot_range = []
-		# for i in range(0,num_params):
-		# 	if parinfo[i]['fixed'] == 1:
-		# 		plot_range.append((0.99*p[i], 1.01*p[i]))
-		# 	else:
-		# 		plot_range.append(None)#0.999)
-		# 		# plot_range[i][1] = max(samples[:,i])
-		# print plot_range
-		fig = corner.corner(samples, labels=['EM', 'Te', 'Damp', 'Dalph', 'Dtemp', 'SDamp', 'dTCMB','Samp','Salph','SDshift','Damp', 'Dalph', 'Dtemp'])#,range=plot_range)#,
+		plot_range = []
+		for i in range(0,num_params):
+			if parinfo[i]['fixed'] == 1:
+				if vals[i] == 0.0:
+					plot_range.append((-0.01, 0.01))
+				else:
+					plot_range.append((0.99*vals[i], 1.01*vals[i]))
+			elif vals[i] == 0.0:
+				plot_range.append((-0.01, 0.01))
+			else:
+				plot_range.append((np.min(samples[:,i]),np.max(samples[:,i])))
+				# plot_range.append((vals[i]-3.0*errs[i],vals[i]+3.0*errs[i]))
+				# plot_range[i][1] = max(samples[:,i])
+		print(plot_range)
+		fig = corner.corner(samples, labels=['EM', 'Te', 'Damp', 'Dalph', 'Dtemp', 'SDamp', 'dTCMB','Samp','Salph','SDshift'],range=plot_range,show_titles=True)#,'Damp', 'Dalph', 'Dtemp'
                       # truths=[m_true, b_true, np.log(f_true)])
 		fig.savefig(outdir+srcname+"_triangle.png")
 		plt.close()
 
-
-
-		###
-		# Plot out the model
-		###
-
-		# Generate the model and plot it
-		if nosync == False:
-			model_sync = synchrotron(const, x, 1.0, vals[7,0], vals[8,0])
-			plt.plot(x, model_sync, 'r')
-		if nofreefree == False:
-			model_freefree = freefree(const, x, vals[0,0], vals[1,0], solid_angle)
-			plt.plot(x, model_freefree, 'b')
-		if nodust == False:
-			model_dust1 = thermaldust(const, x, vals[2,0], vals[3,0], vals[4,0], const['dust_optical_depth_freq'], solid_angle)
-			plt.plot(x, model_dust1, 'g')#, freqs, fd, 'g')
-		if nodust2 == False:
-			model_dust2 = thermaldust(const, x, vals[10,0], vals[11,0], vals[12,0], const['dust_optical_depth_freq'], solid_angle)
-			plt.plot(x, model_dust2, 'y')#, freqs, fd, 'g')
-
-		model_overall = spectrum(vals[:,0], x=x)
-		plt.plot(x, model_overall, 'black')
-		# Add the data to the plot
-		plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1])
-		if badvals:
-			plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
-
-		# Formatting, and output
-		plt.title(srcname)
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.xlabel('Frequency (GHz)')
-		plt.ylabel('Flux density (Jy)')
-		plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
-		plt.savefig(outdir+srcname+'_mcmc.pdf')
-		plt.close()
-
+		plot_results(outdir+srcname+'_mcmc.pdf',srcname,minfreq,maxfreq,vals,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
+		write_results(outdir+srcname+"_mcmc.txt",srcname,freqs,fd,fd_err,vals,errs)
 
 
 # That's all, folks!

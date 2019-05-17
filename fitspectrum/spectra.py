@@ -65,7 +65,7 @@ def freefree(const, freq, EM, Te, solid_angle, equation=1,comm=0):
 
 	if equation == 1:
 		# new equations from Draine (2011) book!
-		g_ff = np.log(np.exp(5.960 - (np.sqrt(3.0)/const['pi'])*np.log(freq*(Te/10000.0)**(-3.0/2.0))) + 2.71828)
+		g_ff = np.log(np.exp(5.960 - (np.sqrt(3.0)/np.pi)*np.log(freq*(Te/10000.0)**(-3.0/2.0))) + 2.71828)
 		tau_ff = 5.468e-2 * Te**(-1.5) * freq**(-2.0) * EM * g_ff
 		# tau_ff = 1.772d-2 * (Te)^(-1.5) * (freq)^(-2d) * EM * g_ff
 	elif equation == 2:
@@ -195,8 +195,8 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 	elif (units_in == 'Jy/pixel' or units_in == 'JY/PIXEL' or units_in == 'JY/PIX' or units_in == 'JyPix' or units_in == 'Jy/Pix' or units_in == 'none'):
 		factor_in = 1.0
 	else:
-		print 'Invalid unit conversion specified for convertunits (units_in='+str(units_in)+'). ***Returning 1.*** Please use one of the following available units:'
-		print unitslist
+		print('Invalid unit conversion specified for convertunits (units_in='+str(units_in)+'). ***Returning 1.*** Please use one of the following available units:')
+		print(unitslist)
 		return 1.0
 
 	if (units_in == 'none'):
@@ -218,8 +218,8 @@ def convertunits(const, units_in, units_out, frequency, pix_area=1.0):
 	elif (units_out == 'Jy/pixel' or units_out == 'JY/PIXEL' or units_out == 'JY/PIX' or units_out == 'JyPix' or units_out == 'Jy/Pix'):
 		factor_out = 1.0
 	else:
-		print 'Invalid unit conversion specified for convertunits (units_out='+str(units_out)+'). ***Returning 1.*** Please use one of the following available units:'
-		print unitslist
+		print('Invalid unit conversion specified for convertunits (units_out='+str(units_out)+'). ***Returning 1.*** Please use one of the following available units:')
+		print(unitslist)
 		return 1.0
 
 	# Return the ratio of the factors
