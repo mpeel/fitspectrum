@@ -27,16 +27,16 @@ import healpy as hp
 import scipy as sp
 import math as m
 import matplotlib.pyplot as plt
-from spectra import *
+from astrocode.fitspectrum.spectra import *
 import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False):
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600):
 	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
-		print "You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!"
+		print("You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
 		# exit()
 		return
 
@@ -52,7 +52,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	# 	print newheader
 	# else:
 	inputfits = fits.open(indir+inputfile)
-	print inputfits.info()
+	print(inputfits.info())
 	cols = inputfits[1].columns
 	col_names = cols.names
 	nmaps = len(cols)
@@ -62,8 +62,8 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	else:
 		for i in range(0,nmaps):
 			maps.append(inputfits[1].data.field(i))
-			print len(maps[i])
-	print len(maps[0])
+			print(len(maps[i]))
+	print(len(maps[0]))
 	# Check to see whether we have nested data, and switch to ring if that is the case.
 	if (inputfits[1].header['ORDERING'] == 'NESTED'):
 		maps = hp.reorder(maps,n2r=True)
@@ -72,7 +72,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 
 	# Do some cleanup of the new header to avoid issues later
 	try:
-		print newheader['TUNIT1']
+		print(newheader['TUNIT1'])
 	except:
 		for i in range(0,nmaps):
 			newheader['TUNIT'+str(i+1)] = 'None'
@@ -99,7 +99,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	newheader['TFIELDS'] = noutputmaps
 	newheader['NAXIS1'] = noutputmaps*4
 	nmaps = noutputmaps
-	print newheader
+	print(newheader)
 
 	# Calculate the unit conversion factor
 	const = get_spectrum_constants()
@@ -124,6 +124,32 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			conv_windowfunction[windowfunction==0] = 0.0
 		# Normalise window function
 		conv_windowfunction /= conv_windowfunction[0]
+		
+		conv_windowfunction_before = conv_windowfunction.copy()
+		# If needed, apply a taper
+		if taper:
+
+			conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
+			conv_windowfunction[lmax_taper:] = 0.0
+
+		# plt.xscale('linear')
+		# plt.yscale('log')
+		# plt.plot(windowfunction,label='Window function')
+		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside),label='Gaussian')
+		# plt.legend()
+		# plt.savefig(outdir+'wf_orig_'+outputfile+'.pdf')
+		# plt.clf()
+
+
+		# plt.xscale('linear')
+		# plt.yscale('linear')
+		# plt.ylim(0.0,1.0)
+		# plt.plot(conv_windowfunction,label='Window function')
+		# plt.plot(conv_windowfunction_before,label='Window function before')
+		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),len(windowfunction)-1)/windowfunction,label='Comparison')
+		# plt.legend()
+		# plt.savefig(outdir+'wf_lin_'+outputfile+'.pdf')
+		# plt.clf()
 
 		# Check whether we'll need to smooth variances too.
 		test = False
@@ -131,11 +157,11 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
 				test = True
 		if test:
-			print 'Covariance maps detected. Calculating variance window function (this may take a short while)'
+			print('Covariance maps detected. Calculating variance window function (this may take a short while)')
 			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
 			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
-			print conv_windowfunction_variance[0]
-			print 'Done! Onwards...'
+			print(conv_windowfunction_variance[0])
+			print('Done! Onwards...')
 
 			plt.xscale('log')
 			plt.yscale('log')
@@ -151,48 +177,52 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			plt.savefig(outdir+'wf_lin_'+outputfile+'.png')
 
 	# Do the smoothing
-	print "Smoothing the maps"
+	print("Smoothing the maps")
 	smoothed_map = maps
 	for i in range(0,nmaps):
-		print 'map ' + str(i)
+		print('map ' + str(i))
+		print(len(maps[i]))
+		map_before = maps[i][:].copy()
+		maps[i][maps[i][:] == hp.UNSEEN] = 0.0
 		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
 		if fwhm_arcmin != -1 and (i not in nosmooth):
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
-				print 'Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.'
-				print np.sum(maps[i])
-				print np.median(maps[i])
+				print('Column '+str(i)+' is an N_OBS map ('+newheader['TUNIT'+str(i+1)]+') - converting to variance map.')
+				print(np.sum(maps[i]))
+				print(np.median(maps[i]))
 				maps[i] = conv_nobs_variance_map(maps[i], sigma_0)
-				print np.sum(maps[i])
-				print np.median(maps[i])
+				print(np.sum(maps[i]))
+				print(np.median(maps[i]))
 				if (nobs_out == False and no_sigma_0 == False):
 					# We don't want to convert back later.
-					print 'test'
+					print('test')
 					newheader['TTYPE'+str(i+1)] = 'II_cov'
 					newheader['TUNIT'+str(i+1)] = '('+sigma_0_unit+')^2'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
 			alms = hp.map2alm(maps[i])
 			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
-				print 'Column '+str(i)+' is a covariance matrix ('+newheader['TUNIT'+str(i+1)]+') - smoothing appropriately.'
+				print('Column '+str(i)+' is a covariance matrix ('+newheader['TUNIT'+str(i+1)]+') - smoothing appropriately.')
 				alms = hp.almxfl(alms, conv_windowfunction_variance)
 			else:
 				alms = hp.almxfl(alms, conv_windowfunction)
 			newmap = hp.alm2map(alms, nside,verbose=False)
 			smoothed_map[i] = newmap
-			print np.sum(smoothed_map[i])
-			print np.median(smoothed_map[i])
+			print(np.sum(smoothed_map[i]))
+			print(np.median(smoothed_map[i]))
+			smoothed_map[i][map_before[:] == hp.UNSEEN] = hp.UNSEEN
 
 			if ('N_OBS' in newheader['TTYPE'+str(i+1)]) and (nobs_out or no_sigma_0):
-				print 'You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!'
-				print np.sum(smoothed_map[i])
+				print('You\'ve either asked for an N_OBS map to be returned, or not set sigma_0, so you will get an N_OBS map returned in your data!')
+				print(np.sum(smoothed_map[i]))
 				smoothed_map[i] = conv_nobs_variance_map(smoothed_map[i], sigma_0)
-				print np.sum(smoothed_map[i])
+				print(np.sum(smoothed_map[i]))
 				newheader['TTYPE'+str(i+1)] = 'N_OBS'
 	maps = 0
 	newmap = 0
 
 	# Do the ud_grading
-	print "ud_grading the maps (if needed)"
+	print("ud_grading the maps (if needed)")
 	nobs_sum = 0
 	if (nside_out == 0):
 		nside_out = nside
@@ -207,7 +237,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				power = 2.0
 			elif ('N_OBS' in newheader['TTYPE'+str(i+1)]) or ('Hits' in newheader['TTYPE'+str(i+1)]):
 				power = -2.0
-			print power
+			print(power)
 			smoothed_map[i] = hp.ud_grade(smoothed_map[i], nside_out=nside_out, power=power)
 
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
@@ -228,13 +258,13 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 						power = 2.0
 						unit = unit.replace(")^2",'').replace('(','')
 						newheader['TUNIT'+str(i+1)] = '('+units_out+")^2"
-					print unit + " " + str(power)
+					print(unit + " " + str(power))
 					conversion = convertunits(const, unit, units_out, frequency, pix_area)
-					print conversion
+					print(conversion)
 					smoothed_map[i] = smoothed_map[i] * conversion**power
 
 	# All done - now just need to write it to disk.
-	print "Writing maps to disk: " + outdir+outputfile
+	print("Writing maps to disk: " + outdir+outputfile)
 	cols = []
 	for i in range(0,nmaps):
 		if ('cov' in newheader['TTYPE'+str(i+1)]):
@@ -244,7 +274,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 
 	# If we want to subtract another map (e.g., a CMB map) then we need to read it in, check nside and units, and then subtract.
 	if subtractmap != '':
-		print 'Subtracting CMB map ' + subtractmap
+		print('Subtracting CMB map ' + subtractmap)
 		sub_inputfits = fits.open(indir+subtractmap)
 		sub_cols = sub_inputfits[1].columns
 		sub_col_names = sub_cols.names
@@ -292,7 +322,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 	bin_hdu.header['PIXTYPE']='HEALPIX'
 	bin_hdu.header['NSIDE']=nside_out
 	bin_hdu.header['COMMENT']="Smoothed using Mike Peel's smoothmap.py version "+ver +" modified by Adam Barr"
-	print bin_hdu.header
+	print(bin_hdu.header)
 	
 	bin_hdu.writeto(outdir+outputfile)
 
@@ -345,20 +375,34 @@ def calc_variance_windowfunction(conv_windowfunction):
 		conva[j] = np.sum((ll+0.5)*conv_windowfunction*lgndr[j,:])
 
 	conva = conva / (2.0*const['pi'])
-	print 'Peak of convolving beam is ' + str(conva[0]) + " (check: " + str(np.max(conva)) + ")"
+	print('Peak of convolving beam is ' + str(conva[0]) + " (check: " + str(np.max(conva)) + ")")
 
 	# Square convolving beam and convert back to window function
 	mult = sinrad*conva**2
 	cvbl = np.zeros(nbl)
-	print nbl
+	print(nbl)
 	for l in range(0,nbl):
 		cvbl[l] = int_tabulated(rad,mult*lgndr[:,l])
 
 	# Put in 2pi normalization factor:
 	cvbl = 2.0*const['pi']*cvbl
 
-	print 'Max in the window function is ' + str(cvbl[0]) + " (check: " + str(np.max(cvbl)) + ")"
+	print('Max in the window function is ' + str(cvbl[0]) + " (check: " + str(np.max(cvbl)) + ")")
 
 	return cvbl
+
+
+# Read in a Planck (HFI or LFI) beam
+def get_beam(FITSfile,hdu=0):
+	# fits.info(FITSfile) # print list of extensions found in FITSfile
+	data, header = fits.getdata(FITSfile, hdu, header=True) # read extension #10 (data and header)
+	# data, header = fits.getdata(FITSfile, 'ABC', header=True) # read extension having EXTNAME='ABC' (data and header)
+	# print(header) # print header
+	# print(data.names) # print column names
+	# pylab.plot( data.field(0).flatten() ) # plot 1st column of binary table
+	newdata = np.zeros(len(data))
+	for i in range(0,len(data)):
+		newdata[i] = data[i][0]
+	return newdata
 
 # EOF
