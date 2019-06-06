@@ -21,7 +21,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600):
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600):
     ver = "0.4"
 
     if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
@@ -52,6 +52,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
 
     if sigma_0 != 0.0:
         # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
+        maps[mapnumber][maps[mapnumber]<=0.0] = hp.UNSEEN
         maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
 
     # We want to sqrt it to get a noise rms map
@@ -68,7 +69,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['PIXTYPE']='HEALPIX'
     bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
-    bin_hdu.writeto(indir+"/"+runname+"_actualvariance.fits")
+    bin_hdu.writeto(outdir+"/"+runname+"_actualvariance.fits")
 
     # Also save the input nobs map, as a cross-check.
     cols = []
@@ -80,7 +81,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['PIXTYPE']='HEALPIX'
     bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
-    bin_hdu.writeto(indir+"/"+runname+"_actualnobs.fits")
+    bin_hdu.writeto(outdir+"/"+runname+"_actualnobs.fits")
 
     # Calculate the window function
     conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),4*nside_in)
@@ -104,12 +105,12 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     returnmap = np.zeros(numpixels)
     # print(np.min(noisemap))
     noisemap[map_before == hp.UNSEEN] = 0.0
-    hp.write_map(indir+"/"+runname+"_noisemap.fits",noisemap,overwrite=True)
-    alms = hp.map2alm(noisemap)#,lmax=4*nside_in)
-    alms = hp.almxfl(alms, conv_windowfunction)
-    newnoisemap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
-    hp.write_map(indir+"/"+runname+"_newnoisemap.fits",newnoisemap,overwrite=True)
-    exit()
+    hp.write_map(outdir+"/"+runname+"_noisemap.fits",noisemap,overwrite=True)
+    # alms = hp.map2alm(noisemap)#,lmax=4*nside_in)
+    # alms = hp.almxfl(alms, conv_windowfunction)
+    # newnoisemap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
+    # hp.write_map(outdir+"/"+runname+"_newnoisemap.fits",newnoisemap,overwrite=True)
+    # exit()
     for i in range(0,numrealisations):
         if i%10==0:
             print(i)
@@ -133,7 +134,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['PIXTYPE']='HEALPIX'
     bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-    bin_hdu.writeto(indir+"/"+runname+"_variance.fits")
+    bin_hdu.writeto(outdir+"/"+runname+"_variance.fits")
 
     # Also do an Nobs map for a consistency check.
     nobs_map = conv_nobs_variance_map(returnmap, sigma_0)
@@ -146,7 +147,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
     bin_hdu.header['PIXTYPE']='HEALPIX'
     bin_hdu.header['NSIDE']=nside_in
     bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-    bin_hdu.writeto(indir+"/"+runname+"_nobs.fits")
+    bin_hdu.writeto(outdir+"/"+runname+"_nobs.fits")
 
     # Do ud_graded versions
     num_nside = len(nside)
@@ -164,7 +165,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['PIXTYPE']='HEALPIX'
         bin_hdu.header['NSIDE']=nside[i]
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_variance.fits")
+        bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_variance.fits")
 
         # Also do an Nobs map for a consistency check.
         nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
@@ -177,7 +178,7 @@ def smoothnoisemap(indir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisati
         bin_hdu.header['PIXTYPE']='HEALPIX'
         bin_hdu.header['NSIDE']=nside[i]
         bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(indir+"/"+str(nside[i])+"_"+runname+"_nobs.fits")
+        bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_nobs.fits")
 
 
 
