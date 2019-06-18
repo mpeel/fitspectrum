@@ -32,7 +32,7 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600):
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False):
 	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
@@ -128,9 +128,17 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		conv_windowfunction_before = conv_windowfunction.copy()
 		# If needed, apply a taper
 		if taper:
-
 			conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
 			conv_windowfunction[lmax_taper:] = 0.0
+		if cap_one:
+			conv_windowfunction[conv_windowfunction >= 1.0] = 1.0
+		if cap_oneall:
+			trip = 0
+			for l in range(0,len(conv_windowfunction)):
+				if trip == 1:
+					conv_windowfunction[l] = 1.0
+				elif conv_windowfunction >= 1.0:
+					trip = 1
 
 		# plt.xscale('linear')
 		# plt.yscale('log')
