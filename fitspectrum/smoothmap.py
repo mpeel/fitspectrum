@@ -18,6 +18,7 @@
 # v0.9d Mike Peel   01 Oct 2017   Input/output dir improvements. Fix bug in beam window functions.
 # v1.0  Mike Peel   06 Oct 2017   Version 1.0. Add option to append maps (e.g. MC output)
 # v1.1  Mike Peel   09 Oct 2017   Add CMB subtraction
+# v1.2  Mike Peel   04 Jul 2019   Multiple options for window function tapering, min/max map values
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -32,7 +33,7 @@ import astropy.io.fits as fits
 from scipy import special
 import os.path
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False):
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0]):
 	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
@@ -192,6 +193,13 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		print(len(maps[i]))
 		map_before = maps[i][:].copy()
 		maps[i][maps[i][:] == hp.UNSEEN] = 0.0
+
+		# See if we want to cut based on min/max map values
+		if minmapvalue != maxmapvalue:
+			if i in minmaxmaps:
+				maps[i][maps[i][:] < minmapvalue] = 0.0
+				maps[i][maps[i][:] > maxmapvalue] = 0.0
+
 		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
 		if fwhm_arcmin != -1 and (i not in nosmooth):
 			if 'N_OBS' in newheader['TTYPE'+str(i+1)]:
