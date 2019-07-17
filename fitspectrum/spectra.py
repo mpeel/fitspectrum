@@ -164,8 +164,7 @@ def paraobla(freq, coeff1, coeff2, coeff3):
 	return S
  
 def planckcorr(const, nu_ghz):
-	nu = nu_ghz * 1.0e9
-	x = const['h'] * nu / (const['k'] * const['tcmb'])
+	x = const['h'] * np.asarray(nu_ghz) * 1.0e9 / (const['k'] * const['tcmb'])
 	value = (np.exp(x)-1.0)**2.0 / (x**2. * np.exp(x))
 	return value
 
