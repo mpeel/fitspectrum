@@ -36,14 +36,14 @@ def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/s
 
 	for i in range(0,nummaps):
 		if maps[i][2] != res:
-			print "Hello!"
+			print("Hello!")
 			newfilename = maps[i][0][:-5]+'_'+str(nside)+"_"+str(res)+".fits"
 			smoothmap(maps[i][0],newfilename, np.sqrt((float(res)/60.0)**2-(float(maps[i][2]))**2),pol=pol,nside_out=nside)
 			maps[i][0] = newfilename
 
-		print maps[i][0]
-		print maps[i][3]
-		print maps[i][4]
+		print(maps[i][0])
+		print(maps[i][3])
+		print(maps[i][4])
 		mapdata_temp = hp.read_map(maps[i][0], maps[i][4],hdu=maps[i][3])
 		if maps[i][1] != nside:
 			mapdata_temp = hp.ud_grade(mapdata_temp, nside)
