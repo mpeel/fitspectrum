@@ -193,7 +193,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		print(len(maps[i]))
 		map_before = maps[i][:].copy()
 		maps[i][maps[i][:] == hp.UNSEEN] = 0.0
-
+		maps[i][~np.isfinite(maps[i][:])] = 0.0
 		# See if we want to cut based on min/max map values
 		if minmapvalue != maxmapvalue:
 			if i in minmaxmaps:
