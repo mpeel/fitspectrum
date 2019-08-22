@@ -167,7 +167,8 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 				test = True
 		if test:
 			print('Covariance maps detected. Calculating variance window function (this may take a short while)')
-			conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
+			conv_windowfunction_variance = conv_windowfunction.copy()
+			# conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
 			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
 			print(conv_windowfunction_variance[0])
 			print('Done! Onwards...')
