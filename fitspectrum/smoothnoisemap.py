@@ -107,7 +107,7 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
     if taper_gauss:
         trip = 0
         val = 0
-        beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
+        beam1 = hp.gauss_beam(np.radians(fwhm/60.0),3*nside)
         param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
         beam2 = hp.gauss_beam(np.radians(param_est[0]/60.0),3*nside)
         # plt.plot(windowfunction[0:301])
