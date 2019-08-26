@@ -26,7 +26,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False):
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,hdu=1):
     ver = "0.4"
 
     if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
@@ -37,7 +37,7 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
     # Read in the input map
     print(indir+'/'+inputmap)
     inputfits = fits.open(indir+"/"+inputmap)
-    cols = inputfits[1].columns
+    cols = inputfits[hdu].columns
     col_names = cols.names
     nmaps = len(cols)
     maps = []
@@ -45,7 +45,7 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
         maps = hp.read_map(indir+inputmap,field=None)
     else:
         for i in range(0,nmaps):
-            maps.append(inputfits[1].data.field(i))
+            maps[hdu].append(inputfits[1].data.field(i))
     nside_in = hp.get_nside(maps)
 
     # Check to see whether we have nested data, and switch to ring if that is the case.
