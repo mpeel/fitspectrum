@@ -32,8 +32,13 @@ from astrocode.fitspectrum.spectra import *
 import astropy.io.fits as fits
 from scipy import special
 import os.path
+from scipy import optimize
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0]):
+def gaussfit(x, param):
+	return hp.gauss_beam(np.radians(param/60.0),300)
+
+
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False):
 	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
@@ -138,27 +143,53 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			for l in range(0,len(conv_windowfunction)):
 				if trip == 1:
 					conv_windowfunction[l] = 1.0
-				elif conv_windowfunction >= 1.0:
+				elif conv_windowfunction[l] >= 1.0:
 					trip = 1
+		if taper_gauss:
+			trip = 0
+			val = 0
+			beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
+			param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
+			beam2 = hp.gauss_beam(np.radians(param_est[0]/60.0),3*nside)
+			# plt.plot(windowfunction[0:301])
+			# plt.plot(beam2)
+			# plt.savefig(outdir+'temp.pdf')
+			print(param_est[0])
+			# exit()
+			for l in range(1,len(conv_windowfunction)):
+				if trip == 1:
+					# conv_windowfunction[l] = val * np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
+					conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+				elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
+					print(l)
+					trip = 1
+					# val = conv_windowfunction[l]/np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
+					val = conv_windowfunction[l-1]/(beam1[l-1]/beam2[l-1])
+					conv_windowfunction[l] = val * (beam1[l]/beam2[l])
 
-		# plt.xscale('linear')
-		# plt.yscale('log')
-		# plt.plot(windowfunction,label='Window function')
-		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside),label='Gaussian')
-		# plt.legend()
-		# plt.savefig(outdir+'wf_orig_'+outputfile+'.pdf')
-		# plt.clf()
+
+		plt.xscale('linear')
+		plt.yscale('log')
+		plt.plot(windowfunction,label='Window function')
+		plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside),label='Gaussian')
+		plt.legend()
+		plt.savefig(outdir+'wf_orig_'+outputfile+'.pdf')
+		plt.clf()
 
 
-		# plt.xscale('linear')
-		# plt.yscale('linear')
-		# plt.ylim(0.0,1.0)
-		# plt.plot(conv_windowfunction,label='Window function')
-		# plt.plot(conv_windowfunction_before,label='Window function before')
-		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),len(windowfunction)-1)/windowfunction,label='Comparison')
-		# plt.legend()
-		# plt.savefig(outdir+'wf_lin_'+outputfile+'.pdf')
-		# plt.clf()
+		plt.xscale('linear')
+		plt.yscale('linear')
+		plt.ylim(0.0,1.0)
+		plt.plot(conv_windowfunction,label='Window function')
+		plt.plot(conv_windowfunction_before,label='Window function before')
+		plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),len(windowfunction)-1)/windowfunction,label='Comparison')
+		plt.legend()
+		plt.savefig(outdir+'wf_lin_'+outputfile+'.pdf')
+		plt.yscale('log')
+		plt.ylim(1e-8,1e4)
+		plt.savefig(outdir+'wf_log_'+outputfile+'.pdf')
+		plt.clf()
+		# return
 
 		# Check whether we'll need to smooth variances too.
 		test = False

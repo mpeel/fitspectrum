@@ -14,6 +14,11 @@ import healpy as hp
 from astrocode.fitspectrum.smoothmap import smoothmap, conv_nobs_variance_map
 import astropy.io.fits as fits
 import os
+from scipy import optimize
+
+def gaussfit(x, param):
+    return hp.gauss_beam(np.radians(param/60.0),300)
+
 
 def noiserealisation(inputmap, numpixels):
     newmap = np.zeros(numpixels)
@@ -21,7 +26,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600):
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False):
     ver = "0.4"
 
     if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
@@ -99,6 +104,27 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
     if taper:
         conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
         conv_windowfunction[lmax_taper:] = 0.0
+    if taper_gauss:
+        trip = 0
+        val = 0
+        beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
+        param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
+        beam2 = hp.gauss_beam(np.radians(param_est[0]/60.0),3*nside)
+        # plt.plot(windowfunction[0:301])
+        # plt.plot(beam2)
+        # plt.savefig(outdir+'temp.pdf')
+        print(param_est[0])
+        # exit()
+        for l in range(1,len(conv_windowfunction)):
+            if trip == 1:
+                # conv_windowfunction[l] = val * np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
+                conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+            elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
+                print(l)
+                trip = 1
+                # val = conv_windowfunction[l]/np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
+                val = conv_windowfunction[l-1]/(beam1[l-1]/beam2[l-1])
+                conv_windowfunction[l] = val * (beam1[l]/beam2[l])
 
     # Now generate the noise realisations
     numpixels = len(noisemap)
