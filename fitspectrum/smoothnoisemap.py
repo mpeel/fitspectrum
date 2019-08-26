@@ -45,11 +45,11 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
         maps = hp.read_map(indir+inputmap,field=None)
     else:
         for i in range(0,nmaps):
-            maps[hdu].append(inputfits[1].data.field(i))
+            maps.append(inputfits[hdu].data.field(i))
     nside_in = hp.get_nside(maps)
 
     # Check to see whether we have nested data, and switch to ring if that is the case.
-    if (inputfits[1].header['ORDERING'] == 'NESTED'):
+    if (inputfits[hdu].header['ORDERING'] == 'NESTED'):
         maps = hp.reorder(maps,n2r=True)
 
     maps[mapnumber][maps[mapnumber]<-1e10] = hp.UNSEEN
