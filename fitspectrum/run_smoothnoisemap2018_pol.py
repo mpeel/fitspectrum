@@ -40,7 +40,7 @@ beamtf_p70 = hp.fitsfunc.mrdfits(directory+'planck2018/LFI_RIMO_R3.31.fits',hdu=
 beamtf_p70 = beamtf_p70[0]
 
 beamtf_p100 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
-print len(beamtf_p100)
+print(len(beamtf_p100))
 beamtf_p143 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
 beamtf_p217 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
 beamtf_p353 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
