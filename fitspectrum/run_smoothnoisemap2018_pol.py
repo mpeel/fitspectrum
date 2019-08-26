@@ -3,7 +3,7 @@ import numpy as np
 import healpy as hp
 import astropy.io.fits as fits
 
-from smoothmap import smoothmap
+from smoothmap import *
 import numpy as np
 import healpy as hp
 import astropy.io.fits as fits
@@ -26,21 +26,18 @@ numrealisations=5
 directory = '/scratch1/mpeel/maps/'
 outdirectory = directory+"wmap9_planck2018_tqu_noisetest/"
 
+
 beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Ka = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Q = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
 beamtf_V = np.loadtxt(directory+'wmap9/wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
 beamtf_W = np.loadtxt(directory+'wmap9/wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
-beamtf_p30 = hp.fitsfunc.mrdfits(directory+'planck2018/LFI_RIMO_R3.31.fits',hdu=28)
-beamtf_p30 = beamtf_p30[0]
-beamtf_p44 = hp.fitsfunc.mrdfits(directory+'planck2018/LFI_RIMO_R3.31.fits',hdu=29)
-beamtf_p44 = beamtf_p44[0]
-beamtf_p70 = hp.fitsfunc.mrdfits(directory+'planck2018/LFI_RIMO_R3.31.fits',hdu=30)
-beamtf_p70 = beamtf_p70[0]
+beamtf_p30 = get_beam(directory+'planck2018/LFI_RIMO_R3.31.fits',28)
+beamtf_p44 = get_beam(directory+'planck2018/LFI_RIMO_R3.31.fits',29)
+beamtf_p70 = get_beam(directory+'planck2018/LFI_RIMO_R3.31.fits',30)
 
 beamtf_p100 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_100x100.fits')
-print(len(beamtf_p100))
 beamtf_p143 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_143x143.fits')
 beamtf_p217 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_217x217.fits')
 beamtf_p353 = get_hfi_beam(directory+'planck2018/BeamWf_HFI_R3.01/Bl_T_R3.01_fullsky_353x353.fits')
