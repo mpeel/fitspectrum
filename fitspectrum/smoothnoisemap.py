@@ -26,7 +26,7 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,tapergauss=False):
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False):
     ver = "0.4"
 
     if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
