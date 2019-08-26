@@ -35,6 +35,7 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
         return
 
     # Read in the input map
+    print(indir+'/'+inputmap)
     inputfits = fits.open(indir+"/"+inputmap)
     cols = inputfits[1].columns
     col_names = cols.names
