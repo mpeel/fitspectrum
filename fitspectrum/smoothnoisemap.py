@@ -58,7 +58,7 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
 
     if sigma_0 != 0.0:
         # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
-        maps[mapnumber][maps[mapnumber]<=0.0] = hp.UNSEEN
+        # maps[mapnumber][maps[mapnumber]<=0.0] = hp.UNSEEN
         maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
 
     # We want to sqrt it to get a noise rms map
