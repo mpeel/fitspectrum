@@ -38,7 +38,7 @@ def gaussfit(x, param):
 	return hp.gauss_beam(np.radians(param/60.0),300)
 
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False):
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False,taper_gauss_sigma=0.0):
 	ver = "1.2"
 
 	if (os.path.isfile(outdir+outputfile)):
@@ -150,11 +150,13 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			val = 0
 			beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
 			param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
-			beam2 = hp.gauss_beam(np.radians(param_est[0]/60.0),3*nside)
+			print(param_est[0])
+			if taper_gauss_sigma == 0:
+				taper_gauss_sigma = param_est[0]
+			beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
 			# plt.plot(windowfunction[0:301])
 			# plt.plot(beam2)
 			# plt.savefig(outdir+'temp.pdf')
-			print(param_est[0])
 			# exit()
 			for l in range(1,len(conv_windowfunction)):
 				if trip == 1:
