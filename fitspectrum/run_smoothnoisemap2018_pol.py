@@ -55,27 +55,27 @@ for i in range(0,numres):
 			sigma_0 = 1.429
 		else:
 			sigma_0 = 1.435
-		smoothnoisemap(directory+'/wmap9/', outdirectory, 'wmap_K_'+str(output_resolution[i])+'_'+str(mapnumbers[m]), 'wmap_band_iqumap_r9_9yr_K_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_K,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_22.8_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_K_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_K,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 		if m == 0:
 			sigma_0 = 1.466
 		else:
 			sigma_0 = 1.472
-		smoothnoisemap(directory+'/wmap9/', outdirectory, 'wmap_Ka_'+str(output_resolution[i])+'_'+str(mapnumbers[m]), 'wmap_band_iqumap_r9_9yr_Ka_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Ka,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_33.0_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Ka_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Ka,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 		if m == 0:
 			sigma_0 = 2.188
 		else:
 			sigma_0 = 2.197
-		smoothnoisemap(directory+'/wmap9/', outdirectory, 'wmap_Q_'+str(output_resolution[i])+'_'+str(mapnumbers[m]), 'wmap_band_iqumap_r9_9yr_Q_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Q,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_40.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Q_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Q,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 		if m == 0:
 			sigma_0 = 3.131
 		else:
 			sigma_0 = 3.141
-		smoothnoisemap(directory+'/wmap9/', outdirectory, 'wmap_V_'+str(output_resolution[i])+'_'+str(mapnumbers[m]), 'wmap_band_iqumap_r9_9yr_V_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_V,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_60.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_V_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_V,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 		if m == 0:
 			sigma_0 = 6.544
 		else:
 			sigma_0 = 6.560
-		smoothnoisemap(directory+'/wmap9/', outdirectory, 'wmap_W_'+str(output_resolution[i])+'_'+str(mapnumbers[m]), 'wmap_band_iqumap_r9_9yr_W_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_W,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_93.5_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_W_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_W,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 
 mapnumbers = [4,5,6,7,8,9]
 
