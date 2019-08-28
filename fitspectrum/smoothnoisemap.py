@@ -8,7 +8,7 @@
 # Mike Peel    04 Oct 2017    Optimising and debugging. Added multiple nside support.
 # Mike Peel    06 Oct 2017    Return to older variance calculation, add rescale param and change output name format
 # Mike Peel    05 Jun 2019    v0.4 Add taper, cope with cut sky maps
-
+# Mike Peel    28 Aug 2019    v0.5 Add taper_gauss, normalise, hdu
 import numpy as np
 import healpy as hp
 from astrocode.fitspectrum.smoothmap import smoothmap, conv_nobs_variance_map
@@ -26,8 +26,8 @@ def noiserealisation(inputmap, numpixels):
     return newmap
 
 
-def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,hdu=1):
-    ver = "0.4"
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,hdu=1):
+    ver = "0.5"
 
     if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
         print("You already have a file with the output name " + indir+"/"+runname+"_actualvariance.fits" + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
@@ -100,7 +100,8 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
             windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
         conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
         conv_windowfunction[windowfunction==0] = 0.0
-    conv_windowfunction /= conv_windowfunction[0]
+    if normalise:
+        conv_windowfunction /= conv_windowfunction[0]
     # If needed, apply a taper
     if taper:
         conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
@@ -108,24 +109,28 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
     if taper_gauss:
         trip = 0
         val = 0
-        beam1 = hp.gauss_beam(np.radians(fwhm/60.0),len(conv_windowfunction))
-        param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
-        beam2 = hp.gauss_beam(np.radians(param_est[0]/60.0),len(conv_windowfunction))
+        # If we haven't been given a FWHM, estimate it from the data at l<300
+        if taper_gauss_sigma == 0:
+            beam1 = hp.gauss_beam(np.radians(fwhm/60.0),len(conv_windowfunction))
+            param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
+            print(param_est[0])
+            taper_gauss_sigma = param_est[0]
+        # beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
         # plt.plot(windowfunction[0:301])
         # plt.plot(beam2)
         # plt.savefig(outdir+'temp.pdf')
-        print(param_est[0])
         # exit()
+        sigma_final = np.radians(fwhm/60.0)/np.sqrt(8*np.log(2))
+        sigma_current = np.radians(taper_gauss_sigma/60.0)/np.sqrt(8*np.log(2))
         for l in range(1,len(conv_windowfunction)):
             if trip == 1:
-                # conv_windowfunction[l] = val * np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
-                conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+                conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
             elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
                 print(l)
                 trip = 1
-                # val = conv_windowfunction[l]/np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
-                val = conv_windowfunction[l-1]/(beam1[l-1]/beam2[l-1])
-                conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+                val = conv_windowfunction[l-1]/np.exp(-0.5*(sigma_final**2-sigma_current**2)*(l-1)*((l-1)+1))
+                conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
+
 
     # Now generate the noise realisations
     numpixels = len(noisemap)

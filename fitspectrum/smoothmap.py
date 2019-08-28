@@ -19,6 +19,7 @@
 # v1.0  Mike Peel   06 Oct 2017   Version 1.0. Add option to append maps (e.g. MC output)
 # v1.1  Mike Peel   09 Oct 2017   Add CMB subtraction
 # v1.2  Mike Peel   04 Jul 2019   Multiple options for window function tapering, min/max map values
+# v1.3  Mike Peel   28 Aug 2019   Gaussian taper, options for normalising wf and unseen vs. 0 in map
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -38,8 +39,8 @@ def gaussfit(x, param):
 	return hp.gauss_beam(np.radians(param/60.0),300)
 
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False,taper_gauss_sigma=0.0):
-	ver = "1.2"
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,useunseen=False):
+	ver = "1.3"
 
 	if (os.path.isfile(outdir+outputfile)):
 		print("You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
@@ -129,7 +130,8 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 			conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
 			conv_windowfunction[windowfunction==0] = 0.0
 		# Normalise window function
-		conv_windowfunction /= conv_windowfunction[0]
+		if normalise:
+			conv_windowfunction /= conv_windowfunction[0]
 		
 		conv_windowfunction_before = conv_windowfunction.copy()
 		# If needed, apply a taper
@@ -148,26 +150,30 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		if taper_gauss:
 			trip = 0
 			val = 0
-			beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
-			param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
-			print(param_est[0])
+			# If we haven't been given a FWHM, estimate it from the data at l<300
 			if taper_gauss_sigma == 0:
+				beam1 = hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside)
+				param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
+				print(param_est[0])
 				taper_gauss_sigma = param_est[0]
-			beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
+			# beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
 			# plt.plot(windowfunction[0:301])
 			# plt.plot(beam2)
 			# plt.savefig(outdir+'temp.pdf')
 			# exit()
+			sigma_final = np.radians(fwhm_arcmin/60.0)/np.sqrt(8*np.log(2))
+			sigma_current = np.radians(taper_gauss_sigma/60.0)/np.sqrt(8*np.log(2))
 			for l in range(1,len(conv_windowfunction)):
 				if trip == 1:
-					# conv_windowfunction[l] = val * np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
-					conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+					conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
+					# conv_windowfunction[l] = val * (beam1[l]/beam2[l])
 				elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
 					print(l)
 					trip = 1
-					# val = conv_windowfunction[l]/np.exp(-0.5*(np.radians(fwhm_arcmin/60.0)**2-np.radians(param_est[0]/60.0)**2)*l*(l+1))
-					val = conv_windowfunction[l-1]/(beam1[l-1]/beam2[l-1])
-					conv_windowfunction[l] = val * (beam1[l]/beam2[l])
+					val = conv_windowfunction[l-1]/np.exp(-0.5*(sigma_final**2-sigma_current**2)*(l-1)*((l-1)+1))
+					conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
+					# val = conv_windowfunction[l-1]/(beam1[l-1]/beam2[l-1])
+					# conv_windowfunction[l] = val * (beam1[l]/beam2[l])
 
 
 		plt.xscale('linear')
@@ -226,13 +232,21 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		print('map ' + str(i))
 		print(len(maps[i]))
 		map_before = maps[i][:].copy()
-		maps[i][maps[i][:] == hp.UNSEEN] = 0.0
-		maps[i][~np.isfinite(maps[i][:])] = 0.0
-		# See if we want to cut based on min/max map values
-		if minmapvalue != maxmapvalue:
-			if i in minmaxmaps:
-				maps[i][maps[i][:] < minmapvalue] = 0.0
-				maps[i][maps[i][:] > maxmapvalue] = 0.0
+		if useunseen == True:
+			maps[i][~np.isfinite(maps[i][:])] = hp.UNSEEN
+			# See if we want to cut based on min/max map values
+			if minmapvalue != maxmapvalue:
+				if i in minmaxmaps:
+					maps[i][maps[i][:] < minmapvalue] = hp.UNSEEN
+					maps[i][maps[i][:] > maxmapvalue] = hp.UNSEEN
+		else:
+			maps[i][maps[i][:] == hp.UNSEEN] = 0.0
+			maps[i][~np.isfinite(maps[i][:])] = 0.0
+			# See if we want to cut based on min/max map values
+			if minmapvalue != maxmapvalue:
+				if i in minmaxmaps:
+					maps[i][maps[i][:] < minmapvalue] = 0.0
+					maps[i][maps[i][:] > maxmapvalue] = 0.0
 
 		# Check that we actually want to do smoothing, as opposed to udgrading. Also check to see if this is in the list of maps to not smooth
 		if fwhm_arcmin != -1 and (i not in nosmooth):
