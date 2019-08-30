@@ -72,6 +72,11 @@ def galacticmask(nside, degrees):
 			mask[i] = 0
 	return mask
 
+# Create a set of masks for each nside=nside_mask pixel at nside_data resolution
+def nside_mask(nside_data, nside_mask):
+	pos = hp.pixelfunc.pix2ang(nside_data,range(0,hp.nside2npix(nside_data)))
+	return hp.pixelfunc.ang2pix(nside_mask,pos[0],pos[1])
+
 # Compute factor to convert from brightness temp to thermodynamic temp
 # INPUTS:
 #   nu_ghz -    frequency in GHz
