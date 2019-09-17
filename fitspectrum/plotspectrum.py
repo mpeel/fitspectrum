@@ -23,7 +23,7 @@ solid_angle = 1.0e-10 # For now
 
 def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],spd_file='amemodels/spdust2_wim.dat', minfreq=0, maxfreq=0, numxpoints=1000, ymin=0, ymax=0, nosync=False, nofreefree=False, noame=False, nocmb=False, nodust=False, nodust2=True, nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True):
 
-	ensure_dir(outdir)
+	# ensure_dir(outdir)
 
 	# Read in the spinning dust curve
 	spd_freq, spd_amp = np.loadtxt(spd_file, dtype=float,usecols=(0,1),comments=';',unpack=True)
@@ -40,7 +40,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		if mask_min[i][1] != nside:
 			maskmap_min_temp = hp.ud_grade(maskmap_min_temp, nside)
 		maskmap_min *= maskmap_min_temp
-	print 'Minimum mask: ' + str(100.0*(sum(maskmap_min[maskmap_min == 1]) / len(maskmap_min)))
+	print('Minimum mask: ' + str(100.0*(sum(maskmap_min[maskmap_min == 1]) / len(maskmap_min))))
 
 
 	# Read in the mask for the maximum values, and ud_grade it if needed
@@ -51,7 +51,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		if mask_max[i][1] != nside:
 			maskmap_max_temp = hp.ud_grade(maskmap_max_temp, nside)
 		maskmap_max *= maskmap_max_temp
-	print 'Maximum mask: ' + str(100.0*(sum(maskmap_max[maskmap_max == 1]) / len(maskmap_max)))
+	print('Maximum mask: ' + str(100.0*(sum(maskmap_max[maskmap_max == 1]) / len(maskmap_max))))
 
 	# Read in the maps, and smooth them if needed
 	nummaps = len(maps)
@@ -59,14 +59,14 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	maxvals = np.zeros(nummaps)
 	for i in range(0,nummaps):
 		if maps[i][2] != res:
-			print "Hello!"
+			print("Hello!")
 			newfilename = maps[i][0][:-5]+'_'+str(nside)+"_"+str(res)+".fits"
 			smoothmap(maps[i][0],newfilename, np.sqrt((float(res)/60.0)**2-(float(maps[i][2]))**2),pol=pol,nside_out=nside)
 			maps[i][0] = newfilename
 
-		print maps[i][0]
-		print maps[i][3]
-		print maps[i][4]
+		print(maps[i][0])
+		print(maps[i][3])
+		print(maps[i][4])
 		mapdata = hp.read_map(maps[i][0], maps[i][4],hdu=maps[i][3])
 		# if pol:
 		# 	mapdata = np.sqrt(mapdata[0]**2+mapdata[1]**2)
@@ -77,8 +77,8 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		minvals[maps[i][5]] = np.sqrt(np.mean(np.square(mapdata[maskmap_min == 1]))) / maps[i][6]
 		maxvals[maps[i][5]] = np.sqrt(np.mean(np.square(mapdata[maskmap_max == 1]))) / maps[i][6]
 
-	print minvals
-	print maxvals
+	print(minvals)
+	print(maxvals)
 
 	# # Generate the model and plot it
 	# if nodust == False:
@@ -135,10 +135,10 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		sync_spectrum_max = syncshifted_pol_comm(x, np.sqrt(maxvals[0]**2+maxvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label="Synchrotron")
 		
-		print minvals[2]
-		print minvals[3]
-		print maxvals[2]
-		print maxvals[3]
+		print(minvals[2])
+		print(minvals[3])
+		print(maxvals[2])
+		print(maxvals[3])
 		minvals[2] = 0.55/np.sqrt(2)
 		minvals[3] = 0.55/np.sqrt(2)
 		maxvals[2] = 0.7/np.sqrt(2)
@@ -164,9 +164,11 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 			plt.plot((freqbands[i][0], freqbands[i][1]), (ymin, ymax), freqbands[i][3], alpha=freqbands[i][4], lw=1.0,zorder=0,label=freqbands[i][2],linestyle=freqbands[i][5])
 
 	if legend == True:
-		l = plt.legend(prop={'size':11})
+		l = plt.legend(prop={'size':9})
+		# l = plt.legend(prop={'size':11})
 		l.set_zorder(20)
 	plt.savefig(outdir+name+'.pdf')
+	plt.savefig(outdir+name+'.png')
 	plt.close()
 
 	# outputfile = open(outdir+srcname+".dat", "w")
