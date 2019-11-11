@@ -52,23 +52,29 @@ def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/s
 	sync = np.zeros(npix)
 	ff = np.zeros(npix)
 	ame = np.zeros(npix)
+	ame1 = np.zeros(npix)
+	ame2 = np.zeros(npix)
 	cmb = np.zeros(npix)
 	thermaldust = np.zeros(npix)
 	total_fg = np.zeros(npix)
 	for i in range(0,npix-1):
 		sync[i] = syncshifted_comm(freq, mapdata[0][i], 4e-3, galprop_freq, galprop_amp)
 		ff[i] = freefree(const, freq, mapdata[1][i], mapdata[2][i], solid_angle, equation=1,comm=1)
-		ame[i] = spinningdust_comm(freq, mapdata[4][i], mapdata[5][i], spd_amp, spd_freq, 1) + spinningdust_comm(freq, mapdata[6][i], 33.35, spd_amp, spd_freq, 2)
+		ame1[i] = spinningdust_comm(freq, mapdata[4][i], mapdata[5][i], spd_amp, spd_freq, 1)
+		ame2[i] = spinningdust_comm(freq, mapdata[6][i], 33.35, spd_amp, spd_freq, 2)
+		ame[i] =  ame1[i] + ame2[i]
 		cmb[i] = cmb_comm(const, freq, mapdata[3][i])
 		thermaldust[i] = thermaldust_comm(const, freq, mapdata[7][i], mapdata[9][i], mapdata[8][i])
 		total_fg[i] = sync[i] + ff[i] + ame[i] + thermaldust[i]
 
-	hp.write_map(outdir+"commander_sync_"+str(freq)+".fits", sync*1e-3)
-	hp.write_map(outdir+"commander_freefree_"+str(freq)+".fits", ff*1e-3)
-	hp.write_map(outdir+"commander_ame_"+str(freq)+".fits", ame*1e-3)
-	hp.write_map(outdir+"commander_cmb_"+str(freq)+".fits", cmb*1e-3)
-	hp.write_map(outdir+"commander_thermaldust_"+str(freq)+".fits", thermaldust*1e-3)
-	hp.write_map(outdir+"commander_total_fg_"+str(freq)+".fits", total_fg*1e-3)
+	hp.write_map(outdir+"commander_sync_"+str(freq)+".fits", sync*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_freefree_"+str(freq)+".fits", ff*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_ame_"+str(freq)+".fits", ame*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_ame1_"+str(freq)+".fits", ame1*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_ame2_"+str(freq)+".fits", ame2*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_cmb_"+str(freq)+".fits", cmb*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_thermaldust_"+str(freq)+".fits", thermaldust*1e-3,overwrite=True)
+	hp.write_map(outdir+"commander_total_fg_"+str(freq)+".fits", total_fg*1e-3,overwrite=True)
 
 
 # That's all, folks!
