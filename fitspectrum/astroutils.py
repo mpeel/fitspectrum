@@ -322,7 +322,7 @@ def query_ellipse(nside, lon, lat, radius, abratio, angle, nest=False):
 # 06-Dec-2012  M. Peel		  Fix bug with noise_model always being set to 1
 # 14-May-2019  M. Peel        Convert to Python
 #
-def haperflux(inmap, freq, res_arcmin, lon, lat, aper_inner_radius, aper_outer_radius1, aper_outer_radius2, units, column=0, dopol=False, nested=False, noise_model=0, abratio=1.0, angle=0.0, silent=False):
+def haperflux(inmap, freq, res_arcmin, lon, lat, aper_inner_radius, aper_outer_radius1, aper_outer_radius2, units, column=0, dopol=False, nested=False, noise_model=0, abratio=1.0, angle=0.0, silent=False,quickplot=''):
 
 	# read in data
 	if isinstance(inmap, str) and not silent:
@@ -383,6 +383,15 @@ def haperflux(inmap, freq, res_arcmin, lon, lat, aper_inner_radius, aper_outer_r
 	# find pixels in the annulus (between outerradius1 and outeradius2) 
 	outerpix = list(set(outerpix2)-set(outerpix1))
 	nouterpix = len(outerpix)
+
+	if quickplot != '':
+		# Do a quick gnomview plot to show the aperture areas
+		plotmap = map[column].copy()
+		plotmap[outerpix] = plotmap[outerpix]*0.7
+		plotmap[innerpix] = plotmap[innerpix]*1.3
+		hp.gnomview(plotmap,rot=[lon,lat],reso=5)
+		plt.savefig(quickplot)
+		plt.clf()
 
 	bg_zero = 0
 	if len(outerpix) <= 1:
