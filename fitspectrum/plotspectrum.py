@@ -6,6 +6,7 @@
 # Version history:
 #
 # 15-Aug-2016  M. Peel       Started, for C-BASS project paper
+# 28-Jan-2020  M. Peel       Upgrade to handle C-BASS commander maps
 
 import numpy as np
 import scipy.optimize as op
@@ -21,13 +22,19 @@ const = get_spectrum_constants()
 solid_angle = 1.0e-10 # For now
 
 
-def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],spd_file='amemodels/spdust2_wim.dat', minfreq=0, maxfreq=0, numxpoints=1000, ymin=0, ymax=0, nosync=False, nofreefree=False, noame=False, nocmb=False, nodust=False, nodust2=True, nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True):
+def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],spd_file='amemodels/spdust2_wim.dat', galprop_file='', minfreq=0, maxfreq=0, numxpoints=1000, ymin=0, ymax=0, nosync=False, nofreefree=False, noame=False, nocmb=False, nodust=False, nodust2=True, nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True,othermask=[]):
 
 	# ensure_dir(outdir)
+	plt.style.use('classic')
+	plt.xticks(fontsize=17)
+	plt.yticks(fontsize=17)
 
+	const = get_spectrum_constants()
 	# Read in the spinning dust curve
-	spd_freq, spd_amp = np.loadtxt(spd_file, dtype=float,usecols=(0,1),comments=';',unpack=True)
-	galprop_freq, galprop_amp = np.loadtxt('commander2015/Synchrotron_template_GHz_extended.txt',dtype=float,usecols=(0,1),comments=";",unpack=True)
+	if spd_file != '':
+		spd_freq, spd_amp = np.loadtxt(spd_file, dtype=float,usecols=(0,1),comments=';',unpack=True)
+	if galprop_file != '':
+		galprop_freq, galprop_amp = np.loadtxt('commander2015/Synchrotron_template_GHz_extended.txt',dtype=float,usecols=(0,1),comments=";",unpack=True)
 
 	# Figure out the X range
 	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/float(numxpoints))
@@ -38,9 +45,13 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	for i in range(0,nummasks_min):
 		maskmap_min_temp = hp.read_map(mask_min[i][0], field=mask_min[i][2])
 		if mask_min[i][1] != nside:
+			print('udgrading to ' + str(nside))
 			maskmap_min_temp = hp.ud_grade(maskmap_min_temp, nside)
 		maskmap_min *= maskmap_min_temp
 	print('Minimum mask: ' + str(100.0*(sum(maskmap_min[maskmap_min == 1]) / len(maskmap_min))))
+	hp.mollview(maskmap_min)
+	plt.savefig(outdir+'mask_min.pdf')
+	plt.clf()
 
 
 	# Read in the mask for the maximum values, and ud_grade it if needed
@@ -49,15 +60,34 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	for i in range(0,nummasks_max):
 		maskmap_max_temp = hp.read_map(mask_max[i][0], field=mask_max[i][2])
 		if mask_max[i][1] != nside:
+			print('udgrading to ' + str(nside))
 			maskmap_max_temp = hp.ud_grade(maskmap_max_temp, nside)
 		maskmap_max *= maskmap_max_temp
 	print('Maximum mask: ' + str(100.0*(sum(maskmap_max[maskmap_max == 1]) / len(maskmap_max))))
+	hp.mollview(maskmap_max)
+	plt.savefig(outdir+'mask_max.pdf')
+	plt.clf()
+
+	maskmap_other = np.ones(hp.nside2npix(nside))
+	if len(othermask) > 0:
+		num = 1
+	else:
+		num = 0
+	for i in range(0,num):
+		maskmap_other = hp.read_map(othermask[0], field=othermask[2])
+		if othermask[1] != nside:
+			print('udgrading to ' + str(nside))
+			maskmap_other = hp.ud_grade(maskmap_other, nside)
+		hp.mollview(maskmap_other)
+		plt.savefig(outdir+'mask_other.pdf')
+		plt.clf()
 
 	# Read in the maps, and smooth them if needed
-	nummaps = len(maps)
+	nummaps = 11#len(maps)
 	minvals = np.zeros(nummaps)
 	maxvals = np.zeros(nummaps)
-	for i in range(0,nummaps):
+	for i in range(0,len(maps)):
+
 		if maps[i][2] != res:
 			print("Hello!")
 			newfilename = maps[i][0][:-5]+'_'+str(nside)+"_"+str(res)+".fits"
@@ -68,12 +98,48 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		print(maps[i][3])
 		print(maps[i][4])
 		mapdata = hp.read_map(maps[i][0], maps[i][4],hdu=maps[i][3])
+
+		hp.mollview(mapdata,norm='hist')
+		plt.savefig(maps[i][0].replace('.fits','_hist.pdf'))
+		plt.clf()
+		if np.min(mapdata[maskmap_min==1]) == 0:
+			minplot = 0
+		else:
+			minplot = -3.0*np.std(mapdata[maskmap_min==1])
+		hp.mollview(mapdata,min=minplot,max=3.0*np.std(mapdata[maskmap_min==1]))
+		plt.savefig(maps[i][0].replace('.fits','_std.pdf'))
+		plt.clf()
+
+		# Create some quick histograms
+		histrange_min = np.min(mapdata[maskmap_min==1])
+		histrange_max = np.max(mapdata[maskmap_min==1])
+		print(histrange_min)
+		print(histrange_max)
+		if histrange_min != histrange_max:
+			if histrange_max - histrange_min > 100 and histrange_min >= 0.0:
+				if histrange_min != 0:
+					print(np.abs(np.log10(histrange_max)-np.log10(histrange_min))/100.0)
+					bins = np.arange(np.log10(histrange_min),np.log10(histrange_max), np.abs(np.log10(histrange_max)-np.log10(histrange_min))/100.0)
+				else:
+					bins = np.arange(0,np.log10(histrange_max), np.abs(np.log10(histrange_max))/100.0)
+				plt.hist(np.log10(mapdata[maskmap_other==1]), bins=bins,label='Mean is ' + ("{0:.2f}".format(np.mean(mapdata[maskmap_other==1]))) + ', median ' + ("{0:.2f}".format(np.median(mapdata[maskmap_other==1]))) + ', std ' + ("{0:.2f}".format(np.std(mapdata[maskmap_other==1]))))
+				plt.xlabel('(log10)')
+			else:
+				bins = np.arange(histrange_min,histrange_max, (histrange_max-histrange_min)/100.0)
+				plt.hist(mapdata[maskmap_other==1], bins=bins,label='Mean is ' + ("{0:.2f}".format(np.mean(mapdata[maskmap_other==1]))) + ', median ' + ("{0:.2f}".format(np.median(mapdata[maskmap_other==1]))) + ', std ' + ("{0:.2f}".format(np.std(mapdata[maskmap_other==1]))))
+			plt.title(maps[i][0])
+			l = plt.legend(prop={'size':9})
+			# l = plt.legend(prop={'size':11})
+			l.set_zorder(20)
+			plt.savefig(maps[i][0].replace('.fits','_histogram.pdf'))
+			plt.clf()
+
 		# if pol:
 		# 	mapdata = np.sqrt(mapdata[0]**2+mapdata[1]**2)
 		if maps[i][1] != nside:
 			mapdata = hp.ud_grade(mapdata, nside)
 
-
+		print(maps[i][5])
 		minvals[maps[i][5]] = np.sqrt(np.mean(np.square(mapdata[maskmap_min == 1]))) / maps[i][6]
 		maxvals[maps[i][5]] = np.sqrt(np.mean(np.square(mapdata[maskmap_max == 1]))) / maps[i][6]
 
@@ -97,6 +163,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 
 	# Formatting, and output
 	plt.style.use('classic')
+	plt.figure(figsize=(7.2, 5.4), dpi=80)
 	plt.xscale('log')
 	plt.yscale('log')
 	plt.xlabel('Frequency (GHz)', fontsize=17)
@@ -106,28 +173,42 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	plt.xticks(fontsize=17)
 	plt.yticks(fontsize=17)
 	if pol == False:
-		sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
-		sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
-		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
+
+		sync_spectrum_min = 0
+		if galprop_file != '':
+			sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
+			sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
+			plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
+		elif minvals[10] != 0:
+			print(minvals[0])
+			sync_spectrum_min = synchrotron(const, x, 22.8, minvals[0], -minvals[10])
+			sync_spectrum_max = synchrotron(const, x, 22.8, maxvals[0], -maxvals[10])
+			print(sync_spectrum_min)
+			# exit(0)
+			plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
 
 		freefree_spectrum_min = freefree(const, x, minvals[1], minvals[2], solid_angle, equation=1,comm=1)
 		freefree_spectrum_max = freefree(const, x, maxvals[1], maxvals[2], solid_angle, equation=1,comm=1)
 		plt.fill_between(x, freefree_spectrum_min, freefree_spectrum_max,facecolor='blue',lw=0,zorder=9,label='Free-free')
 
-		ame_spectrum_min = spinningdust_comm(x, minvals[4], minvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, minvals[6], 33.35, spd_amp, spd_freq, 2)
-		ame_spectrum_max = spinningdust_comm(x, maxvals[4], maxvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, maxvals[6], 33.35, spd_amp, spd_freq, 2)
+		print(minvals[10])
+		print(minvals[5])
+		ame_spectrum_min = spinningdust_comm(x, minvals[4], minvals[5], spd_amp, spd_freq, 3)
+		ame_spectrum_max = spinningdust_comm(x, maxvals[4], maxvals[5], spd_amp, spd_freq, 3)
+		# ame_spectrum_min = spinningdust_comm(x, minvals[4], minvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, minvals[6], 33.35, spd_amp, spd_freq, 2)
+		# ame_spectrum_max = spinningdust_comm(x, maxvals[4], maxvals[5], spd_amp, spd_freq, 1) + spinningdust_comm(x, maxvals[6], 33.35, spd_amp, spd_freq, 2)
 		plt.fill_between(x, ame_spectrum_min, ame_spectrum_max,facecolor='gold',lw=0,zorder=9,label="AME")
 
 		cmb_spectrum_min = cmb_comm(const, x, minvals[3])
 		cmb_spectrum_max = cmb_comm(const, x, maxvals[3])
 		plt.fill_between(x, cmb_spectrum_min, cmb_spectrum_max,facecolor='k',lw=1.0,zorder=11,label='CMB')
 
-		thermaldust_spectrum_min = thermaldust_comm(const, x, minvals[7], minvals[9], minvals[8])
-		thermaldust_spectrum_max = thermaldust_comm(const, x, maxvals[7], maxvals[9], maxvals[8])
-		plt.fill_between(x, thermaldust_spectrum_min, thermaldust_spectrum_max,facecolor='r',lw=0,zorder=9,label='Thermal dust')
+		# thermaldust_spectrum_min = thermaldust_comm(const, x, minvals[7], minvals[9], minvals[8])
+		# thermaldust_spectrum_max = thermaldust_comm(const, x, maxvals[7], maxvals[9], maxvals[8])
+		# plt.fill_between(x, thermaldust_spectrum_min, thermaldust_spectrum_max,facecolor='r',lw=0,zorder=9,label='Thermal dust')
 
-		fd_min = sync_spectrum_min + freefree_spectrum_min + ame_spectrum_min + thermaldust_spectrum_min
-		fd_max = sync_spectrum_max + freefree_spectrum_max + ame_spectrum_max + thermaldust_spectrum_max
+		fd_min = sync_spectrum_min + freefree_spectrum_min + ame_spectrum_min# + thermaldust_spectrum_min
+		fd_max = sync_spectrum_max + freefree_spectrum_max + ame_spectrum_max# + thermaldust_spectrum_max
 		plt.plot(x, fd_min, 'k--',zorder=12,label='Total foreground')
 		plt.plot(x, fd_max, 'k--',zorder=12)
 	else:
