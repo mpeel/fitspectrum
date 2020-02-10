@@ -139,8 +139,8 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
 	for output_nside in nside:
 		numpixels.append(hp.nside2npix(output_nside))
 		returnmap.append(np.zeros(hp.nside2npix(output_nside)))
-	# numpixels = len(noisemap)
-	# returnmap = np.zeros(numpixels)
+	numpixels_orig = len(noisemap)
+	# returnmap = np.zeros(numpixels_orig)
 	# print(np.min(noisemap))
 	noisemap[map_before == hp.UNSEEN] = 0.0
 	hp.write_map(outdir+"/"+runname+"_noisemap.fits",noisemap,overwrite=True)
@@ -153,33 +153,33 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
 		if i%10==0:
 			print(i)
 		# Generate the noise realisation
-		newmap = noiserealisation(noisemap, numpixels)
+		newmap = noiserealisation(noisemap, numpixels_orig)
 		# smooth it
 		alms = hp.map2alm(newmap)#,lmax=4*nside_in)
 		alms = hp.almxfl(alms, conv_windowfunction)
 		newmap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
 		for j in range(0,num_nside):
-			newmap_udgrade = hp.ud_grade(newmap, output_nside[i], power=0)
+			newmap_udgrade = hp.ud_grade(newmap, nside[j], power=0)
 			returnmap[j][:] = returnmap[j][:] + np.square(newmap_udgrade)
 
 	for j in range(0,num_nside):
 		returnmap[j] = returnmap[j]/(numrealisations-1)
-		returnmap[j][map_before == hp.UNSEEN] = hp.UNSEEN
+		# returnmap[j][map_before == hp.UNSEEN] = hp.UNSEEN
 		
 		# All done - now just need to write it to disk.
 		cols = []
-		cols.append(fits.Column(name='II_cov', format='E', array=returnmap))
+		cols.append(fits.Column(name='II_cov', format='E', array=returnmap[j]))
 		cols = fits.ColDefs(cols)
 		bin_hdu = fits.BinTableHDU.from_columns(cols)
 		bin_hdu.header['ORDERING']='RING'
 		bin_hdu.header['POLCONV']='COSMO'
 		bin_hdu.header['PIXTYPE']='HEALPIX'
-		bin_hdu.header['NSIDE']=output_nside[j]
+		bin_hdu.header['NSIDE']=nside[j]
 		bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-		bin_hdu.writeto(outdir+"/"+runname+"_variance_"+str(output_nside[j])+".fits")
+		bin_hdu.writeto(outdir+"/"+runname+"_variance_"+str(nside[j])+".fits")
 
 		# Also do an Nobs map for a consistency check.
-		nobs_map = conv_nobs_variance_map(returnmap, sigma_0)
+		nobs_map = conv_nobs_variance_map(returnmap[j], sigma_0)
 		cols = []
 		cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
 		cols = fits.ColDefs(cols)
@@ -187,15 +187,15 @@ def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numr
 		bin_hdu.header['ORDERING']='RING'
 		bin_hdu.header['POLCONV']='COSMO'
 		bin_hdu.header['PIXTYPE']='HEALPIX'
-		bin_hdu.header['NSIDE']=nside_in
+		bin_hdu.header['NSIDE']=nside[j]
 		bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-		bin_hdu.writeto(outdir+"/"+runname+"_nobs_"+str(output_nside[j])+".fits")
+		bin_hdu.writeto(outdir+"/"+runname+"_nobs_"+str(nside[j])+".fits")
 
 	# Do ud_graded versions
 	num_nside = len(nside)
 	for i in range(0,num_nside):
 		# ud_grade it using power=0 (assuming correlated pixels)
-		returnmap_ud = hp.ud_grade(returnmap, nside[i], power=0)
+		returnmap_ud = hp.ud_grade(returnmap[0], nside[i], power=0)
 
 		# Output the variance map
 		cols = []
