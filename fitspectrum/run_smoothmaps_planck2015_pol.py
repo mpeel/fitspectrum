@@ -29,12 +29,9 @@ beamtf_V = np.loadtxt(directory+'wmap9/wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,
 beamtf_W = np.loadtxt(directory+'wmap9/wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
 
-beamtf_p30 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R2.50.fits',hdu=28)
-beamtf_p30 = beamtf_p30[0]
-beamtf_p44 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R2.50.fits',hdu=29)
-beamtf_p44 = beamtf_p44[0]
-beamtf_p70 = hp.fitsfunc.mrdfits(directory+'LFI_RIMO_R2.50.fits',hdu=30)
-beamtf_p70 = beamtf_p70[0]
+beamtf_p30 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',28)
+beamtf_p44 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',29)
+beamtf_p70 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',30)
 
 HFIbeams = fits.open(directory+'HFI_RIMO_Beams-100pc_R2.00.fits')
 beamtf_p100 = HFIbeams[3].data[0][0]
