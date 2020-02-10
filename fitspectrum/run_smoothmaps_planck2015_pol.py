@@ -33,7 +33,7 @@ beamtf_p30 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',28)
 beamtf_p44 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',29)
 beamtf_p70 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',30)
 
-HFIbeams = fits.open(directory+'HFI_RIMO_Beams-100pc_R2.00.fits')
+HFIbeams = fits.open(directory+'planck2015/HFI_RIMO_Beams-100pc_R2.00.fits')
 beamtf_p100 = HFIbeams[3].data[0][0]
 beamtf_p143 = HFIbeams[4].data[0][0]
 beamtf_p217 = HFIbeams[5].data[0][0]
