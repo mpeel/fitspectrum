@@ -22,10 +22,10 @@ def get_hfi_beam(FITSfile):
 
 output_resolution = [60.0]#,120.0,240.0]
 output_nside = [512, 256, 128, 64]
-numrealisations=1000
+numrealisations=10
 # directory = '/Users/mpeel/Documents/maps/'
 directory = '/scratch1/mpeel/maps/'
-outdirectory = directory+"wmap9_planck2018_tqu_noise/"
+outdirectory = directory+"wmap9_planck2018_tqu_noise_10/"
 
 
 beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
