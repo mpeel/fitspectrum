@@ -23,7 +23,8 @@ def get_hfi_beam(FITSfile):
 output_resolution = [60.0]#,120.0,240.0]
 output_nside = [512, 256, 128, 64]
 numrealisations=1000
-directory = '/Users/mpeel/Documents/maps/'
+# directory = '/Users/mpeel/Documents/maps/'
+directory = '/scratch1/mpeel/maps/'
 outdirectory = directory+"wmap9_planck2018_tqu_noise/"
 
 

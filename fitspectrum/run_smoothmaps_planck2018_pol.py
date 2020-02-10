@@ -18,8 +18,8 @@ def get_hfi_beam(FITSfile):
 output_resolution = 60.0
 output_nside = [512, 256, 128, 64]
 
-directory = '/Users/mpeel/Documents/maps/'
-# directory = '/scratch1/mpeel/maps/'
+# directory = '/Users/mpeel/Documents/maps/'
+directory = '/scratch1/mpeel/maps/'
 outdirectory = directory+"wmap9_planck2018_tqu/"
 
 beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
