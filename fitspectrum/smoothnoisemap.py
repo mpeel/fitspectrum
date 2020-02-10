@@ -17,201 +17,211 @@ import os
 from scipy import optimize
 
 def gaussfit(x, param):
-    return hp.gauss_beam(np.radians(param/60.0),300)
+	return hp.gauss_beam(np.radians(param/60.0),300)
 
 
 def noiserealisation(inputmap, numpixels):
-    newmap = np.zeros(numpixels)
-    newmap = np.random.normal(scale=1.0, size=numpixels) * inputmap
-    return newmap
+	newmap = np.zeros(numpixels)
+	newmap = np.random.normal(scale=1.0, size=numpixels) * inputmap
+	return newmap
 
 
 def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,hdu=1):
-    ver = "0.5"
+	ver = "0.5"
 
-    if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
-        print("You already have a file with the output name " + indir+"/"+runname+"_actualvariance.fits" + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
-        # exit()
-        return
+	if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
+		print("You already have a file with the output name " + indir+"/"+runname+"_actualvariance.fits" + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
+		# exit()
+		return
 
-    # Read in the input map
-    print(indir+'/'+inputmap)
-    inputfits = fits.open(indir+"/"+inputmap)
-    cols = inputfits[hdu].columns
-    col_names = cols.names
-    nmaps = len(cols)
-    maps = []
-    if usehealpixfits:
-        maps = hp.read_map(indir+inputmap,field=None)
-    else:
-        for i in range(0,nmaps):
-            maps.append(inputfits[hdu].data.field(i))
-    nside_in = hp.get_nside(maps)
+	# Read in the input map
+	print(indir+'/'+inputmap)
+	inputfits = fits.open(indir+"/"+inputmap)
+	cols = inputfits[hdu].columns
+	col_names = cols.names
+	nmaps = len(cols)
+	maps = []
+	if usehealpixfits:
+		maps = hp.read_map(indir+inputmap,field=None)
+	else:
+		for i in range(0,nmaps):
+			maps.append(inputfits[hdu].data.field(i))
+	nside_in = hp.get_nside(maps)
 
-    # Check to see whether we have nested data, and switch to ring if that is the case.
-    if (inputfits[hdu].header['ORDERING'] == 'NESTED'):
-        maps = hp.reorder(maps,n2r=True)
+	# Check to see whether we have nested data, and switch to ring if that is the case.
+	if (inputfits[hdu].header['ORDERING'] == 'NESTED'):
+		maps = hp.reorder(maps,n2r=True)
 
-    maps[mapnumber][maps[mapnumber]<-1e10] = hp.UNSEEN
-    maps[mapnumber][~np.isfinite(maps[mapnumber])] = hp.UNSEEN
-    map_before = maps[mapnumber].copy()
+	maps[mapnumber][maps[mapnumber]<-1e10] = hp.UNSEEN
+	maps[mapnumber][~np.isfinite(maps[mapnumber])] = hp.UNSEEN
+	map_before = maps[mapnumber].copy()
 
-    if sigma_0 != 0.0:
-        # If we have a value for sigma_0, then we have an Nobs map and need to convert it.
-        # maps[mapnumber][maps[mapnumber]<=0.0] = hp.UNSEEN
-        maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
+	if sigma_0 != 0.0:
+		# If we have a value for sigma_0, then we have an Nobs map and need to convert it.
+		# maps[mapnumber][maps[mapnumber]<=0.0] = hp.UNSEEN
+		maps[mapnumber] = conv_nobs_variance_map(maps[mapnumber], sigma_0)
 
-    # We want to sqrt it to get a noise rms map
-    noisemap = np.sqrt(maps[mapnumber])
-    noisemap = noisemap * rescale
+	# We want to sqrt it to get a noise rms map
+	noisemap = np.sqrt(maps[mapnumber])
+	noisemap = noisemap * rescale
 
-    # Write the variance map to disk so we can compare to it later.
-    cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=np.square(noisemap)))
-    cols = fits.ColDefs(cols)
-    bin_hdu = fits.BinTableHDU.from_columns(cols)
-    bin_hdu.header['ORDERING']='RING'
-    bin_hdu.header['POLCONV']='COSMO'
-    bin_hdu.header['PIXTYPE']='HEALPIX'
-    bin_hdu.header['NSIDE']=nside_in
-    bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
-    bin_hdu.writeto(outdir+"/"+runname+"_actualvariance.fits")
+	# Write the variance map to disk so we can compare to it later.
+	cols = []
+	cols.append(fits.Column(name='II_cov', format='E', array=np.square(noisemap)))
+	cols = fits.ColDefs(cols)
+	bin_hdu = fits.BinTableHDU.from_columns(cols)
+	bin_hdu.header['ORDERING']='RING'
+	bin_hdu.header['POLCONV']='COSMO'
+	bin_hdu.header['PIXTYPE']='HEALPIX'
+	bin_hdu.header['NSIDE']=nside_in
+	bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
+	bin_hdu.writeto(outdir+"/"+runname+"_actualvariance.fits")
 
-    # Also save the input nobs map, as a cross-check.
-    cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(noisemap), sigma_0)))
-    cols = fits.ColDefs(cols)
-    bin_hdu = fits.BinTableHDU.from_columns(cols)
-    bin_hdu.header['ORDERING']='RING'
-    bin_hdu.header['POLCONV']='COSMO'
-    bin_hdu.header['PIXTYPE']='HEALPIX'
-    bin_hdu.header['NSIDE']=nside_in
-    bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
-    bin_hdu.writeto(outdir+"/"+runname+"_actualnobs.fits")
+	# Also save the input nobs map, as a cross-check.
+	cols = []
+	cols.append(fits.Column(name='II_cov', format='E', array=conv_nobs_variance_map(np.square(noisemap), sigma_0)))
+	cols = fits.ColDefs(cols)
+	bin_hdu = fits.BinTableHDU.from_columns(cols)
+	bin_hdu.header['ORDERING']='RING'
+	bin_hdu.header['POLCONV']='COSMO'
+	bin_hdu.header['PIXTYPE']='HEALPIX'
+	bin_hdu.header['NSIDE']=nside_in
+	bin_hdu.header['COMMENT']="Input variance map - for test purposes only."
+	bin_hdu.writeto(outdir+"/"+runname+"_actualnobs.fits")
 
-    # Calculate the window function
-    conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),4*nside_in)
-    if (windowfunction != []):
-        window_len = len(conv_windowfunction)
-        beam_len = len(windowfunction)
-        if (beam_len > window_len):
-            windowfunction  = windowfunction[0:len(conv_windowfunction)]
-        else:
-            windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
-        conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
-        conv_windowfunction[windowfunction==0] = 0.0
-    if normalise:
-        conv_windowfunction /= conv_windowfunction[0]
-    # If needed, apply a taper
-    if taper:
-        conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
-        conv_windowfunction[lmax_taper:] = 0.0
-    if taper_gauss:
-        trip = 0
-        val = 0
-        # If we haven't been given a FWHM, estimate it from the data at l<300
-        if taper_gauss_sigma == 0:
-            beam1 = hp.gauss_beam(np.radians(fwhm/60.0),len(conv_windowfunction))
-            param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
-            print(param_est[0])
-            taper_gauss_sigma = param_est[0]
-        # beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
-        # plt.plot(windowfunction[0:301])
-        # plt.plot(beam2)
-        # plt.savefig(outdir+'temp.pdf')
-        # exit()
-        sigma_final = np.radians(fwhm/60.0)/np.sqrt(8*np.log(2))
-        sigma_current = np.radians(taper_gauss_sigma/60.0)/np.sqrt(8*np.log(2))
-        for l in range(1,len(conv_windowfunction)):
-            if trip == 1:
-                conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
-            elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
-                print(l)
-                trip = 1
-                val = conv_windowfunction[l-1]/np.exp(-0.5*(sigma_final**2-sigma_current**2)*(l-1)*((l-1)+1))
-                conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
-
-
-    # Now generate the noise realisations
-    numpixels = len(noisemap)
-    returnmap = np.zeros(numpixels)
-    # print(np.min(noisemap))
-    noisemap[map_before == hp.UNSEEN] = 0.0
-    hp.write_map(outdir+"/"+runname+"_noisemap.fits",noisemap,overwrite=True)
-    # alms = hp.map2alm(noisemap)#,lmax=4*nside_in)
-    # alms = hp.almxfl(alms, conv_windowfunction)
-    # newnoisemap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
-    # hp.write_map(outdir+"/"+runname+"_newnoisemap.fits",newnoisemap,overwrite=True)
-    # exit()
-    for i in range(0,numrealisations):
-        if i%10==0:
-            print(i)
-        # Generate the noise realisation
-        newmap = noiserealisation(noisemap, numpixels)
-        # smooth it
-        alms = hp.map2alm(newmap)#,lmax=4*nside_in)
-        alms = hp.almxfl(alms, conv_windowfunction)
-        newmap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
-        returnmap = returnmap + np.square(newmap)
-    returnmap = returnmap/(numrealisations-1)
-    returnmap[map_before == hp.UNSEEN] = hp.UNSEEN
-    
-    # All done - now just need to write it to disk.
-    cols = []
-    cols.append(fits.Column(name='II_cov', format='E', array=returnmap))
-    cols = fits.ColDefs(cols)
-    bin_hdu = fits.BinTableHDU.from_columns(cols)
-    bin_hdu.header['ORDERING']='RING'
-    bin_hdu.header['POLCONV']='COSMO'
-    bin_hdu.header['PIXTYPE']='HEALPIX'
-    bin_hdu.header['NSIDE']=nside_in
-    bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-    bin_hdu.writeto(outdir+"/"+runname+"_variance.fits")
-
-    # Also do an Nobs map for a consistency check.
-    nobs_map = conv_nobs_variance_map(returnmap, sigma_0)
-    cols = []
-    cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
-    cols = fits.ColDefs(cols)
-    bin_hdu = fits.BinTableHDU.from_columns(cols)
-    bin_hdu.header['ORDERING']='RING'
-    bin_hdu.header['POLCONV']='COSMO'
-    bin_hdu.header['PIXTYPE']='HEALPIX'
-    bin_hdu.header['NSIDE']=nside_in
-    bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-    bin_hdu.writeto(outdir+"/"+runname+"_nobs.fits")
-
-    # Do ud_graded versions
-    num_nside = len(nside)
-    for i in range(0,num_nside):
-        # ud_grade it using power=0 (assuming correlated pixels)
-        returnmap_ud = hp.ud_grade(returnmap, nside[i], power=0)
-
-        # Output the variance map
-        cols = []
-        cols.append(fits.Column(name='II_cov', format='E', array=returnmap_ud))
-        cols = fits.ColDefs(cols)
-        bin_hdu = fits.BinTableHDU.from_columns(cols)
-        bin_hdu.header['ORDERING']='RING'
-        bin_hdu.header['POLCONV']='COSMO'
-        bin_hdu.header['PIXTYPE']='HEALPIX'
-        bin_hdu.header['NSIDE']=nside[i]
-        bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_variance.fits")
-
-        # Also do an Nobs map for a consistency check.
-        nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
-        cols = []
-        cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
-        cols = fits.ColDefs(cols)
-        bin_hdu = fits.BinTableHDU.from_columns(cols)
-        bin_hdu.header['ORDERING']='RING'
-        bin_hdu.header['POLCONV']='COSMO'
-        bin_hdu.header['PIXTYPE']='HEALPIX'
-        bin_hdu.header['NSIDE']=nside[i]
-        bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
-        bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_nobs.fits")
+	# Calculate the window function
+	conv_windowfunction = hp.gauss_beam(np.radians(fwhm/60.0),4*nside_in)
+	if (windowfunction != []):
+		window_len = len(conv_windowfunction)
+		beam_len = len(windowfunction)
+		if (beam_len > window_len):
+			windowfunction  = windowfunction[0:len(conv_windowfunction)]
+		else:
+			windowfunction = np.pad(windowfunction, (0, window_len - beam_len), 'constant')
+		conv_windowfunction[windowfunction!=0] /= windowfunction[windowfunction!=0]
+		conv_windowfunction[windowfunction==0] = 0.0
+	if normalise:
+		conv_windowfunction /= conv_windowfunction[0]
+	# If needed, apply a taper
+	if taper:
+		conv_windowfunction[lmin_taper:lmax_taper] = conv_windowfunction[lmin_taper:lmax_taper] * np.cos((np.pi/2.0)*((np.arange(lmin_taper,lmax_taper)-lmin_taper)/(lmax_taper-lmin_taper)))
+		conv_windowfunction[lmax_taper:] = 0.0
+	if taper_gauss:
+		trip = 0
+		val = 0
+		# If we haven't been given a FWHM, estimate it from the data at l<300
+		if taper_gauss_sigma == 0:
+			beam1 = hp.gauss_beam(np.radians(fwhm/60.0),len(conv_windowfunction))
+			param_est, cov_x = optimize.curve_fit(gaussfit, range(0,299), windowfunction[0:301], 60.0)
+			print(param_est[0])
+			taper_gauss_sigma = param_est[0]
+		# beam2 = hp.gauss_beam(np.radians(taper_gauss_sigma/60.0),3*nside)
+		# plt.plot(windowfunction[0:301])
+		# plt.plot(beam2)
+		# plt.savefig(outdir+'temp.pdf')
+		# exit()
+		sigma_final = np.radians(fwhm/60.0)/np.sqrt(8*np.log(2))
+		sigma_current = np.radians(taper_gauss_sigma/60.0)/np.sqrt(8*np.log(2))
+		for l in range(1,len(conv_windowfunction)):
+			if trip == 1:
+				conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
+			elif (conv_windowfunction[l]-conv_windowfunction[l-1]) > 0.0:
+				print(l)
+				trip = 1
+				val = conv_windowfunction[l-1]/np.exp(-0.5*(sigma_final**2-sigma_current**2)*(l-1)*((l-1)+1))
+				conv_windowfunction[l] = val * np.exp(-0.5*(sigma_final**2-sigma_current**2)*l*(l+1))
 
 
+	# Now generate the noise realisations
+	numpixels = []
+	returnmap = []
+	num_nside = len(nside)
+	for output_nside in nside:
+		numpixels.append(hp.nside2npix(output_nside))
+		returnmap.append(np.zeros(hp.nside2npix(output_nside)))
+	# numpixels = len(noisemap)
+	# returnmap = np.zeros(numpixels)
+	# print(np.min(noisemap))
+	noisemap[map_before == hp.UNSEEN] = 0.0
+	hp.write_map(outdir+"/"+runname+"_noisemap.fits",noisemap,overwrite=True)
+	# alms = hp.map2alm(noisemap)#,lmax=4*nside_in)
+	# alms = hp.almxfl(alms, conv_windowfunction)
+	# newnoisemap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
+	# hp.write_map(outdir+"/"+runname+"_newnoisemap.fits",newnoisemap,overwrite=True)
+	# exit()
+	for i in range(0,numrealisations):
+		if i%10==0:
+			print(i)
+		# Generate the noise realisation
+		newmap = noiserealisation(noisemap, numpixels)
+		# smooth it
+		alms = hp.map2alm(newmap)#,lmax=4*nside_in)
+		alms = hp.almxfl(alms, conv_windowfunction)
+		newmap = hp.alm2map(alms, nside_in)#,lmax=4*nside_in)
+		for j in range(0,num_nside):
+			newmap_udgrade = hp.ud_grade(newmap, output_nside[i], power=0)
+			returnmap[j][:] = returnmap[j][:] + np.square(newmap_udgrade)
 
-    return
+	for j in range(0,num_nside):
+		returnmap[j] = returnmap[j]/(numrealisations-1)
+		returnmap[j][map_before == hp.UNSEEN] = hp.UNSEEN
+		
+		# All done - now just need to write it to disk.
+		cols = []
+		cols.append(fits.Column(name='II_cov', format='E', array=returnmap))
+		cols = fits.ColDefs(cols)
+		bin_hdu = fits.BinTableHDU.from_columns(cols)
+		bin_hdu.header['ORDERING']='RING'
+		bin_hdu.header['POLCONV']='COSMO'
+		bin_hdu.header['PIXTYPE']='HEALPIX'
+		bin_hdu.header['NSIDE']=output_nside[j]
+		bin_hdu.header['COMMENT']="Smoothed variance map calculated by Mike Peel's smoothnoisemap version "+ver +"."
+		bin_hdu.writeto(outdir+"/"+runname+"_variance_"+str(output_nside[j])+".fits")
+
+		# Also do an Nobs map for a consistency check.
+		nobs_map = conv_nobs_variance_map(returnmap, sigma_0)
+		cols = []
+		cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
+		cols = fits.ColDefs(cols)
+		bin_hdu = fits.BinTableHDU.from_columns(cols)
+		bin_hdu.header['ORDERING']='RING'
+		bin_hdu.header['POLCONV']='COSMO'
+		bin_hdu.header['PIXTYPE']='HEALPIX'
+		bin_hdu.header['NSIDE']=nside_in
+		bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
+		bin_hdu.writeto(outdir+"/"+runname+"_nobs_"+str(output_nside[j])+".fits")
+
+	# Do ud_graded versions
+	num_nside = len(nside)
+	for i in range(0,num_nside):
+		# ud_grade it using power=0 (assuming correlated pixels)
+		returnmap_ud = hp.ud_grade(returnmap, nside[i], power=0)
+
+		# Output the variance map
+		cols = []
+		cols.append(fits.Column(name='II_cov', format='E', array=returnmap_ud))
+		cols = fits.ColDefs(cols)
+		bin_hdu = fits.BinTableHDU.from_columns(cols)
+		bin_hdu.header['ORDERING']='RING'
+		bin_hdu.header['POLCONV']='COSMO'
+		bin_hdu.header['PIXTYPE']='HEALPIX'
+		bin_hdu.header['NSIDE']=nside[i]
+		bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
+		bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_variance_udgrade.fits")
+
+		# Also do an Nobs map for a consistency check.
+		nobs_map = conv_nobs_variance_map(returnmap_ud, sigma_0)
+		cols = []
+		cols.append(fits.Column(name='II_nobs', format='E', array=nobs_map))
+		cols = fits.ColDefs(cols)
+		bin_hdu = fits.BinTableHDU.from_columns(cols)
+		bin_hdu.header['ORDERING']='RING'
+		bin_hdu.header['POLCONV']='COSMO'
+		bin_hdu.header['PIXTYPE']='HEALPIX'
+		bin_hdu.header['NSIDE']=nside[i]
+		bin_hdu.header['COMMENT']="Smoothed Nobs map calculated by Mike Peel's smoothnoisemap version "+ver +"."
+		bin_hdu.writeto(outdir+"/"+str(nside[i])+"_"+runname+"_nobs_udgrade.fits")
+
+
+
+	return

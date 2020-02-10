@@ -111,8 +111,8 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		plt.clf()
 
 		# Create some quick histograms
-		histrange_min = np.min(mapdata[maskmap_min==1])
-		histrange_max = np.max(mapdata[maskmap_min==1])
+		histrange_min = np.min(mapdata[maskmap_other==1])
+		histrange_max = np.max(mapdata[maskmap_other==1])
 		print(histrange_min)
 		print(histrange_max)
 		if histrange_min != histrange_max:
@@ -127,6 +127,31 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 			else:
 				bins = np.arange(histrange_min,histrange_max, (histrange_max-histrange_min)/100.0)
 				plt.hist(mapdata[maskmap_other==1], bins=bins,label='Mean is ' + ("{0:.2f}".format(np.mean(mapdata[maskmap_other==1]))) + ', median ' + ("{0:.2f}".format(np.median(mapdata[maskmap_other==1]))) + ', std ' + ("{0:.2f}".format(np.std(mapdata[maskmap_other==1]))))
+			plt.title(maps[i][0])
+			l = plt.legend(prop={'size':9})
+			# l = plt.legend(prop={'size':11})
+			l.set_zorder(20)
+			# plt.savefig(maps[i][0].replace('.fits','_histogram_maskother.pdf'))
+			# plt.clf()
+
+
+		# Create some quick histograms, using the min mask
+		histrange_min = np.min(mapdata[maskmap_min==1])
+		histrange_max = np.max(mapdata[maskmap_min==1])
+		print(histrange_min)
+		print(histrange_max)
+		if histrange_min != histrange_max:
+			if histrange_max - histrange_min > 100 and histrange_min >= 0.0:
+				if histrange_min != 0:
+					print(np.abs(np.log10(histrange_max)-np.log10(histrange_min))/100.0)
+					bins = np.arange(np.log10(histrange_min),np.log10(histrange_max), np.abs(np.log10(histrange_max)-np.log10(histrange_min))/100.0)
+				else:
+					bins = np.arange(0,np.log10(histrange_max), np.abs(np.log10(histrange_max))/100.0)
+				plt.hist(np.log10(mapdata[maskmap_min==1]), bins=bins,label='Mean is ' + ("{0:.2f}".format(np.mean(mapdata[maskmap_min==1]))) + ', median ' + ("{0:.2f}".format(np.median(mapdata[maskmap_min==1]))) + ', std ' + ("{0:.2f}".format(np.std(mapdata[maskmap_min==1]))))
+				plt.xlabel('(log10)')
+			else:
+				bins = np.arange(histrange_min,histrange_max, (histrange_max-histrange_min)/100.0)
+				plt.hist(mapdata[maskmap_min==1], bins=bins,label='Mean is ' + ("{0:.2f}".format(np.mean(mapdata[maskmap_min==1]))) + ', median ' + ("{0:.2f}".format(np.median(mapdata[maskmap_min==1]))) + ', std ' + ("{0:.2f}".format(np.std(mapdata[maskmap_min==1]))))
 			plt.title(maps[i][0])
 			l = plt.legend(prop={'size':9})
 			# l = plt.legend(prop={'size':11})

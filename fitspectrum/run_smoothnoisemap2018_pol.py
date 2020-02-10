@@ -21,9 +21,9 @@ def get_hfi_beam(FITSfile):
 	return newdata
 
 output_resolution = [60.0]#,120.0,240.0]
-output_nside = [512]#, 256, 128, 64]
+output_nside = [512, 256, 128, 64]
 numrealisations=1000
-directory = '/scratch1/mpeel/maps/'
+directory = '/Users/mpeel/Documents/maps/'
 outdirectory = directory+"wmap9_planck2018_tqu_noise/"
 
 
@@ -86,9 +86,9 @@ for i in range(0,numres):
 		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_28.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_030-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p30,rescale=1000.0)
 		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_44.1_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_044-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p44,rescale=1000.0)
 		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_70.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_070-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p70,rescale=1000.0)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_100_1024_2018_mKCMBunits', 'HFI_SkyMap_100_2048_R3.00_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_143_1024_2018_mKCMBunits', 'HFI_SkyMap_143_2048_R3.00_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_217_1024_2018_mKCMBunits', 'HFI_SkyMap_217_2048_R3.00_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_353_1024_2018_mKCMBunits', 'HFI_SkyMap_353-psb_2048_R3.00_full.fits',mapnumber=4,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_545_1024_2018_MJySrunits', 'HFI_SkyMap_545_2048_R3.00_full.fits',mapnumber=2,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
-		# smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_857_1024_2018_MJySrunits', 'HFI_SkyMap_857_2048_R3.00_full.fits',mapnumber=2,numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_100_1024_2018_mKCMBunits', 'HFI_SkyMap_100_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_143_1024_2018_mKCMBunits', 'HFI_SkyMap_143_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_217_1024_2018_mKCMBunits', 'HFI_SkyMap_217_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_353_1024_2018_mKCMBunits', 'HFI_SkyMap_353-psb_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_545_1024_2018_MJySrunits', 'HFI_SkyMap_545_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
+		smoothnoisemap(directory, resolution+'smoothed_PlanckR3fullbeam_857_1024_2018_MJySrunits', 'HFI_SkyMap_857_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)

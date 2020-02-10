@@ -117,6 +117,8 @@ def spinningdust_comm(nu, spinningdust_amp, spdustshift, spinningdust_em_comm, s
 
 	if component == 2:
 		nu_0 = 41.0
+	elif component == 3:
+		nu_0 = 30.0
 	else:
 		nu_0 = 22.8
 

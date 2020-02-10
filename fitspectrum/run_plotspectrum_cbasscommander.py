@@ -8,7 +8,7 @@ from astroutils import *
 # Overall parameters
 basedir = '/Users/mpeel/Desktop/Low-Frequency_Survey2/'
 
-run_rmsspectra = False
+run_rmsspectra = True
 run_aperflux = False
 run_extramapplots = True
 
