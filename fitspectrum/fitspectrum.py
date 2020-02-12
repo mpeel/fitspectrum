@@ -138,6 +138,25 @@ def plot_results(outfile,srcname,minfreq,maxfreq,params,const,solid_angle,spd_fr
 	plt.close()
 	return
 
+def get_percentage(outfile,srcname,freq,params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux):
+	
+	x = freq
+
+	model_sync = synchrotron(const, x, 1.0, params[7], params[8])
+	model_freefree = freefree(const, x, params[0], params[1], solid_angle)
+	model_spd = spinningdust(spd_freq, spd_amp, solid_angle, x, params[5], params[9])
+	model_dust1 = thermaldust(const, x, params[2]*1e-5, params[3], params[4], const['dust_optical_depth_freq'], solid_angle)
+
+	model_overall = spectrum(params, x=x)
+
+	print(model_overall)
+	print(model_sync)
+	print(model_freefree)
+	print(model_spd)
+	print(model_dust1)
+
+	return
+
 def write_results(outfile,srcname,freqs,fd,fd_err,params,perror):
 	outputfile = open(outfile, "w")
 	outputfile.write("# " + srcname + "\n")
@@ -334,7 +353,9 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 
 	plot_results(outdir+srcname+'.pdf',srcname,minfreq,maxfreq,m.params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
 
+	get_percentage(outdir+srcname+'.pdf',srcname,30.0,m.params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
 	write_results(outdir+srcname+".txt",srcname,freqs,fd,fd_err,m.params,m.perror)
+	exit()
 
 	###
 	# MCMC fitting

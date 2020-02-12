@@ -10,7 +10,11 @@ from fitspectrum import fitspectrum
 
 # fitspectrum('seds/m31_srt.txt',srcname="M31_srt",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True)
 
-fitspectrum('seds/m31_dx11d_quijoterasterrescale_cbass.txt',srcname="M31qc_rescale",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False)
+fitspectrum('seds/m31_dx11d_cbassonly.txt',srcname="M31c_joint",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False)
+
+fitspectrum('seds/m31_dx11d_quijotejoint_cbass.txt',srcname="M31qc_joint",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False)
+
+# fitspectrum('seds/m31_dx11d_quijoterasterrescale_cbass.txt',srcname="M31qc_rescale",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False)
 # fitspectrum('seds/m31_dx11d.txt',srcname="M31",outdir='sedfits/',format=1,maxfitfreq=2000,mcmc=True,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False)
 exit()
 
