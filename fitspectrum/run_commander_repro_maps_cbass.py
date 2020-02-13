@@ -36,5 +36,5 @@ for run in runs:
 	# names = ['cbass', 'wmapk', 'planck30']
 
 	for i in range(0,len(frequencies)):
-		commander_repro_maps(outdir=basedir+'commander_freq_maps/', name=run, maps=maps, mask=mask,spd_file='amemodels/spdust2_cnm.dat',nside=nside,res=60.0,freq=frequencies[i],use_ame2=False,use_thermaldust=False,syncmodel=2)
+		commander_repro_maps(outdir=basedir+'commander_freq_maps/', name=run, maps=maps, mask=mask,spd_file='amemodels/spdust2_cnm.dat',nside=nside,res=60.0,freq=frequencies[i],use_ame2=False,use_thermaldust=False,syncmodel=2,amemodel=3)
 

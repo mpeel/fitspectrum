@@ -21,7 +21,7 @@ const = get_spectrum_constants()
 solid_angle = 1.0e-10 # For now
 
 
-def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/spdust2_wim.dat', nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True,freq=30.0,use_ame1=True,use_ame2=True,use_ff=True,use_sync=True,use_cmb=True,use_thermaldust=True,syncmodel=1,mask=[]):
+def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/spdust2_wim.dat', nside=256,res=60.0,freqbands=[[0,0,'nofreq','k']],pol=False,legend=True,freq=30.0,use_ame1=True,use_ame2=True,use_ff=True,use_sync=True,use_cmb=True,use_thermaldust=True,syncmodel=1,mask=[],amemodel=1):
 
 	# ensure_dir(outdir)
 
@@ -81,7 +81,7 @@ def commander_repro_maps(outdir='', name='plot', maps=[''],spd_file='amemodels/s
 			if use_ff:
 				ff[i] = freefree(const, freq, mapdata[1][i], mapdata[2][i], solid_angle, equation=1,comm=1)
 			if use_ame1:
-				ame1[i] = spinningdust_comm(freq, mapdata[4][i], mapdata[5][i], spd_amp, spd_freq, 1)
+				ame1[i] = spinningdust_comm(freq, mapdata[4][i], mapdata[5][i], spd_amp, spd_freq, amemodel)
 			if use_ame2:
 				ame2[i] = spinningdust_comm(freq, mapdata[6][i], 33.35, spd_amp, spd_freq, 2)
 			ame[i] =  ame1[i] + ame2[i]
