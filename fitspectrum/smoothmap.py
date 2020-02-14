@@ -28,6 +28,11 @@ import numpy as np
 import healpy as hp
 import scipy as sp
 import math as m
+
+# Work-around for no X display
+import matplotlib as mpl
+mpl.use('Agg')
+
 import matplotlib.pyplot as plt
 from astrocode.fitspectrum.spectra import *
 import astropy.io.fits as fits
