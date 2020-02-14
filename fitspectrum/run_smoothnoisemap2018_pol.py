@@ -52,31 +52,31 @@ for i in range(0,numres):
 	for m in range(0,len(mapnumbers)):
 		resolution = "%.2f" % output_resolution[i]
 
-		if m == 0:
-			sigma_0 = 1.429
-		else:
-			sigma_0 = 1.435
-		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_22.8_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_K_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_K,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
-		if m == 0:
-			sigma_0 = 1.466
-		else:
-			sigma_0 = 1.472
-		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_33.0_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Ka_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Ka,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
-		if m == 0:
-			sigma_0 = 2.188
-		else:
-			sigma_0 = 2.197
-		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_40.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Q_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Q,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
-		if m == 0:
-			sigma_0 = 3.131
-		else:
-			sigma_0 = 3.141
-		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_60.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_V_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_V,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
-		if m == 0:
-			sigma_0 = 6.544
-		else:
-			sigma_0 = 6.560
-		smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_93.5_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_W_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_W,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		# if m == 0:
+		# 	sigma_0 = 1.429
+		# else:
+		# 	sigma_0 = 1.435
+		# smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_22.8_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_K_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_K,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		# if m == 0:
+		# 	sigma_0 = 1.466
+		# else:
+		# 	sigma_0 = 1.472
+		# smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_33.0_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Ka_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Ka,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		# if m == 0:
+		# 	sigma_0 = 2.188
+		# else:
+		# 	sigma_0 = 2.197
+		# smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_40.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_Q_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_Q,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		# if m == 0:
+		# 	sigma_0 = 3.131
+		# else:
+		# 	sigma_0 = 3.141
+		# smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_60.7_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_V_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_V,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
+		# if m == 0:
+		# 	sigma_0 = 6.544
+		# else:
+		# 	sigma_0 = 6.560
+		# smoothnoisemap(directory+'/wmap9/', outdirectory, str(output_resolution[i])+'smoothed_wmap9beam_93.5_512_20132018_mKCMBunits_'+str(mapnumbers[m])+'.fits', 'wmap_band_iqumap_r9_9yr_W_v5.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],windowfunction=beamtf_W,sigma_0=sigma_0,nside=output_nside,hdu=hdu)
 
 mapnumbers = [4,5,6,7,8,9]
 
@@ -84,12 +84,12 @@ for i in range(0,numres):
 	for m in range(0,len(mapnumbers)):
 		resolution = "%.2f" % output_resolution[i]
 
-		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_28.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_030-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p30,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_44.1_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_044-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p44,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_70.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_070-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p70,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_100_1024_2018_mKCMBunits', 'HFI_SkyMap_100_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_143_1024_2018_mKCMBunits', 'HFI_SkyMap_143_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_217_1024_2018_mKCMBunits', 'HFI_SkyMap_217_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_353_1024_2018_mKCMBunits', 'HFI_SkyMap_353-psb_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_545_1024_2018_MJySrunits', 'HFI_SkyMap_545_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
-		smoothnoisemap(directory+'planck2018/', resolution+'smoothed_PlanckR3fullbeam_857_1024_2018_MJySrunits', 'HFI_SkyMap_857_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)
+		# smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_28.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_030-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p30,rescale=1000.0)
+		# smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_44.1_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_044-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p44,rescale=1000.0)
+		# smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_70.4_1024_2018_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_070-BPassCorrected_1024_R3.00_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p70,rescale=1000.0)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_100_1024_2018_mKCMBunits', 'HFI_SkyMap_100_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_143_1024_2018_mKCMBunits', 'HFI_SkyMap_143_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_217_1024_2018_mKCMBunits', 'HFI_SkyMap_217_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_353_1024_2018_mKCMBunits', 'HFI_SkyMap_353-psb_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_545_1024_2018_MJySrunits', 'HFI_SkyMap_545_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
+		smoothnoisemap(directory+'planck2018/', outdirectory, resolution+'smoothed_PlanckR3fullbeam_857_1024_2018_MJySrunits', 'HFI_SkyMap_857_2048_R3.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)
