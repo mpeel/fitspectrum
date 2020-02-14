@@ -25,7 +25,7 @@ output_nside = [512, 256, 128, 64]
 numrealisations=1000
 # directory = '/Users/mpeel/Documents/maps/'
 # directory = '/scratch1/mpeel/maps/'
-directory = '/net/nas/proyectos/quijote/mikepeel/maps/'
+directory = '/net/nas/proyectos/quijote/mikepeel/'
 outdirectory = directory+"wmap9_planck2015_tqu_noise/"
 
 # beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
