@@ -24,14 +24,15 @@ output_resolution = [60.0]#,120.0,240.0]
 output_nside = [512, 256, 128, 64]
 numrealisations=1000
 # directory = '/Users/mpeel/Documents/maps/'
-directory = '/scratch1/mpeel/maps/'
+# directory = '/scratch1/mpeel/maps/'
+directory = '/net/nas/proyectos/quijote/mikepeel/maps/'
 outdirectory = directory+"wmap9_planck2015_tqu_noise/"
 
-beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
-beamtf_Ka = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
-beamtf_Q = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
-beamtf_V = np.loadtxt(directory+'wmap9/wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
-beamtf_W = np.loadtxt(directory+'wmap9/wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
+# beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
+# beamtf_Ka = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
+# beamtf_Q = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
+# beamtf_V = np.loadtxt(directory+'wmap9/wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
+# beamtf_W = np.loadtxt(directory+'wmap9/wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
 
 beamtf_p30 = get_beam(directory+'planck2015/LFI_RIMO_R2.50.fits',28)
@@ -57,12 +58,12 @@ for i in range(0,numres):
 		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_28.4_1024_2015_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_030_1024_R2.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p30,rescale=1000.0)
 		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_44.1_1024_2015_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_044_1024_R2.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p44,rescale=1000.0)
 		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_70.4_1024_2015_mKCMBunits_'+str(mapnumbers[m]), 'LFI_SkyMap_070_2048_R2.01_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p70,rescale=1000.0)
-		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_100_1024_2015_mKCMBunits', 'HFI_SkyMap_100_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
-		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_143_1024_2015_mKCMBunits', 'HFI_SkyMap_143_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
-		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_217_1024_2015_mKCMBunits', 'HFI_SkyMap_217_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
-		smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_353_1024_2015_mKCMBunits', 'HFI_SkyMap_353_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
-		try:
-			smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_545_1024_2015_MJySrunits', 'HFI_SkyMap_545_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
-			smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_857_1024_2015_MJySrunits', 'HFI_SkyMap_857_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)
+		# smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_100_1024_2015_mKCMBunits', 'HFI_SkyMap_100_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p100,rescale=1000.0)
+		# smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_143_1024_2015_mKCMBunits', 'HFI_SkyMap_143_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p143,rescale=1000.0)
+		# smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_217_1024_2015_mKCMBunits', 'HFI_SkyMap_217_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p217,rescale=1000.0)
+		# smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_353_1024_2015_mKCMBunits', 'HFI_SkyMap_353_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p353,rescale=1000.0)
+		# try:
+		# 	smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_545_1024_2015_MJySrunits', 'HFI_SkyMap_545_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p545)
+		# 	smoothnoisemap(directory+'planck2015/', outdirectory, resolution+'smoothed_PlanckR2fullbeam_857_1024_2015_MJySrunits', 'HFI_SkyMap_857_2048_R2.02_full.fits',mapnumber=mapnumbers[m],numrealisations=numrealisations,fwhm=output_resolution[i],nside=output_nside,windowfunction=beamtf_p857)
 		except:
 			null = 0
