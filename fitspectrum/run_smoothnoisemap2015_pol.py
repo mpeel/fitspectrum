@@ -8,6 +8,10 @@ import numpy as np
 import healpy as hp
 import astropy.io.fits as fits
 
+# Work-around for no X display
+import matplotlib as mpl
+mpl.use('Agg')
+
 def get_hfi_beam(FITSfile):
 	fits.info(FITSfile) # print list of extensions found in FITSfile
 	data, header = fits.getdata(FITSfile, 0, header=True) # read extension #10 (data and header)
