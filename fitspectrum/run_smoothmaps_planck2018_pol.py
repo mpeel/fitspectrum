@@ -18,8 +18,8 @@ def get_hfi_beam(FITSfile):
 output_resolution = 60.0
 output_nside = [512, 256, 128, 64]
 
-# directory = '/Users/mpeel/Documents/maps/'
-directory = '/scratch1/mpeel/maps/'
+directory = '/Users/mpeel/Documents/maps/'
+# directory = '/scratch1/mpeel/maps/'
 outdirectory = directory+"wmap9_planck2018_tqu/"
 
 beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
@@ -87,6 +87,13 @@ for i in range(0,numnside):
 		# smoothmap(directory,outdirectory,'HFI_SkyMap_353_2048_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckR3full_353_2048_2018_KCMBunits.fits', np.sqrt(output_resolution**2-4.7**2),nside_out=output_nside[i],outputmaps=[0,4])
 		# smoothmap(directory,outdirectory,'HFI_SkyMap_545_2048_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckR3full_545_2048_2018_MJySrunits.fits', np.sqrt(output_resolution**2-4.73**2),nside_out=output_nside[i],outputmaps=[0,2])
 		# smoothmap(directory,outdirectory,'HFI_SkyMap_857_2048_R3.00_full.fits',str(output_nside[i])+'_60.00smoothed_PlanckR3full_857_2048_2018_MJySrunits.fits', np.sqrt(output_resolution**2-4.51**2),nside_out=output_nside[i],outputmaps=[0,2])
+
+
+		smoothmap(directory+'planck2018/',outdirectory,'LFI_SkyMap_030_1024_R3.00_full.fits',str(output_nside[i])+'_'+str(output_resolution)+'smoothed_PlanckR3fullbeamnobp'+subtractmaps_name[j]+'_28.4_1024_2018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],windowfunction=beamtf_p30,units_out='mKCMB',subtractmap=subtractmaps[j])#,appendmap=directory+str(output_nside[i])+'_60.00smoothed_PlanckR3fullbeam_28.4_1024_2018_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2"
+
+		smoothmap(directory+'planck2018/',outdirectory,'LFI_SkyMap_044_1024_R3.00_full.fits',str(output_nside[i])+'_'+str(output_resolution)+'smoothed_PlanckR3fullbeamnobp'+subtractmaps_name[j]+'_44.1_1024_2018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],windowfunction=beamtf_p44,units_out='mKCMB',subtractmap=subtractmaps[j])#,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_PlanckR3fullbeam_44.1_1024_2018_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2"
+		smoothmap(directory+'planck2018/',outdirectory,'LFI_SkyMap_070_1024_R3.00_full.fits',str(output_nside[i])+'_'+str(output_resolution)+'smoothed_PlanckR3fullbeamnobp'+subtractmaps_name[j]+'_70.4_1024_2018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],windowfunction=beamtf_p70,units_out='mKCMB',subtractmap=subtractmaps[j])#,maxnummaps=1,appendmap=directory+str(output_nside[i])+'_60.00smoothed_PlanckR3fullbeam_70.4_1024_2018_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2"
+
 
 		smoothmap(directory+'planck2018/',outdirectory,'LFI_SkyMap_030-BPassCorrected_1024_R3.00_full.fits',str(output_nside[i])+'_'+str(output_resolution)+'smoothed_PlanckR3fullbeam'+subtractmaps_name[j]+'_28.4_1024_2018_mKCMBunits.fits', output_resolution,nside_out=output_nside[i],windowfunction=beamtf_p30,units_out='mKCMB',subtractmap=subtractmaps[j])#,appendmap=directory+str(output_nside[i])+'_60.00smoothed_PlanckR3fullbeam_28.4_1024_2018_mKCMBunits_variance.fits',appendmapname="II_cov",appendmapunit="(mK)^2"
 
