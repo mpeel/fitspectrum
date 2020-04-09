@@ -122,19 +122,45 @@ def plot_results(outfile,srcname,minfreq,maxfreq,params,const,solid_angle,spd_fr
 	# plt.plot(x, model_dust2, 'y')
 
 	model_overall = spectrum(params, x=x)
+	# plt.style.use('classic')
 	plt.plot(x, model_overall, 'orange')
 	# Add the data to the plot
 	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1],fmt='+')
 	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
+	plt.errorbar(7.0, spectrum(params,x=7.0),fmt='r.',markersize=10.0)
+	plt.errorbar(18.6, spectrum(params,x=18.6),fmt='r.',markersize=10.0)
+	plt.errorbar(24.6, spectrum(params,x=24.6),fmt='r.',markersize=10.0)
+	
+	model_spd = spinningdust(spd_freq, spd_amp, solid_angle, 30.0, 1.0, 0.0)
+	model_spd_norm = 0.5*spectrum(params,x=30.0)/model_spd
+	model_spd_25 = spinningdust(spd_freq, spd_amp, solid_angle, 24.6, 1.0, 0.0)*model_spd_norm
+	model_spd_19 = spinningdust(spd_freq, spd_amp, solid_angle, 18.6, 1.0, 0.0)*model_spd_norm
+
+	plt.errorbar(18.6, spectrum(params,x=18.6)+model_spd_19,fmt='rx',markersize=5.0)
+	plt.errorbar(24.6, spectrum(params,x=24.6)+model_spd_25,fmt='rx',markersize=5.0)
+
+
+	# print(spectrum(params,x=30.0))
+	# print(spectrum(params,x=24.6))
+	# print(spectrum(params,x=18.6))
+	# print(model_spd_25)
+	# print(model_spd_19)
+	# exit()
+	
 
 	# Formatting, and output
-	plt.title(srcname)
+	plt.title(srcname, fontsize=15)
+	plt.rcParams["font.family"] = "serif"
+	plt.rc('xtick',labelsize=14)
+	plt.rc('ytick',labelsize=14)
 	plt.xscale('log')
 	plt.yscale('log')
-	plt.xlabel('Frequency (GHz)')
-	plt.ylabel('Flux density (Jy)')
-	plt.ylim(ymin=minflux*0.1,ymax=maxflux*10)
+	plt.xlabel('Frequency (GHz)', fontsize=15)
+	plt.ylabel('Flux density (Jy)', fontsize=15)
+	plt.ylim(ymin=minflux*0.1,ymax=maxflux*2)
+	plt.tight_layout()
 	plt.savefig(outfile)
+	plt.clf()
 	plt.close()
 	return
 
@@ -157,7 +183,7 @@ def get_percentage(outfile,srcname,freq,params,const,solid_angle,spd_freq,spd_am
 
 	return
 
-def write_results(outfile,srcname,freqs,fd,fd_err,params,perror):
+def write_results(outfile,srcname,freqs,fd,fd_err,params,perror, const, solid_angle):
 	outputfile = open(outfile, "w")
 	outputfile.write("# " + srcname + "\n")
 	for i in range(0,len(freqs)):
@@ -167,7 +193,12 @@ def write_results(outfile,srcname,freqs,fd,fd_err,params,perror):
 	outputfile.write('# Sync index: ' + str(params[8]) + " +- " + str(perror[8]) + '\n')
 	outputfile.write('# Freefree amplitude: ' + str(params[0]) + " +- " + str(perror[0]) + '\n')
 	outputfile.write('# Freefree temp: ' + str(params[1]) + " +- " + str(perror[1]) + '\n')
+	ff1 = freefree(const, 1.0, params[0], params[1], solid_angle)
+	ff1_err = ff1*perror[0]/params[0]
+	outputfile.write('# Free-free at 1GHz ' + str(ff1) + ' +- ' + str(ff1_err) +'\n')
 	outputfile.write('# AME amplitude: ' + str(params[5]) + " +- " + str(perror[5]) + '\n')
+	outputfile.write('# AME significance: ' + str(params[5]/perror[5]) + '\n')
+
 	outputfile.write('# AME shift: ' + str(params[9]) + " +- " + str(perror[9]) + '\n')
 	outputfile.write('# CMB amplitude: ' + str(params[6]*1e-6) + " +- " + str(perror[6]*1e-6) + '\n')
 	# outputfile.write('# AME at 25GHz: ' + str(spinningdust(spd_freq, spd_amp, solid_angle, 25.0, m.params[5], m.params[9])) + '\n')
@@ -178,14 +209,32 @@ def write_results(outfile,srcname,freqs,fd,fd_err,params,perror):
 	# outputfile.write('# Dust2 amplitude: ' + str(params[10]) + " +- " + str(perror[10]) + '\n')
 	# outputfile.write('# Dust2 index: ' + str(params[11]) + " +- " + str(perror[11]) + '\n')
 	# outputfile.write('# Dust2 temperature: ' + str(params[12]) + " +- " + str(perror[12]) + '\n')
+	outputfile.write('# At 7GHz, model says ' + str(spectrum(params, x=7.0))+'\n')
+	outputfile.write('# At 18.6GHz, model says ' + str(spectrum(params, x=18.6))+'\n')
+	outputfile.write('# At 24.6GHz, model says ' + str(spectrum(params, x=24.6))+'\n')
 
+
+	model_spd = spinningdust(spd_freq, spd_amp, solid_angle, 30.0, 1.0, 0.0)
+	model_spd_norm = 0.5*spectrum(params,x=30.0)/model_spd
+	model_spd_25 = spinningdust(spd_freq, spd_amp, solid_angle, 24.6, 1.0, 0.0)*model_spd_norm
+	model_spd_19 = spinningdust(spd_freq, spd_amp, solid_angle, 18.6, 1.0, 0.0)*model_spd_norm
+
+	outputfile.write('# At 30GHz, model says ' + str(spectrum(params,x=30.0))+'\n')
+	outputfile.write('# At 18.6GHz, AME might be ' + str(model_spd_19)+'\n')
+	outputfile.write('# At 24.6GHz, AME might be ' + str(model_spd_25)+'\n')
+	flux = spectrum(params, x=7.0)
+	outputfile.write('# 7.0	'+str(flux)+'	'+str(flux*0.05)+'\n')
+	flux = spectrum(params, x=18.6)+model_spd_19
+	outputfile.write('# 18.6	'+str(flux)+'	'+str(flux*0.05)+'\n')
+	flux = spectrum(params, x=24.6)+model_spd_25
+	outputfile.write('# 24.6	'+str(flux)+'	'+str(flux*0.05)+'\n')
 	outputfile.close()
 	return
 
 def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/spdust2_wim.dat',
 	format=1, inunits='Jy',fitunits='Jy',minfitfreq=0,maxfitfreq=0,
 	nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,
-	startparams=0,mcmc=True,quiet=False):#,nodust2=True, fixdust2temp=0
+	startparams=0,mcmc=True,quiet=False,nosyncbeta=False):#,nodust2=True, fixdust2temp=0
 
 	print(outdir)
 	ensure_dir(outdir)
@@ -314,6 +363,8 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		p0[7] = 0
 		parinfo[7]['fixed'] = 1
 		parinfo[8]['fixed'] = 1
+	if nosyncbeta == True:
+		parinfo[8]['fixed'] = 1
 	p0[8] = -1.0
 	# parinfo[8]['fixed'] = 1
 
@@ -354,8 +405,8 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 	plot_results(outdir+srcname+'.pdf',srcname,minfreq,maxfreq,m.params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
 
 	get_percentage(outdir+srcname+'.pdf',srcname,30.0,m.params,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
-	write_results(outdir+srcname+".txt",srcname,freqs,fd,fd_err,m.params,m.perror)
-	exit()
+	write_results(outdir+srcname+".txt",srcname,freqs,fd,fd_err,m.params,m.perror, const, solid_angle)
+	# exit()
 
 	###
 	# MCMC fitting
@@ -398,7 +449,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		print(result['message'])
 
 		plot_results(outdir+srcname+'_likelihood.pdf',srcname,minfreq,maxfreq,maxlikelihood,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
-		write_results(outdir+srcname+"_likelihood.txt",srcname,freqs,fd,fd_err,maxlikelihood,np.zeros(len(maxlikelihood)))
+		write_results(outdir+srcname+"_likelihood.txt",srcname,freqs,fd,fd_err,maxlikelihood,np.zeros(len(maxlikelihood)), const, solid_angle)
 
 		# Let's do some MCMC fitting!
 		ndim = num_params
@@ -482,7 +533,7 @@ def fitspectrum(filename, srcname='',indir='', outdir='', spd_file='amemodels/sp
 		plt.close()
 
 		plot_results(outdir+srcname+'_mcmc.pdf',srcname,minfreq,maxfreq,vals,const,solid_angle,spd_freq,spd_amp,freqs,fd,fd_err,goodvals,minflux,maxflux)
-		write_results(outdir+srcname+"_mcmc.txt",srcname,freqs,fd,fd_err,vals,errs)
+		write_results(outdir+srcname+"_mcmc.txt",srcname,freqs,fd,fd_err,vals,errs, const, solid_angle)
 
 
 # That's all, folks!

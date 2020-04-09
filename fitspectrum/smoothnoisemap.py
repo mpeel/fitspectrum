@@ -26,7 +26,12 @@ def noiserealisation(inputmap, numpixels):
 	return newmap
 
 
-def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,hdu=1):
+def noiserealisation_QU(covariance, numpixels):
+	newmap = [np.zeros(numpixels), np.zeros(numpixels)]
+	newmap = np.random.multivariate_normal([0,0], covariance, size=(numpixels, numpixels))
+	return newmap
+
+def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,hdu=1, QU_index=[]):
 	ver = "0.5"
 
 	if (os.path.isfile(indir+"/"+runname+"_actualvariance.fits")):
