@@ -3,6 +3,9 @@ import numpy as np
 import healpy as hp
 from math import pi
 import matplotlib.pyplot as plt
+from astropy.coordinates import SkyCoord
+from astropy.coordinates import Galactic, FK5
+from astropy import units as u
 
 # Ensure that a directory exists
 # Function from http://stackoverflow.com/questions/273192/in-python-check-if-a-directory-exists-and-create-it-if-necessary
@@ -71,6 +74,20 @@ def galacticmask(nside, degrees):
 		if (abs(90.0-(pos[0]*180.0/pi)) <= degrees):
 			mask[i] = 0
 	return mask
+
+def declinationmask_galactic(nside, decmin, decmax):
+	# Create a map that is the declination for given Galactic pixels
+	npix = hp.nside2npix(nside)
+	declinationmask = np.zeros(npix)
+	pos = hp.pixelfunc.pix2ang(nside,range(0,npix),lonlat=True)
+	galcoord = SkyCoord(l=pos[0]*u.degree, b=pos[1]*u.degree, frame='galactic')
+	newpos = galcoord.transform_to(FK5(equinox='J2000'))
+	declinationmask = newpos.dec.degree#+90.0
+	declinationmask[declinationmask<decmin] = hp.UNSEEN
+	declinationmask[declinationmask>decmax] = hp.UNSEEN
+	declinationmask[declinationmask != hp.UNSEEN] = 1
+	declinationmask[declinationmask == hp.UNSEEN] = 0
+	return declinationmask
 
 # Create a set of masks for each nside=nside_mask pixel at nside_data resolution
 def nside_mask(nside_data, nside_mask):
