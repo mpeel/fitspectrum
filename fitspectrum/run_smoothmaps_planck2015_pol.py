@@ -19,9 +19,9 @@ output_resolution = 60.0
 output_nside = [2048, 1024, 512, 256, 128, 64, 32]
 smoothvariance = False
 
-directory = '/Users/mpeel/Documents/maps/'
-# directory = '/scratch1/mpeel/maps/'
-outdirectory = directory+"wmap9_planck2015_tqu/"
+# directory = '/Users/mpeel/Documents/maps/'
+directory = '/scratch1/mpeel/maps/'
+outdirectory = directory+"wmap9_planck2015_tqu_v1.4/"
 
 beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
 beamtf_Ka = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
