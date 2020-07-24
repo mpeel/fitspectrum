@@ -20,6 +20,7 @@
 # v1.1  Mike Peel   09 Oct 2017   Add CMB subtraction
 # v1.2  Mike Peel   04 Jul 2019   Multiple options for window function tapering, min/max map values
 # v1.3  Mike Peel   28 Aug 2019   Gaussian taper, options for normalising wf and unseen vs. 0 in map
+# v1.4  Mike Peel   24 Jul 2020   Add an option to not smooth the variance maps (but save them in the output anyway)
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -44,8 +45,8 @@ def gaussfit(x, param):
 	return hp.gauss_beam(np.radians(param/60.0),300)
 
 
-def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,useunseen=False):
-	ver = "1.3"
+def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,maxnummaps=-1, frequency=100.0, units_in='',units_out='', windowfunction = [],nobs_out=False,variance_out=True, sigma_0 = -1, sigma_0_unit='', rescale=1.0, nosmooth=[], outputmaps=[],appendmap='',appendmapname='',appendmapunit='',subtractmap='',subtractmap_units='',usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600, cap_one=False, cap_oneall=False,minmapvalue=0,maxmapvalue=0,minmaxmaps=[0],taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,useunseen=False,smoothvariance=False):
+	ver = "1.4"
 
 	if (os.path.isfile(outdir+outputfile)):
 		print("You already have a file with the output name " + outdir+outputfile + "! Not going to overwrite it. Move it, or set a new output filename, and try again!")
@@ -181,54 +182,54 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 					# conv_windowfunction[l] = val * (beam1[l]/beam2[l])
 
 
-		plt.xscale('linear')
-		plt.yscale('log')
-		plt.plot(windowfunction,label='Window function')
-		plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside),label='Gaussian')
-		plt.legend()
-		plt.savefig(outdir+'wf_orig_'+outputfile+'.pdf')
-		plt.clf()
+		# plt.xscale('linear')
+		# plt.yscale('log')
+		# plt.plot(windowfunction,label='Window function')
+		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),3*nside),label='Gaussian')
+		# plt.legend()
+		# plt.savefig(outdir+'wf_orig_'+outputfile+'.pdf')
+		# plt.clf()
 
-
-		plt.xscale('linear')
-		plt.yscale('linear')
-		plt.ylim(0.0,1.0)
-		plt.plot(conv_windowfunction,label='Window function')
-		plt.plot(conv_windowfunction_before,label='Window function before')
-		plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),len(windowfunction)-1)/windowfunction,label='Comparison')
-		plt.legend()
-		plt.savefig(outdir+'wf_lin_'+outputfile+'.pdf')
-		plt.yscale('log')
-		plt.ylim(1e-8,1e4)
-		plt.savefig(outdir+'wf_log_'+outputfile+'.pdf')
-		plt.clf()
+		# plt.xscale('linear')
+		# plt.yscale('linear')
+		# plt.ylim(0.0,1.0)
+		# plt.plot(conv_windowfunction,label='Window function')
+		# plt.plot(conv_windowfunction_before,label='Window function before')
+		# plt.plot(hp.gauss_beam(np.radians(fwhm_arcmin/60.0),len(windowfunction)-1)/windowfunction,label='Comparison')
+		# plt.legend()
+		# plt.savefig(outdir+'wf_lin_'+outputfile+'.pdf')
+		# plt.yscale('log')
+		# plt.ylim(1e-8,1e4)
+		# plt.savefig(outdir+'wf_log_'+outputfile+'.pdf')
+		# plt.clf()
 		# return
 
 		# Check whether we'll need to smooth variances too.
-		test = False
-		for i in range(0,nmaps):
-			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
-				test = True
-		if test:
-			print('Covariance maps detected. Calculating variance window function (this may take a short while)')
-			conv_windowfunction_variance = conv_windowfunction.copy()
-			# conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
-			# conv_windowfunction_variance /= conv_windowfunction_variance[0]
-			print(conv_windowfunction_variance[0])
-			print('Done! Onwards...')
+		if smoothvariance != False:
+			test = False
+			for i in range(0,nmaps):
+				if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
+					test = True
+			if test:
+				print('Covariance maps detected. Calculating variance window function (this may take a short while)')
+				conv_windowfunction_variance = conv_windowfunction.copy()
+				# conv_windowfunction_variance = calc_variance_windowfunction(conv_windowfunction)
+				# conv_windowfunction_variance /= conv_windowfunction_variance[0]
+				print(conv_windowfunction_variance[0])
+				print('Done! Onwards...')
 
-			plt.xscale('log')
-			plt.yscale('log')
-			plt.plot(conv_windowfunction,label='Window function')
-			plt.plot(conv_windowfunction_variance,label='Variance window function')
-			plt.legend()
-			plt.savefig(outdir+'wf_'+outputfile+'.png')
-			plt.xscale('log')
-			plt.yscale('linear')
-			plt.plot(conv_windowfunction,label='Window function')
-			plt.plot(conv_windowfunction_variance,label='Variance window function')
-			plt.legend()
-			plt.savefig(outdir+'wf_lin_'+outputfile+'.png')
+				plt.xscale('log')
+				plt.yscale('log')
+				plt.plot(conv_windowfunction,label='Window function')
+				plt.plot(conv_windowfunction_variance,label='Variance window function')
+				plt.legend()
+				plt.savefig(outdir+'wf_'+outputfile+'.png')
+				plt.xscale('log')
+				plt.yscale('linear')
+				plt.plot(conv_windowfunction,label='Window function')
+				plt.plot(conv_windowfunction_variance,label='Variance window function')
+				plt.legend()
+				plt.savefig(outdir+'wf_lin_'+outputfile+'.png')
 
 	# Do the smoothing
 	print("Smoothing the maps")
@@ -269,13 +270,18 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 					newheader['TUNIT'+str(i+1)] = '('+sigma_0_unit+')^2'
 
 			# Calculate the alm's, multiply them by the window function, and convert back to the map
-			alms = hp.map2alm(maps[i])
 			if ('cov' in newheader['TTYPE'+str(i+1)]) or ('N_OBS' in newheader['TTYPE'+str(i+1)]):
-				print('Column '+str(i)+' is a covariance matrix ('+newheader['TUNIT'+str(i+1)]+') - smoothing appropriately.')
-				alms = hp.almxfl(alms, conv_windowfunction_variance)
+				if smoothvariance != False:
+					print('Column '+str(i)+' is a covariance matrix ('+newheader['TUNIT'+str(i+1)]+') - smoothing appropriately.')
+					alms = hp.map2alm(maps[i])
+					alms = hp.almxfl(alms, conv_windowfunction_variance)
+					newmap = hp.alm2map(alms, nside,verbose=False)
+				else:
+					newmap = maps[i].copy()
 			else:
+				alms = hp.map2alm(maps[i])
 				alms = hp.almxfl(alms, conv_windowfunction)
-			newmap = hp.alm2map(alms, nside,verbose=False)
+				newmap = hp.alm2map(alms, nside,verbose=False)
 			smoothed_map[i] = newmap
 			print(np.sum(smoothed_map[i]))
 			print(np.median(smoothed_map[i]))
