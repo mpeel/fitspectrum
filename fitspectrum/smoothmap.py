@@ -332,6 +332,7 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 					if ('^2' in unit):
 						power = 2.0
 						unit = unit.replace(")^2",'').replace('(','')
+						unit = unit.replace("^2",'')
 						newheader['TUNIT'+str(i+1)] = '('+units_out+")^2"
 					print(unit + " " + str(power))
 					conversion = convertunits(const, unit, units_out, frequency, pix_area)
