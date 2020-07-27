@@ -21,6 +21,7 @@
 # v1.2  Mike Peel   04 Jul 2019   Multiple options for window function tapering, min/max map values
 # v1.3  Mike Peel   28 Aug 2019   Gaussian taper, options for normalising wf and unseen vs. 0 in map
 # v1.4  Mike Peel   24 Jul 2020   Add an option to not smooth the variance maps (but save them in the output anyway)
+# v1.4a Mike Peel   27 Jul 2020   Tweak to only check for NESTED when not using usehealpixfits
 #
 # Requirements:
 # Numpy, healpy, matplotlib
@@ -76,10 +77,10 @@ def smoothmap(indir, outdir, inputfile, outputfile, fwhm_arcmin=-1, nside_out=0,
 		for i in range(0,nmaps):
 			maps.append(inputfits[1].data.field(i))
 			print(len(maps[i]))
-	print(len(maps[0]))
-	# Check to see whether we have nested data, and switch to ring if that is the case.
-	if (inputfits[1].header['ORDERING'] == 'NESTED'):
-		maps = hp.reorder(maps,n2r=True)
+		print(len(maps[0]))
+		# Check to see whether we have nested data, and switch to ring if that is the case.
+		if (inputfits[1].header['ORDERING'] == 'NESTED'):
+			maps = hp.reorder(maps,n2r=True)
 	newheader = inputfits[1].header.copy(strip=False)
 	inputfits.close()
 
