@@ -4,9 +4,10 @@ import healpy as hp
 import astropy.io.fits as fits
 
 from smoothmap import *
-import numpy as np
-import healpy as hp
-import astropy.io.fits as fits
+import numba
+import matplotlib.pyplot as plt
+from scipy.sparse.linalg import lsqr
+from scipy.sparse import csr_matrix
 
 def get_hfi_beam(FITSfile):
 	fits.info(FITSfile) # print list of extensions found in FITSfile
@@ -20,6 +21,34 @@ def get_hfi_beam(FITSfile):
 		newdata[i] = data[i][0]
 	return newdata
 
+n = 10000
+x, y = np.random.multivariate_normal([0,0], [[1, 0.9], [0.9, 1]], n).T
+plt.plot(x,y,'.')
+plt.savefig('noisetest2.png')
+# plt.clf()
+
+# vals2 = np.asarray([[vals[0:100], vals[100:200]], [vals[200:300], vals[300:400]]]).T
+
+# exit()
+A = np.asarray([[1.0, 0.9], [0.9, 1.0]])
+B = np.asarray([A]*n)
+C = np.linalg.cholesky(B)
+vals = np.random.normal(0,1, size = (n,2))
+x,y = np.einsum('nij,nj->ni', C, vals).T
+# vals = np.random.normal(scale=1.0, size=100)
+# vals2 = np.asarray([[vals, vals], [vals, vals]]).T
+# arr = vals2 * C
+# print(np.shape(C))
+# print(np.shape(vals))
+# print(np.shape(vals2))
+# arr = lsqr(C,vals2)
+# arr = np.matmul(np.asarray(C[0]),np.asarray(vals))
+# x = arr[:,0,0]
+# y = arr[:,0,0]
+plt.plot(x,y,'.')
+plt.savefig('noisetest.png')
+exit()
+
 output_resolution = [60.0]#,120.0,240.0]
 output_nside = [512, 256, 128, 64]
 numrealisations=1000
@@ -29,8 +58,9 @@ outdirectory = directory+"wmap9_planck2018_tqu_noise_QU/"
 
 nside = 8
 npix = 12*nside*nside
+
 cov = [[np.ones(npix), np.ones(npix)*0.01], [-np.ones(npix)*0.01, np.ones(npix)]]
-testmap = noiserealisation_QU(cov, npix)
+testmap = noiserealisation_QU(np.ones(npix), np.ones(npix), np.ones(npix)*0.01, npix)
 print(testmap)
 print(np.shape(testmap))
 exit()

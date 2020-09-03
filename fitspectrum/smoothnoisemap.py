@@ -10,6 +10,7 @@
 # Mike Peel    05 Jun 2019    v0.4 Add taper, cope with cut sky maps
 # Mike Peel    28 Aug 2019    v0.5 Add taper_gauss, normalise, hdu
 import numpy as np
+import numba
 import healpy as hp
 from astrocode.fitspectrum.smoothmap import smoothmap, conv_nobs_variance_map
 import astropy.io.fits as fits
@@ -25,11 +26,28 @@ def noiserealisation(inputmap, numpixels):
 	newmap = np.random.normal(scale=1.0, size=numpixels) * inputmap
 	return newmap
 
+# @numba.jit(nopython=True, parallel=True)
+# def test():
+# 	x, y = np.random.multivariate_normal([0,0], [[1, 0], [0, 1]], 5000).T
+# 	return  x,y
 
-def noiserealisation_QU(covariance, numpixels):
-	newmap = [np.zeros(numpixels), np.zeros(numpixels)]
-	newmap = np.random.multivariate_normal([0,0], covariance, size=(numpixels, numpixels))
-	return newmap
+# @numba.jit(nopython=True, parallel=True)
+# def noiserealisation_QU(Q, U, QU, numpixels):
+# 	newmap = [np.zeros(numpixels), np.zeros(numpixels)]
+# 	for i in range(0,numpixels):
+# 		newmap[i] = np.random.multivariate_normal([0,0], [[Q[i], QU[i]], [-QU[i], U[i]]], size=1)
+# 	return newmap
+
+def precalc_C(Q, U, QU):
+	B = [[Q,QU][-QU,U]]
+	return np.linalg.cholesky(B)
+
+def noiserealisation_QU(C,inputmap_Q,inputmap_U):
+	vals = np.random.normal(0,1, size = (len(C),2))
+	Q,U = np.einsum('nij,nj->ni', C, vals).T
+	Q = Q * inputmap_Q
+	U = U * inputmap_U
+	return Q, U
 
 def smoothnoisemap(indir, outdir, runname, inputmap, mapnumber=2, fwhm=0.0, numrealisations=10, sigma_0 = 0.0, nside=[512], windowfunction = [], rescale=1.0,usehealpixfits=False,taper=False,lmin_taper=350,lmax_taper=600,taper_gauss=False,taper_gauss_sigma=0.0,normalise=True,hdu=1, QU_index=[]):
 	ver = "0.5"
