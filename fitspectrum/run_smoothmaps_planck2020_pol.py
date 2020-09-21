@@ -16,18 +16,12 @@ def get_hfi_beam(FITSfile):
 	return newdata
 
 output_resolution = 60.0
-output_nside = [2048, 1024, 512, 256, 128, 64, 32]
+output_nside = [2048, 1024, 512, 256, 128, 64, 32, 16, 8]
 smoothvariance = False
 
 # directory = '/Users/mpeel/Documents/maps/'
 directory = '/scratch1/mpeel/maps/'
 outdirectory = directory+"wmap9_planck2020_tqu_v1.4/"
-
-beamtf_K = np.loadtxt(directory+'wmap9/wmap_ampl_bl_K1_9yr_v5p1.txt',usecols=(1,))
-beamtf_Ka = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Ka1_9yr_v5p1.txt',usecols=(1,))
-beamtf_Q = np.loadtxt(directory+'wmap9/wmap_ampl_bl_Q1_9yr_v5p1.txt',usecols=(1,))
-beamtf_V = np.loadtxt(directory+'wmap9/wmap_ampl_bl_V1_9yr_v5p1.txt',usecols=(1,))
-beamtf_W = np.loadtxt(directory+'wmap9/wmap_ampl_bl_W1_9yr_v5p1.txt',usecols=(1,))
 
 beamtf_p30 = get_beam(directory+'planck2018/LFI_RIMO_R3.31.fits',28)
 beamtf_p44 = get_beam(directory+'planck2018/LFI_RIMO_R3.31.fits',29)
