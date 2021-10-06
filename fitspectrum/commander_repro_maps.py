@@ -14,7 +14,7 @@ from spectra import *
 from astroutils import *
 import copy
 import matplotlib.pyplot as plt
-from smoothmap import smoothmap
+from astrocode.smoothmaps.smoothmap import smoothmap
 
 # Define some constants, used later in the SED functions
 const = get_spectrum_constants()

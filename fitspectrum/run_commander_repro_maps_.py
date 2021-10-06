@@ -1,5 +1,5 @@
 from commander_repro_maps import commander_repro_maps
-from astrocode.smoothmaps.smoothmap import smoothmap
+from smoothmap import smoothmap
 import numpy as np
 
 # smoothmap('commander2015/COM_CompMap_SynchrotronPol-commander_0256_R2.00.fits','commander2015/256_60.00smoothed_COM_CompMap_SynchrotronPol-commander_0256_R2.00.fits', np.sqrt(60.0**2-40.0**2),pol=True,nside_out=256)
@@ -73,8 +73,7 @@ mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 # mask_min=[['commander2015/commander_dx11d2_mask_temp_n2048_fullres_v3_n0256.fits',256,0]]
 # mask_max=[['commander2015/commander_mask_n256_likelihood_v1.fits',256,0]]
 
-# commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=30.0)
-# commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=4.7)
-# commander_repro_maps(outdir='commander_freq_maps/', name='wmap', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=22.8)
-commander_repro_maps(outdir='commander_freq_maps/', name='', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=28.4)
+commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=30.0)
+commander_repro_maps(outdir='commander_freq_maps/', name='cbass', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=4.7)
+commander_repro_maps(outdir='commander_freq_maps/', name='wmap', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=22.8)
 

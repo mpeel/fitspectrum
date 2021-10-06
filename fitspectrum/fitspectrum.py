@@ -127,17 +127,17 @@ def plot_results(outfile,srcname,minfreq,maxfreq,params,const,solid_angle,spd_fr
 	# Add the data to the plot
 	plt.errorbar(freqs[goodvals == 1], fd[goodvals == 1], fd_err[goodvals == 1],fmt='+')
 	plt.errorbar(freqs[goodvals == 0], fd[goodvals == 0], fd_err[goodvals == 0])
-	plt.errorbar(7.0, spectrum(params,x=7.0),fmt='r.',markersize=10.0)
-	plt.errorbar(18.6, spectrum(params,x=18.6),fmt='r.',markersize=10.0)
-	plt.errorbar(24.6, spectrum(params,x=24.6),fmt='r.',markersize=10.0)
+	# plt.errorbar(7.0, spectrum(params,x=7.0),fmt='r.',markersize=10.0)
+	# plt.errorbar(18.6, spectrum(params,x=18.6),fmt='r.',markersize=10.0)
+	# plt.errorbar(24.6, spectrum(params,x=24.6),fmt='r.',markersize=10.0)
 	
 	model_spd = spinningdust(spd_freq, spd_amp, solid_angle, 30.0, 1.0, 0.0)
 	model_spd_norm = 0.5*spectrum(params,x=30.0)/model_spd
 	model_spd_25 = spinningdust(spd_freq, spd_amp, solid_angle, 24.6, 1.0, 0.0)*model_spd_norm
 	model_spd_19 = spinningdust(spd_freq, spd_amp, solid_angle, 18.6, 1.0, 0.0)*model_spd_norm
 
-	plt.errorbar(18.6, spectrum(params,x=18.6)+model_spd_19,fmt='rx',markersize=5.0)
-	plt.errorbar(24.6, spectrum(params,x=24.6)+model_spd_25,fmt='rx',markersize=5.0)
+	# plt.errorbar(18.6, spectrum(params,x=18.6)+model_spd_19,fmt='rx',markersize=5.0)
+	# plt.errorbar(24.6, spectrum(params,x=24.6)+model_spd_25,fmt='rx',markersize=5.0)
 
 
 	# print(spectrum(params,x=30.0))

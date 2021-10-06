@@ -404,9 +404,9 @@ def haperflux(inmap, freq, res_arcmin, lon, lat, aper_inner_radius, aper_outer_r
 	if quickplot != '':
 		# Do a quick gnomview plot to show the aperture areas
 		plotmap = map[column].copy()
-		plotmap[outerpix] = plotmap[outerpix]*0.7
+		plotmap[outerpix] = plotmap[outerpix]*0.4#0.7
 		plotmap[innerpix] = plotmap[innerpix]*1.3
-		hp.gnomview(plotmap,rot=[lon,lat],reso=5)
+		hp.gnomview(plotmap,rot=[lon,lat],reso=3,norm='hist')#5)
 		plt.savefig(quickplot)
 		plt.clf()
 
