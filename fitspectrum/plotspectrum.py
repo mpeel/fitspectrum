@@ -2,7 +2,7 @@
 # -*- coding: utf-8  -*-
 #
 # Plot the spectrum of the Commander maps
-# 
+#
 # Version history:
 #
 # 15-Aug-2016  M. Peel       Started, for C-BASS project paper
@@ -15,7 +15,7 @@ from spectra import *
 from astroutils import *
 import copy
 import matplotlib.pyplot as plt
-from smoothmap import smoothmap
+from astrocode.smoothmaps.smoothmap import smoothmap
 
 # Define some constants, used later in the SED functions
 const = get_spectrum_constants()
@@ -174,7 +174,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	# # Generate the model and plot it
 	# if nodust == False:
 	# 	model_dust1 = thermaldust(const, x, m.params[2], m.params[3], m.params[4], const['dust_optical_depth_freq'], solid_angle)
-	# 	
+	#
 	# if nodust2 == False:
 	# 	model_dust2 = thermaldust(const, x, m.params[10], m.params[11], m.params[12], const['dust_optical_depth_freq'], solid_angle)
 	# 	plt.plot(x, model_dust2, 'g')#, freqs, fd, 'g')
@@ -200,6 +200,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 	if pol == False:
 
 		sync_spectrum_min = 0
+		sync_spectrum_max = 0
 		if galprop_file != '':
 			sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
 			sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
@@ -240,7 +241,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		sync_spectrum_min = syncshifted_pol_comm(x, np.sqrt(minvals[0]**2+minvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		sync_spectrum_max = syncshifted_pol_comm(x, np.sqrt(maxvals[0]**2+maxvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label="Synchrotron")
-		
+
 		print(minvals[2])
 		print(minvals[3])
 		print(maxvals[2])
