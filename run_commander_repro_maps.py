@@ -60,14 +60,14 @@ freqbands_P = [[4.5,5.5,'C-BASS','g', 0.3],
 [217.0-(0.33*217.0)/2,217.0+(0.33*217.0)/2,'','r', 0.1],
 [353.0-(0.33*353.0)/2,353.0+(0.33*353.0)/2,'','r', 0.1]]
 
-# 0  = 'GAL020  '           / 20% sky coverage                               
-# 1  = 'GAL040  '           / 40% sky coverage                               
-# 2  = 'GAL060  '           / 60% sky coverage                               
-# 3  = 'GAL070  '           / 70% sky coverage                               
-# 4  = 'GAL080  '           / 80% sky coverage                               
-# 5  = 'GAL090  '           / 90% sky coverage                               
-# 6  = 'GAL097  '           / 97% sky coverage                               
-# 7  = 'GAL099  '           / 99% sky coverage   
+# 0  = 'GAL020  '           / 20% sky coverage
+# 1  = 'GAL040  '           / 40% sky coverage
+# 2  = 'GAL060  '           / 60% sky coverage
+# 3  = 'GAL070  '           / 70% sky coverage
+# 4  = 'GAL080  '           / 80% sky coverage
+# 5  = 'GAL090  '           / 90% sky coverage
+# 6  = 'GAL097  '           / 97% sky coverage
+# 7  = 'GAL099  '           / 99% sky coverage
 mask_min=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,4]]
 mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 # mask_min=[['commander2015/commander_dx11d2_mask_temp_n2048_fullres_v3_n0256.fits',256,0]]
@@ -78,3 +78,8 @@ mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 # commander_repro_maps(outdir='commander_freq_maps/', name='wmap', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=22.8)
 commander_repro_maps(outdir='commander_freq_maps/', name='', maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=28.4)
 
+# frequencies = [4.76]#, 11.0, 13.0, 17.0, 19.0, 22.8]
+# names = ['cbass']#'commander_sim_q11', 'commander_sim_q13', 'commander_sim_q17', 'commander_sim_q19', 'commander_sim_q23']
+#
+# for i in range(0,len(frequencies)):
+# 	commander_repro_maps(outdir='commander_freq_maps/', name=names[i], maps=maps_I, spd_file='amemodels/spdust2_cnm.dat',nside=256,res=60.0,freq=frequencies[i])

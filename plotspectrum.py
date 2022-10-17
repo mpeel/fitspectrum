@@ -15,7 +15,7 @@ from spectra import *
 from astroutils import *
 import copy
 import matplotlib.pyplot as plt
-from astrocode.smoothmaps.smoothmap import smoothmap
+from smoothmaps.smoothmap import smoothmap
 
 # Define some constants, used later in the SED functions
 const = get_spectrum_constants()
@@ -35,7 +35,6 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		spd_freq, spd_amp = np.loadtxt(spd_file, dtype=float,usecols=(0,1),comments=';',unpack=True)
 	if galprop_file != '':
 		galprop_freq, galprop_amp = np.loadtxt('commander2015/Synchrotron_template_GHz_extended.txt',dtype=float,usecols=(0,1),comments=";",unpack=True)
-
 	# Figure out the X range
 	x = np.arange(minfreq,maxfreq,(maxfreq-minfreq)/float(numxpoints))
 
@@ -98,6 +97,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		print(maps[i][3])
 		print(maps[i][4])
 		mapdata = hp.read_map(maps[i][0], maps[i][4],hdu=maps[i][3])
+		mapdata = hp.ud_grade(mapdata, nside)
 
 		hp.mollview(mapdata,norm='hist')
 		plt.savefig(maps[i][0].replace('.fits','_hist.pdf'))
@@ -241,6 +241,17 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 		sync_spectrum_min = syncshifted_pol_comm(x, np.sqrt(minvals[0]**2+minvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		sync_spectrum_max = syncshifted_pol_comm(x, np.sqrt(maxvals[0]**2+maxvals[1]**2), 4e-3, galprop_freq, galprop_amp)
 		plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label="Synchrotron")
+		# if galprop_file != '':
+		# 	sync_spectrum_min = syncshifted_comm(x, minvals[0], 4e-3, galprop_freq, galprop_amp)
+		# 	sync_spectrum_max = syncshifted_comm(x, maxvals[0], 4e-3, galprop_freq, galprop_amp)
+		# 	plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
+		# elif minvals[10] != 0:
+		# 	print(minvals[0])
+		# 	sync_spectrum_min = synchrotron(const, x, 22.8, minvals[0], -minvals[10])
+		# 	sync_spectrum_max = synchrotron(const, x, 22.8, maxvals[0], -maxvals[10])
+		# 	print(sync_spectrum_min)
+		# 	# exit(0)
+		# 	plt.fill_between(x, sync_spectrum_min, sync_spectrum_max,facecolor='magenta',lw=0,zorder=10,label='Synchrotron')
 
 		print(minvals[2])
 		print(minvals[3])
@@ -271,7 +282,7 @@ def plotspectrum(outdir='', name='plot', maps=[''],mask_min=[''],mask_max=[''],s
 			plt.plot((freqbands[i][0], freqbands[i][1]), (ymin, ymax), freqbands[i][3], alpha=freqbands[i][4], lw=1.0,zorder=0,label=freqbands[i][2],linestyle=freqbands[i][5])
 
 	if legend == True:
-		l = plt.legend(prop={'size':9})
+		l = plt.legend(prop={'size':12})
 		# l = plt.legend(prop={'size':11})
 		l.set_zorder(20)
 	plt.savefig(outdir+name+'.pdf')

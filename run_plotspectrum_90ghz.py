@@ -41,19 +41,25 @@ freqbands_I = [[0.408,0.408,'Haslam','grey', 0.5,'-'],
 [545.0-(0.33*545.0)/2,545.0+(0.33*545.0)/2,'','r', 0.1], # Planck
 [857.0-(0.33*857.0)/2,857.0+(0.33*857.0)/2,'','r', 0.1]] # Planck
 
-freqbands_P = [[4.5,5.5,'C-BASS','g', 0.3],
+freqbands_P = [[4.5,5.5,'C-BASS','grey', 0.3],
 [19.5,25.0,'WMAP','b', 0.1],
 [28.0,37.0,'','b', 0.1],
 [35,46.0,'','b', 0.1],
 [53.0,69.0,'','b', 0.1],
 [82.0,106.0,'','b', 0.1],
-[30.0-(0.2*30.0)/2,30.0+(0.2*30.0)/2,'Planck','r', 0.1],
-[44.0-(0.2*44.0)/2,44.0+(0.2*44.0)/2,'','r', 0.1],
-[70.0-(0.2*70.0)/2,70.0+(0.2*70.0)/2,'','r', 0.1],
-[100.0-(0.33*100.0)/2,100.0+(0.33*100.0)/2,'','r', 0.1],
-[143.0-(0.33*143.0)/2,143.0+(0.33*143.0)/2,'','r', 0.1],
-[217.0-(0.33*217.0)/2,217.0+(0.33*217.0)/2,'','r', 0.1],
-[353.0-(0.33*353.0)/2,353.0+(0.33*353.0)/2,'','r', 0.1]]
+[30.0-(0.2*30.0)/2,30.0+(0.2*30.0)/2,'Planck','y', 0.2],
+[44.0-(0.2*44.0)/2,44.0+(0.2*44.0)/2,'','y', 0.2],
+[70.0-(0.2*70.0)/2,70.0+(0.2*70.0)/2,'','y', 0.2],
+[100.0-(0.33*100.0)/2,100.0+(0.33*100.0)/2,'','y', 0.2],
+[143.0-(0.33*143.0)/2,143.0+(0.33*143.0)/2,'','y', 0.2],
+[217.0-(0.33*217.0)/2,217.0+(0.33*217.0)/2,'','y', 0.2],
+[353.0-(0.33*353.0)/2,353.0+(0.33*353.0)/2,'','y', 0.2],
+[10,20,'QUIJOTE','r', 0.3],
+[30.0-6/2,30.0+6/2,'','r', 0.3],
+[40.0-6/2,40.0+6/2,'','r', 0.3],
+[150-40/2,150+40/2,'GroundBIRD','r', 0.3],
+[220-40/2,220+40/2,'','r', 0.3],
+[90-40/2,90+40/2,'','g', 0.4]]
 
 # 0  = 'GAL020  '           / 20% sky coverage
 # 1  = 'GAL040  '           / 40% sky coverage
@@ -68,6 +74,6 @@ mask_max=[['commander2015/HFI_Mask_GalPlane-apo0_2048_R2.00.fits',2048,5]]
 # mask_min=[['commander2015/commander_dx11d2_mask_temp_n2048_fullres_v3_n0256.fits',256,0]]
 # mask_max=[['commander2015/commander_mask_n256_likelihood_v1.fits',256,0]]
 
-# plotspectrum(outdir='', name='spectrum_90ghz_I', maps=maps_I, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_cnm.dat',minfreq=0.2,maxfreq=2000.0,numxpoints=1000,ymin=1,ymax=5e7,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_I,nside=256,res=60.0,pol=False)
+# plotspectrum(outdir='', name='spectrum_90ghz_I', maps=maps_I, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_cnm.dat',minfreq=0.2,maxfreq=2000.0,numxpoints=1000,ymin=1,ymax=5e7,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_I,nside=256,res=60.0,pol=False,galprop_file=True)
 
-plotspectrum(outdir='', name='spectrum_90ghz_P', maps=maps_P, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_cnm.dat',minfreq=0.2,maxfreq=2000.0,numxpoints=1000,ymin=0.1,ymax=5e6,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_P,nside=256,res=60.0,pol=True)
+plotspectrum(outdir='', name='spectrum_90ghz_P', maps=maps_P, mask_min=mask_min,mask_max=mask_max,spd_file='amemodels/spdust2_cnm.dat',minfreq=4,maxfreq=2000.0,numxpoints=1000,ymin=0.1,ymax=1e4,nosync=False,nofreefree=False,noame=False,nocmb=False,nodust=False,nodust2=True,freqbands=freqbands_P,nside=256,res=60.0,pol=True,galprop_file=True)
